@@ -1,0 +1,72 @@
+﻿@model SacViet.Models.Article
+
+<!-- Article Image -->
+@if (!string.IsNullOrEmpty(Model.ThumbnailImage))
+{
+    <div class="article-image mb-4">
+        <img src="@Model.ThumbnailImage" class="img-fluid w-100 rounded" alt="@Model.Title">
+    </div>
+}
+
+@{
+    // Original content
+    var contentHtml = Model.Content ?? string.Empty;
+
+    // We support a token writers can put anywhere to place the video
+    // Normalize common variants, including when the token is wrapped by <p> or has spaces
+    // Replace them with a unique placeholder, then split and inject the video player
+    const string placeholder = "##SV_VIDEO_PLACEHOLDER##";
+    var normalizedContent = System.Text.RegularExpressions.Regex.Replace(
+        contentHtml,
+        @"(<p[^>]*>\s*)?\[\s*SV-VIDEO\s*\](\s*</p>)?",
+        placeholder,
+        System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Multiline
+    );
+
+    var segments = normalizedContent.Split(placeholder);
+}
+
+@if (segments.Length > 1)
+{
+    <div class="article-content" id="articleContent">
+        @for (var i = 0; i < segments.Length; i++)
+        {
+            @Html.Raw(segments[i])
+            if (i < segments.Length - 1)
+            {
+                if (!string.IsNullOrEmpty(Model.VideoUrl))
+                {
+                    @await Html.PartialAsync("_VideoPlayer", Model)
+                }
+                // If no VideoUrl, just remove the token (i.e., don't render anything)
+            }
+        }
+    </div>
+}
+else
+{
+    // No token found in content
+    <div class="article-content" id="articleContent">
+        @if (!string.IsNullOrEmpty(Model.VideoUrl))
+        {
+            <!-- Video Player (default: right after thumbnail if no token in content) -->
+            @await Html.PartialAsync("_VideoPlayer", Model)
+        }
+        @Html.Raw(Model.Content)
+    </div>
+}
+
+<!-- Article Tags -->
+@if (Model.Tags.Any())
+{
+    <div class="article-tags mt-4 pt-3 border-top no-print">
+        <h6 class="mb-2">Từ khóa:</h6>
+        @foreach (var tag in Model.Tags)
+        {
+            <a href="@Url.Action("Search", "Home", new { keyword = tag.TagName })" 
+               class="badge bg-outline-danger me-2 mb-2 text-decoration-none">
+                @tag.TagName
+            </a>
+        }
+    </div>
+}

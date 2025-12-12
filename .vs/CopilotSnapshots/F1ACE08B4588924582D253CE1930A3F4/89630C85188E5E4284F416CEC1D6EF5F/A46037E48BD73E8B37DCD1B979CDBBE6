@@ -1,0 +1,71 @@
+﻿@model SacViet.Models.Article
+
+@* Video Player for Multimedia Video category *@
+@if (!string.IsNullOrEmpty(Model.VideoUrl))
+{
+    var videoFileId = "";
+    var videoMatch = System.Text.RegularExpressions.Regex.Match(Model.VideoUrl, @"[?&]id=([^&]+)");
+    if (videoMatch.Success)
+    {
+        videoFileId = videoMatch.Groups[1].Value;
+    }
+    else
+    {
+        var videoMatch2 = System.Text.RegularExpressions.Regex.Match(Model.VideoUrl, @"/file/d/([^/\?]+)");
+        if (videoMatch2.Success)
+        {
+            videoFileId = videoMatch2.Groups[1].Value;
+        }
+    }
+    
+    <div class="mb-4">
+        @if (!string.IsNullOrEmpty(videoFileId))
+        {
+            <!-- Google Drive Embed Video -->
+            <div class="video-player-wrapper" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                <iframe 
+                    src="https://drive.google.com/file/d/@videoFileId/preview" 
+                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
+                    allow="autoplay"
+                    class="multimedia-video-player">
+                </iframe>
+            </div>
+        }
+        else if (Model.VideoUrl.Contains("youtube.com") || Model.VideoUrl.Contains("youtu.be"))
+        {
+            var youtubeId = "";
+            if (Model.VideoUrl.Contains("youtube.com/watch?v="))
+            {
+                var match3 = System.Text.RegularExpressions.Regex.Match(Model.VideoUrl, @"[?&]v=([^&]+)");
+                if (match3.Success) youtubeId = match3.Groups[1].Value;
+            }
+            else if (Model.VideoUrl.Contains("youtu.be/"))
+            {
+                var match3 = System.Text.RegularExpressions.Regex.Match(Model.VideoUrl, @"youtu\.be/([^?]+)");
+                if (match3.Success) youtubeId = match3.Groups[1].Value;
+            }
+            
+            if (!string.IsNullOrEmpty(youtubeId))
+            {
+                <!-- YouTube Embed -->
+                <div class="video-player-wrapper" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                    <iframe 
+                        src="https://www.youtube.com/embed/@youtubeId" 
+                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen
+                        class="multimedia-video-player">
+                    </iframe>
+                </div>
+            }
+        }
+        else
+        {
+            <!-- Generic Video Player -->
+            <video controls class="w-100 multimedia-video-player" style="border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-height: 500px; background: #000;">
+                <source src="@Model.VideoUrl" type="video/mp4">
+                Trình duyệt không hỗ trợ video này.
+            </video>
+        }
+    </div>
+}

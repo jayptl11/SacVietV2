@@ -1,0 +1,303 @@
+﻿// Writer Article Form JavaScript
+// Shared functions for Create & Edit Article pages
+
+// === SCHEDULED PUBLISH DEFAULT ===
+function initScheduledPublish() {
+    const scheduledInput = document.querySelector('input[name="ScheduledPublishDate"]');
+    
+    if (scheduledInput && !scheduledInput.value) {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        
+        scheduledInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+}
+
+// === THUMBNAIL MANAGEMENT ===
+function uploadThumbnail(uploadImageUrl) {
+    const fileInput = document.getElementById('thumbnail-file');
+    const file = fileInput.files[0];
+
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+        alert('Ảnh quá lớn! Vui lòng chọn ảnh nhỏ hơn 5MB');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    fetch(uploadImageUrl, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('thumbnail-url').value = data.url;
+            document.getElementById('thumbnail-img').src = data.url;
+            document.getElementById('thumbnail-preview').style.display = 'block';
+            document.getElementById('thumbnail-upload').style.display = 'none';
+        } else {
+            alert(data.message || 'Upload thất bại');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Có lỗi xảy ra khi upload ảnh');
+    });
+}
+
+function removeThumbnail() {
+    document.getElementById('thumbnail-url').value = '';
+    document.getElementById('thumbnail-img').src = '';
+    document.getElementById('thumbnail-preview').style.display = 'none';
+    document.getElementById('thumbnail-upload').style.display = 'block';
+    document.getElementById('thumbnail-file').value = '';
+    document.getElementById('thumbnail-url-input').value = '';
+}
+
+function setThumbnailByUrl() {
+    const urlInput = document.getElementById('thumbnail-url-input');
+    const imageUrl = urlInput.value.trim();
+
+    if (!imageUrl) {
+        alert('Vui lòng nhập URL hình ảnh');
+        return;
+    }
+
+    try {
+        new URL(imageUrl);
+    } catch (e) {
+        alert('URL không hợp lệ');
+        return;
+    }
+
+    document.getElementById('thumbnail-url').value = imageUrl;
+    document.getElementById('thumbnail-img').src = imageUrl;
+    document.getElementById('thumbnail-preview').style.display = 'block';
+    document.getElementById('thumbnail-upload').style.display = 'none';
+}
+
+// === TAGS MANAGEMENT ===
+let tags = [];
+
+function initTagsInput() {
+    const tagsInput = document.getElementById('tags-input');
+    const tagsContainer = document.getElementById('tags-container');
+
+    if (tagsInput) {
+        tagsInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const tag = this.value.trim();
+                if (tag && !tags.includes(tag)) {
+                    tags.push(tag);
+                    renderTags();
+                    this.value = '';
+                }
+            }
+        });
+    }
+}
+
+function renderTags() {
+    const tagsContainer = document.getElementById('tags-container');
+    if (tagsContainer) {
+        tagsContainer.innerHTML = '';
+        tags.forEach((tag, index) => {
+            const badge = document.createElement('span');
+            badge.className = 'tag-badge';
+            badge.innerHTML = `
+                ${tag}
+                <i class="fas fa-times" onclick="removeTag(${index})"></i>
+                <input type="hidden" name="Tags" value="${tag}" />
+            `;
+            tagsContainer.appendChild(badge);
+        });
+    }
+}
+
+function removeTag(index) {
+    tags.splice(index, 1);
+    renderTags();
+}
+
+// === CKEDITOR MANAGEMENT ===
+function initCKEditor(uploadImageUrl) {
+    CKEDITOR.replace('editor', {
+        height: 450,
+        filebrowserUploadUrl: uploadImageUrl,
+        filebrowserImageUploadUrl: uploadImageUrl,
+        filebrowserUploadMethod: 'form',
+        toolbar: [
+            { name: 'document', items: ['Source', '-', 'NewPage', 'Preview', 'Print'] },
+            { name: 'clipboard', items: ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo', 'Redo'] },
+            { name: 'editing', items: ['Find', 'Replace', '-', 'SelectAll'] },
+            '/',
+            { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat'] },
+            { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', 'CreateDiv', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'] },
+            { name: 'links', items: ['Link', 'Unlink', 'Anchor'] },
+            { name: 'insert', items: ['Image', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar', 'PageBreak', 'Iframe'] },
+            '/',
+            { name: 'styles', items: ['Styles', 'Format', 'Font', 'FontSize'] },
+            { name: 'colors', items: ['TextColor', 'BGColor'] },
+            { name: 'tools', items: ['Maximize', 'ShowBlocks'] }
+        ]
+    });
+}
+
+function updateCKEditorBeforeSubmit() {
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            for (var instance in CKEDITOR.instances) {
+                CKEDITOR.instances[instance].updateElement();
+            }
+        });
+    }
+}
+
+// === WEB CRAWLER ===
+function startCrawl(crawlUrl) {
+    const urlInput = document.getElementById('crawl-url');
+    const url = urlInput.value.trim();
+    const statusDiv = document.getElementById('crawl-status');
+    const btnCrawl = document.querySelector('.btn-crawl');
+
+    if (!url) {
+        alert('Vui lòng nhập URL bài báo');
+        return;
+    }
+
+    try {
+        new URL(url);
+    } catch (e) {
+        alert('URL không hợp lệ. Vui lòng nhập URL đầy đủ (bắt đầu với http:// hoặc https://)');
+        return;
+    }
+
+    // Show loading
+    statusDiv.className = 'crawl-status loading';
+    statusDiv.style.display = 'block';
+    statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang lấy nội dung từ trang web... (có thể mất 5-10 giây)';
+    btnCrawl.disabled = true;
+    btnCrawl.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang xử lý...';
+
+    // Call API
+    fetch(crawlUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+        },
+        body: JSON.stringify({ url: url })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            statusDiv.className = 'crawl-status success';
+            statusDiv.innerHTML = '<i class="fas fa-check-circle me-2"></i>✅ Lấy nội dung thành công! Đang điền vào form...';
+
+            // Fill form
+            if (data.title) {
+                document.querySelector('input[name="Title"]').value = data.title;
+            }
+            if (data.summary) {
+                document.querySelector('textarea[name="Summary"]').value = data.summary;
+            }
+            if (data.content) {
+                CKEDITOR.instances.editor.setData(data.content);
+            }
+            
+            // AUTO SET THUMBNAIL - NEW FEATURE
+            // Priority: thumbnailUrl > first imageUrl
+            var thumbnailToSet = data.thumbnailUrl || (data.imageUrls && data.imageUrls.length > 0 ? data.imageUrls[0] : null);
+            
+            if (thumbnailToSet) {
+                // Set thumbnail URL to hidden input
+                document.getElementById('thumbnail-url').value = thumbnailToSet;
+                
+                // Set thumbnail image preview
+                var thumbnailImg = document.getElementById('thumbnail-img');
+                if (thumbnailImg) {
+                    thumbnailImg.src = thumbnailToSet;
+                }
+                
+                // Show preview, hide upload area
+                var thumbnailPreview = document.getElementById('thumbnail-preview');
+                var thumbnailUpload = document.getElementById('thumbnail-upload');
+                
+                if (thumbnailPreview) {
+                    thumbnailPreview.style.display = 'block';
+                }
+                if (thumbnailUpload) {
+                    thumbnailUpload.style.display = 'none';
+                }
+                
+                console.log('✅ Đã set thumbnail:', thumbnailToSet);
+            }
+
+            // Add source note
+            setTimeout(() => {
+                const currentContent = CKEDITOR.instances.editor.getData();
+                const sourceNote = `
+<hr>
+<p style="background-color: #fff3cd; padding: 10px; border-left: 4px solid #ffc107;">
+    <strong>📌 Nguồn tham khảo:</strong> 
+    <a href="${data.sourceUrl}" target="_blank" rel="noopener">${data.sourceUrl}</a>
+</p>`;
+                CKEDITOR.instances.editor.setData(currentContent + sourceNote);
+            }, 1000);
+
+            // Update status with thumbnail info
+            statusDiv.innerHTML = `
+                <i class="fas fa-check-circle me-2"></i>
+                ✅ <strong>Hoàn tất!</strong><br>
+                <small>
+                    • Tiêu đề: ${data.title ? '✅' : '❌'}<br>
+                    • Tóm tắt: ${data.summary ? '✅' : '❌'}<br>
+                    • Nội dung: ${data.content ? '✅ (Đã bao gồm hình ảnh)' : '❌'}<br>
+                    • Ảnh đại diện: ${thumbnailToSet ? '✅ Đã tự động set' : '❌'}
+                </small>
+            `;
+
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 5000);
+
+        } else {
+            statusDiv.className = 'crawl-status error';
+            statusDiv.innerHTML = `
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <strong>Không thể lấy nội dung</strong><br>
+                <small>${data.message || 'Lỗi không xác định'}</small><br>
+                <small style="color: #666;">💡 Gợi ý: Thử với trang web khác hoặc nhập thủ công</small>
+            `;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        statusDiv.className = 'crawl-status error';
+        statusDiv.innerHTML = `
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <strong>Lỗi kết nối</strong><br>
+            <small>Không thể kết nối tới server. Vui lòng thử lại.</small>
+        `;
+    })
+    .finally(() => {
+        btnCrawl.disabled = false;
+        btnCrawl.innerHTML = '<i class="fas fa-download me-2"></i>Lấy nội dung';
+    });
+}
+
+// === INITIALIZATION ===
+document.addEventListener('DOMContentLoaded', function() {
+    initScheduledPublish();
+    initTagsInput();
+});

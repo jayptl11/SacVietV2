@@ -1,0 +1,169 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - SacViet</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/SacViet.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+</head>
+<body>
+    <!-- Top Red Bar -->
+    <div class="top-red-bar bg-danger">
+        <div class="container-fluid">
+            <div class="row align-items-center py-2">
+                <div class="col-md-3">
+                    <button class="btn btn-link text-white p-0" type="button">
+                        <i class="fas fa-bars me-2"></i>
+                    </button>
+                    <button class="btn btn-link text-white p-0 ms-2" type="button">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                </div>
+                <div class="col-md-6 text-center">
+                    <!-- Logo will be in next section -->
+                </div>
+                <div class="col-md-3 text-end">
+                    <div class="language-selector">
+                        <a href="#" class="text-white me-2 small">Tiếng Việt</a>
+                        <a href="#" class="text-white me-2 small">English</a>
+                        <a href="#" class="text-white me-2 small">Français</a>
+                        <a href="#" class="text-white small">中文</a>
+                        <button class="btn btn-link text-white p-0 ms-3">
+                            <i class="fas fa-search"></i>
+                        </button>
+                        <button class="btn btn-link text-white p-0 ms-2">
+                            <i class="fas fa-user"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logo Section -->
+    <div class="logo-section bg-white py-3 border-bottom">
+        <div class="container text-center">
+            <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+                <h1 class="logo-text mb-0">SacViet<span class="text-danger">+</span></h1>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Navigation -->
+    <nav class="main-navigation border-bottom">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <ul class="nav nav-pills nav-justified">
+                        <li class="nav-item">
+                            <a class="nav-link text-uppercase" href="#">Nhịp văn hóa</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-uppercase" href="#">Du lịch</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-uppercase" href="#">Con người</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-uppercase" href="#">Ẩm thực</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-uppercase" href="#">Trang phục & Kiến trúc</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-uppercase" href="#">Thanh - Sắc</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-uppercase" href="#">Multimedia</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-uppercase" href="#">Chống tham</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Date Bar -->
+    <div class="date-bar bg-light border-bottom">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 py-2">
+                    <small class="text-muted">
+                        <i class="fas fa-calendar-alt me-2"></i>
+                        Thứ @DateTime.Now.ToString("dddd"), ngày @DateTime.Now.ToString("dd/MM/yyyy")
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        @RenderBody()
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white mt-5">
+        <div class="container py-4">
+            <div class="row">
+                <div class="col-md-3">
+                    <h5 class="text-danger mb-3">SacViet</h5>
+                    <p class="small">Báo điện tử SacViet - Nơi hội tụ những giá trị văn hóa Việt Nam</p>
+                    <div class="social-links mt-3">
+                        <a href="#" class="text-white me-3"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-youtube"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <h6 class="mb-3">Chuyên mục</h6>
+                    <ul class="list-unstyled small">
+                        <li class="mb-2"><a href="#" class="text-white-50">Nhịp văn hóa</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50">Du lịch</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50">Con người</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50">Ẩm thực</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h6 class="mb-3">Multimedia</h6>
+                    <ul class="list-unstyled small">
+                        <li class="mb-2"><a href="#" class="text-white-50">Podcast</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50">Video</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50">Infographic</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50">eMagazine</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h6 class="mb-3">Liên hệ</h6>
+                    <p class="small"><i class="fas fa-map-marker-alt me-2"></i>Hà Nội, Việt Nam</p>
+                    <p class="small"><i class="fas fa-phone me-2"></i>(024) 123 4567</p>
+                    <p class="small"><i class="fas fa-envelope me-2"></i>info@sacviet.vn</p>
+                </div>
+            </div>
+            <hr class="my-3 bg-secondary">
+            <div class="row">
+                <div class="col-md-6">
+                    <small>&copy; 2025 SacViet. Bản quyền thuộc về SacViet.</small>
+                </div>
+                <div class="col-md-6 text-end">
+                    <small>
+                        <a href="#" class="text-white-50 me-3">Chính sách bảo mật</a>
+                        <a href="#" class="text-white-50">Điều khoản sử dụng</a>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

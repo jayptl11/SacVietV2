@@ -1,0 +1,282 @@
+﻿@model SacViet.ViewModels.ArticleCreateViewModel
+@{
+    ViewData["Title"] = "Tạo bài viết mới";
+    var categories = ViewBag.Categories as IEnumerable<SacViet.Models.Category>;
+}
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="d-flex align-items-center justify-content-between">
+                <h2 class="text-danger mb-0">
+                    <i class="fas fa-plus-circle me-2"></i>Tạo bài viết mới
+                </h2>
+                <a href="@Url.Action("MyArticles")" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Quay lại
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <form asp-action="Create" method="post" enctype="multipart/form-data">
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">Nội dung bài viết</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Title -->
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label fw-bold">
+                                Tiêu đề <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Title" class="form-control form-control-lg" 
+                                   placeholder="Nhập tiêu đề bài viết..." />
+                            <span asp-validation-for="Title" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Summary -->
+                        <div class="mb-3">
+                            <label asp-for="Summary" class="form-label fw-bold">Tóm tắt</label>
+                            <textarea asp-for="Summary" class="form-control" rows="3"
+                                      placeholder="Nhập tóm tắt ngắn gọn về bài viết..."></textarea>
+                            <span asp-validation-for="Summary" class="text-danger small"></span>
+                            <small class="text-muted">Tóm tắt sẽ hiển thị trong danh sách bài viết</small>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="mb-3">
+                            <label asp-for="Content" class="form-label fw-bold">
+                                Nội dung <span class="text-danger">*</span>
+                            </label>
+                            <textarea asp-for="Content" id="editor" class="form-control" rows="15"></textarea>
+                            <span asp-validation-for="Content" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Actions -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h6 class="mb-0">Hành động</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button type="submit" name="action" value="draft" class="btn btn-outline-secondary">
+                                <i class="fas fa-save me-2"></i>Lưu nháp
+                            </button>
+                            <button type="submit" name="action" value="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-2"></i>Gửi để duyệt
+                            </button>
+                        </div>
+                        <hr>
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Lưu nháp: Lưu bài viết để chỉnh sửa sau<br/>
+                            Gửi để duyệt: Gửi bài viết cho Admin duyệt
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Category -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h6 class="mb-0">Danh mục</h6>
+                    </div>
+                    <div class="card-body">
+                        <select asp-for="CategoryId" class="form-select">
+                            <option value="">-- Chọn danh mục --</option>
+                            @if (categories != null)
+                            {
+                                @foreach (var category in categories.Where(c => c.ParentCategoryId == null))
+                                {
+                                    <option value="@category.CategoryId">@category.CategoryName</option>
+                                    
+                                    @foreach (var subCategory in categories.Where(c => c.ParentCategoryId == category.CategoryId))
+                                    {
+                                        <option value="@subCategory.CategoryId">  └─ @subCategory.CategoryName</option>
+                                    }
+                                }
+                            }
+                        </select>
+                        <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Thumbnail -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h6 class="mb-0">Ảnh đại diện</h6>
+                    </div>
+                    <div class="card-body">
+                        <div id="thumbnail-preview" class="mb-3" style="display: none;">
+                            <img id="thumbnail-img" src="" class="img-fluid rounded" alt="Thumbnail" />
+                            <button type="button" class="btn btn-sm btn-danger mt-2 w-100" onclick="removeThumbnail()">
+                                <i class="fas fa-trash me-1"></i>Xóa ảnh
+                            </button>
+                        </div>
+                        <div id="thumbnail-upload">
+                            <input type="file" id="thumbnail-file" class="form-control mb-2" accept="image/*" />
+                            <button type="button" class="btn btn-sm btn-outline-primary w-100" onclick="uploadThumbnail()">
+                                <i class="fas fa-upload me-1"></i>Tải ảnh lên
+                            </button>
+                        </div>
+                        <input type="hidden" asp-for="ThumbnailImage" id="thumbnail-url" />
+                        <small class="text-muted d-block mt-2">
+                            Kích thước khuyến nghị: 1200x630px
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Scheduled Publish -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h6 class="mb-0">Hẹn giờ đăng bài</h6>
+                    </div>
+                    <div class="card-body">
+                        <input asp-for="ScheduledPublishDate" type="datetime-local" class="form-control" />
+                        <small class="text-muted d-block mt-2">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Nếu để trống, bài viết sẽ được đăng ngay khi được duyệt.
+                            Nếu đặt thời gian, bài viết sẽ được đăng vào thời điểm đã chọn.
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Tags -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h6 class="mb-0">Thẻ (Tags)</h6>
+                    </div>
+                    <div class="card-body">
+                        <input type="text" id="tags-input" class="form-control" 
+                               placeholder="Nhập tag và nhấn Enter..." />
+                        <div id="tags-container" class="mt-2"></div>
+                        <small class="text-muted d-block mt-2">
+                            Nhập từ khóa và nhấn Enter để thêm tag
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @Html.AntiForgeryToken()
+    </form>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.ckeditor.com/4.25.1-lts/standard/ckeditor.js"></script>
+    <script>
+        // Initialize CKEditor
+        CKEDITOR.replace('editor', {
+            height: 400,
+            filebrowserUploadUrl: '@Url.Action("UploadImage")',
+            filebrowserUploadMethod: 'form'
+        });
+
+        // Thumbnail upload
+        function uploadThumbnail() {
+            const fileInput = document.getElementById('thumbnail-file');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('Vui lòng chọn file ảnh');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('@Url.Action("UploadImage")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('thumbnail-url').value = data.url;
+                    document.getElementById('thumbnail-img').src = data.url;
+                    document.getElementById('thumbnail-preview').style.display = 'block';
+                    document.getElementById('thumbnail-upload').style.display = 'none';
+                } else {
+                    alert(data.message || 'Upload thất bại');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi upload ảnh');
+            });
+        }
+
+        function removeThumbnail() {
+            document.getElementById('thumbnail-url').value = '';
+            document.getElementById('thumbnail-img').src = '';
+            document.getElementById('thumbnail-preview').style.display = 'none';
+            document.getElementById('thumbnail-upload').style.display = 'block';
+            document.getElementById('thumbnail-file').value = '';
+        }
+
+        // Tags management
+        let tags = [];
+        const tagsInput = document.getElementById('tags-input');
+        const tagsContainer = document.getElementById('tags-container');
+
+        tagsInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const tag = this.value.trim();
+                if (tag && !tags.includes(tag)) {
+                    tags.push(tag);
+                    renderTags();
+                    this.value = '';
+                }
+            }
+        });
+
+        function renderTags() {
+            tagsContainer.innerHTML = '';
+            tags.forEach((tag, index) => {
+                const badge = document.createElement('span');
+                badge.className = 'badge bg-primary me-1 mb-1';
+                badge.innerHTML = `
+                    ${tag}
+                    <i class="fas fa-times ms-1" style="cursor: pointer;" onclick="removeTag(${index})"></i>
+                    <input type="hidden" name="Tags" value="${tag}" />
+                `;
+                tagsContainer.appendChild(badge);
+            });
+        }
+
+        function removeTag(index) {
+            tags.splice(index, 1);
+            renderTags();
+        }
+
+        // Form validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            // Update CKEditor content to textarea
+            for (var instance in CKEDITOR.instances) {
+                CKEDITOR.instances[instance].updateElement();
+            }
+        });
+    </script>
+}
+
+<style>
+    .cke_top {
+        background: #f8f9fa !important;
+    }
+
+    .card {
+        transition: box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1) !important;
+    }
+</style>

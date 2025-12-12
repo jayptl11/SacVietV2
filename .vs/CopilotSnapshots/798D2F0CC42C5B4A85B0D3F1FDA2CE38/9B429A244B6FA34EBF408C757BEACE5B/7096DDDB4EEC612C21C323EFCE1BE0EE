@@ -1,0 +1,173 @@
+﻿using Microsoft.EntityFrameworkCore;
+using SacViet.Models;
+
+namespace SacViet.Repositories
+{
+    public class ArticleRepository : IArticleRepository
+    {
+        private readonly SacVietContext _context;
+
+        public ArticleRepository(SacVietContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<IEnumerable<Article>> GetFeaturedArticlesAsync(int count = 5)
+        {
+            return await _context.Articles
+                .Include(a => a.Category)
+                .Where(a => a.Status == "published" && a.ViewCount > 100) // Coi như featured nếu có nhiều view
+                .OrderByDescending(a => a.ViewCount)
+                .ThenByDescending(a => a.PublishedAt)
+                .Take(count)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Article>> GetLatestArticlesAsync(int count = 10)
+        {
+            return await _context.Articles
+                .Include(a => a.Category)
+                .Where(a => a.Status == "published")
+                .OrderByDescending(a => a.PublishedAt)
+                .Take(count)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Article>> GetHotArticlesTodayAsync(int count = 6)
+        {
+            // Lấy thời gian bắt đầu và kết thúc của ngày hiện tại
+            var today = DateTime.Today; // 00:00:00 của ngày hôm nay
+            var tomorrow = today.AddDays(1); // 00:00:00 của ngày mai
+
+            return await _context.Articles
+                .Include(a => a.Category)
+                .Where(a => a.Status == "published" && 
+                           a.PublishedAt.HasValue && // Đảm bảo có ngày đăng
+                           a.PublishedAt.Value.Date == today && // CHỈ lấy bài đăng trong ngày hôm nay
+                           a.ViewCount.HasValue && 
+                           a.ViewCount.Value > 0) // Chỉ lấy bài có view > 0
+                .OrderByDescending(a => a.ViewCount) // Sắp xếp theo view count giảm dần
+                .ThenByDescending(a => a.PublishedAt) // Sau đó sắp xếp theo thời gian đăng
+                .Take(count)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Article>> GetArticlesByCategoryAsync(int categoryId, int page = 1, int pageSize = 10)
+        {
+            var query = _context.Articles
+                .Include(a => a.Category)
+                .Where(a => a.CategoryId == categoryId && a.Status == "published");
+
+            return await query
+                .OrderByDescending(a => a.PublishedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Article>> SearchArticlesAsync(string keyword, int? categoryId = null, int? authorId = null, DateTime? fromDate = null, DateTime? toDate = null, int page = 1, int pageSize = 10)
+        {
+            var query = _context.Articles
+                .Include(a => a.Category)
+                .Where(a => a.Status == "published");
+
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                query = query.Where(a => 
+                    EF.Functions.Contains(a.Title, keyword) ||
+                    EF.Functions.Contains(a.Content, keyword) ||
+                    (a.Summary != null && EF.Functions.Contains(a.Summary, keyword)));
+            }
+
+            if (categoryId.HasValue)
+            {
+                query = query.Where(a => a.CategoryId == categoryId.Value);
+            }
+
+            if (authorId.HasValue)
+            {
+                query = query.Where(a => a.AuthorId == authorId.Value);
+            }
+
+            if (fromDate.HasValue)
+            {
+                query = query.Where(a => a.PublishedAt >= fromDate.Value);
+            }
+
+            if (toDate.HasValue)
+            {
+                query = query.Where(a => a.PublishedAt <= toDate.Value);
+            }
+
+            return await query
+                .OrderByDescending(a => a.PublishedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+        }
+
+        public async Task<Article?> GetArticleByIdAsync(int id)
+        {
+            return await _context.Articles
+                .Include(a => a.Category)
+                .FirstOrDefaultAsync(a => a.ArticleId == id);
+        }
+
+        public async Task<Article?> GetArticleBySlugAsync(string slug)
+        {
+            return await _context.Articles
+                .Include(a => a.Category)
+                .FirstOrDefaultAsync(a => a.Slug == slug && a.Status == "published");
+        }
+
+        public async Task<int> GetTotalArticlesCountAsync()
+        {
+            return await _context.Articles
+                .Where(a => a.Status == "published")
+                .CountAsync();
+        }
+
+        public async Task<int> GetArticlesCountByCategoryAsync(int categoryId)
+        {
+            return await _context.Articles
+                .Where(a => a.CategoryId == categoryId && a.Status == "published")
+                .CountAsync();
+        }
+
+        public async Task<int> GetSearchResultsCountAsync(string keyword, int? categoryId = null, int? authorId = null, DateTime? fromDate = null, DateTime? toDate = null)
+        {
+            var query = _context.Articles
+                .Where(a => a.Status == "published");
+
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                query = query.Where(a => 
+                    EF.Functions.Contains(a.Title, keyword) ||
+                    EF.Functions.Contains(a.Content, keyword) ||
+                    (a.Summary != null && EF.Functions.Contains(a.Summary, keyword)));
+            }
+
+            if (categoryId.HasValue)
+            {
+                query = query.Where(a => a.CategoryId == categoryId.Value);
+            }
+
+            if (authorId.HasValue)
+            {
+                query = query.Where(a => a.AuthorId == authorId.Value);
+            }
+
+            if (fromDate.HasValue)
+            {
+                query = query.Where(a => a.PublishedAt >= fromDate.Value);
+            }
+
+            if (toDate.HasValue)
+            {
+                query = query.Where(a => a.PublishedAt <= toDate.Value);
+            }
+
+            return await query.CountAsync();
+        }
+    }
+}

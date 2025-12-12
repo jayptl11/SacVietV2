@@ -1,0 +1,190 @@
+﻿@model SacViet.Models.Article
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Article Header -->
+            <article class="article-detail">
+                <div class="article-header mb-4">
+                    <div class="category-badge bg-danger text-white px-3 py-1 d-inline-block mb-3">
+                        @Model.Category.CategoryName
+                    </div>
+                    <h1 class="article-title fw-bold mb-3">@Model.Title</h1>
+                    
+                    @if (!string.IsNullOrEmpty(Model.Summary))
+                    {
+                        <p class="article-summary lead text-muted mb-4">@Model.Summary</p>
+                    }
+                    
+                    <div class="article-meta d-flex align-items-center mb-4 pb-3 border-bottom">
+                        <div class="author-info me-4">
+                            <small class="text-muted">
+                                <i class="fas fa-user me-1"></i>
+                                <strong>@Model.Author.FullName</strong>
+                            </small>
+                        </div>
+                        <div class="publish-date me-4">
+                            <small class="text-muted">
+                                <i class="fas fa-clock me-1"></i>
+                                @Model.PublishedAt?.ToString("dd/MM/yyyy HH:mm")
+                            </small>
+                        </div>
+                        @if (Model.ViewCount.HasValue && Model.ViewCount > 0)
+                        {
+                            <div class="view-count">
+                                <small class="text-muted">
+                                    <i class="fas fa-eye me-1"></i>
+                                    @Model.ViewCount lượt xem
+                                </small>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Article Image -->
+                @if (!string.IsNullOrEmpty(Model.ThumbnailImage))
+                {
+                    <div class="article-image mb-4">
+                        <img src="@Model.ThumbnailImage" class="img-fluid w-100 rounded" alt="@Model.Title">
+                    </div>
+                }
+
+                <!-- Article Content -->
+                <div class="article-content">
+                    @Html.Raw(Model.Content)
+                </div>
+
+                <!-- Article Tags -->
+                @if (Model.Tags.Any())
+                {
+                    <div class="article-tags mt-4 pt-3 border-top">
+                        <h6 class="mb-2">Từ khóa:</h6>
+                        @foreach (var tag in Model.Tags)
+                        {
+                            <a href="@Url.Action("Search", "Home", new { keyword = tag.TagName })" 
+                               class="badge bg-outline-danger me-2 mb-2 text-decoration-none">
+                                @tag.TagName
+                            </a>
+                        }
+                    </div>
+                }
+
+                <!-- Social Share -->
+                <div class="social-share mt-4 pt-3 border-top">
+                    <h6 class="mb-3">Chia sẻ bài viết:</h6>
+                    <div class="share-buttons">
+                        <a href="#" class="btn btn-outline-primary btn-sm me-2 mb-2">
+                            <i class="fab fa-facebook-f me-1"></i>Facebook
+                        </a>
+                        <a href="#" class="btn btn-outline-info btn-sm me-2 mb-2">
+                            <i class="fab fa-twitter me-1"></i>Twitter
+                        </a>
+                        <a href="#" class="btn btn-outline-success btn-sm me-2 mb-2">
+                            <i class="fab fa-whatsapp me-1"></i>WhatsApp
+                        </a>
+                        <a href="#" class="btn btn-outline-secondary btn-sm mb-2">
+                            <i class="fas fa-link me-1"></i>Sao chép liên kết
+                        </a>
+                    </div>
+                </div>
+            </article>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Related Articles -->
+            @if (ViewBag.RelatedArticles != null && ((IEnumerable<SacViet.Models.Article>)ViewBag.RelatedArticles).Any())
+            {
+                <div class="sidebar-widget mb-4">
+                    <h5 class="widget-title bg-danger text-white p-3 mb-0">
+                        <i class="fas fa-newspaper me-2"></i>BÀI VIẾT LIÊN QUAN
+                    </h5>
+                    <div class="widget-content bg-light p-3">
+                        @foreach (var relatedArticle in (IEnumerable<SacViet.Models.Article>)ViewBag.RelatedArticles)
+                        {
+                            <div class="related-article d-flex mb-3">
+                                <div class="related-image me-3">
+                                    <img src="@(string.IsNullOrEmpty(relatedArticle.ThumbnailImage) ? "/images/placeholder-article.jpg" : relatedArticle.ThumbnailImage)" 
+                                         class="img-fluid rounded" alt="@relatedArticle.Title" style="width: 80px; height: 60px; object-fit: cover;">
+                                </div>
+                                <div class="related-content">
+                                    <h6 class="mb-1">
+                                        <a href="@Url.Action("Details", "Article", new { slug = relatedArticle.Slug })" 
+                                           class="text-dark text-decoration-none">
+                                            @relatedArticle.Title
+                                        </a>
+                                    </h6>
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>
+                                        @relatedArticle.PublishedAt?.ToString("dd/MM/yyyy")
+                                    </small>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Newsletter -->
+            <div class="sidebar-widget">
+                <h5 class="widget-title bg-danger text-white p-3 mb-0">
+                    <i class="fas fa-envelope me-2"></i>ĐĂNG KÝ NHẬN TIN
+                </h5>
+                <div class="widget-content bg-light p-3">
+                    <p class="mb-3">Nhận tin tức mới nhất qua email</p>
+                    <form>
+                        <div class="mb-3">
+                            <input type="email" class="form-control" placeholder="Nhập địa chỉ email của bạn">
+                        </div>
+                        <button type="submit" class="btn btn-danger w-100">Đăng ký</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .article-content {
+        font-size: 1.1rem;
+        line-height: 1.8;
+    }
+    
+    .article-content p {
+        margin-bottom: 1.5rem;
+    }
+    
+    .article-content h2, .article-content h3, .article-content h4 {
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        color: var(--text-dark);
+    }
+    
+    .article-title {
+        font-size: 2.2rem;
+        line-height: 1.3;
+        color: var(--text-dark);
+    }
+    
+    .article-summary {
+        font-size: 1.2rem;
+        line-height: 1.6;
+    }
+    
+    .related-article:last-child {
+        margin-bottom: 0 !important;
+    }
+    
+    @@media (max-width: 768px) {
+        .article-title {
+            font-size: 1.8rem;
+        }
+        
+        .article-content {
+            font-size: 1rem;
+        }
+    }
+</style>

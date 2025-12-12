@@ -1,0 +1,472 @@
+﻿using Microsoft.EntityFrameworkCore;
+using SacViet.Models;
+using SacViet.ViewModels;
+using System.Text.RegularExpressions;
+using System.Net; // Added for HtmlDecode
+
+namespace SacViet.Services
+{
+    public class WriterService : IWriterService
+    {
+        private readonly SacVietContext _context;
+        private readonly IWebHostEnvironment _environment;
+
+        public WriterService(SacVietContext context, IWebHostEnvironment environment)
+        {
+            _context = context;
+            _environment = environment;
+        }
+
+        public async Task<WriterStatsViewModel> GetWriterStatsAsync(int userId)
+        {
+            var articles = await _context.Articles
+                .Where(a => a.AuthorId == userId)
+                .ToListAsync();
+
+            var stats = new WriterStatsViewModel
+            {
+                TotalArticles = articles.Count,
+                DraftArticles = articles.Count(a => a.Status == "Draft"),
+                PendingArticles = articles.Count(a => a.Status == "Pending"),
+                PublishedArticles = articles.Count(a => a.Status == "Published"),
+                TotalViews = articles.Sum(a => a.ViewCount ?? 0)
+            };
+
+            // Count approved and rejected from ArticleApprovals
+            var approvals = await _context.ArticleApprovals
+                .Where(aa => aa.SubmittedByUserId == userId)
+                .GroupBy(aa => aa.Status)
+                .Select(g => new { Status = g.Key, Count = g.Count() })
+                .ToListAsync();
+
+            stats.ApprovedArticles = approvals.FirstOrDefault(a => a.Status == "Approved")?.Count ?? 0;
+            stats.RejectedArticles = approvals.FirstOrDefault(a => a.Status == "Rejected")?.Count ?? 0;
+
+            return stats;
+        }
+
+        public async Task<(IEnumerable<ArticleListItemViewModel> Articles, int TotalCount)> GetMyArticlesAsync(
+            int userId, string? status, int page, int pageSize)
+        {
+            var query = _context.Articles
+                .Include(a => a.Category)
+                .Where(a => a.AuthorId == userId);
+
+            if (!string.IsNullOrEmpty(status))
+            {
+                query = query.Where(a => a.Status == status);
+            }
+
+            var totalCount = await query.CountAsync();
+
+            var articles = await query
+                .OrderByDescending(a => a.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(a => new ArticleListItemViewModel
+                {
+                    ArticleId = a.ArticleId,
+                    Title = a.Title,
+                    Slug = a.Slug,
+                    ThumbnailImage = a.ThumbnailImage,
+                    CategoryName = a.Category.CategoryName,
+                    Status = a.Status ?? "Draft",
+                    ViewCount = a.ViewCount ?? 0,
+                    CreatedAt = a.CreatedAt,
+                    UpdatedAt = a.UpdatedAt,
+                    PublishedAt = a.PublishedAt,
+                    LatestApprovalStatus = a.ArticleApprovals
+                        .OrderByDescending(aa => aa.SubmittedAt)
+                        .Select(aa => aa.Status)
+                        .FirstOrDefault(),
+                    RejectionReason = a.ArticleApprovals
+                        .Where(aa => aa.Status == "Rejected")
+                        .OrderByDescending(aa => aa.ReviewedAt)
+                        .Select(aa => aa.ReviewNote)
+                        .FirstOrDefault()
+                })
+                .ToListAsync();
+
+            return (articles, totalCount);
+        }
+
+        public async Task<int> CreateArticleAsync(ArticleCreateViewModel model, int userId, string status)
+        {
+            // Decode inputs that might be HTML-encoded by client or upstream tools
+            var decodedTitle = WebUtility.HtmlDecode(model.Title ?? string.Empty);
+            var decodedSummary = WebUtility.HtmlDecode(model.Summary ?? string.Empty);
+            var decodedVideoTitle = string.IsNullOrWhiteSpace(model.VideoTitle) ? null : WebUtility.HtmlDecode(model.VideoTitle);
+
+            var article = new Article
+            {
+                Title = decodedTitle,
+                Slug = GenerateSlug(decodedTitle),
+                Summary = decodedSummary,
+                Content = model.Content,
+                ThumbnailImage = model.ThumbnailImage,
+                CategoryId = model.CategoryId,
+                AuthorId = userId,
+                Status = status,
+                ViewCount = 0,
+                ScheduledPublishDate = model.ScheduledPublishDate,
+                AudioUrl = ConvertGoogleDriveAudioUrl(model.AudioUrl),
+                VideoUrl = model.VideoUrl,
+                VideoTitle = decodedVideoTitle,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            };
+
+            _context.Articles.Add(article);
+            await _context.SaveChangesAsync();
+
+            // Persist inline media
+            await UpsertInlineMediaAsync(article.ArticleId, model.Videos, model.Images);
+
+            if (model.Tags != null && model.Tags.Any())
+            {
+                await AddTagsToArticleAsync(article.ArticleId, model.Tags);
+            }
+
+            if (status == "Pending")
+            {
+                var approval = new ArticleApproval
+                {
+                    ArticleId = article.ArticleId,
+                    SubmittedByUserId = userId,
+                    Status = "Pending",
+                    SubmittedAt = DateTime.Now
+                };
+                _context.ArticleApprovals.Add(approval);
+                await _context.SaveChangesAsync();
+            }
+
+            return article.ArticleId;
+        }
+
+        public async Task<ArticleEditViewModel?> GetArticleForEditAsync(int articleId, int userId)
+        {
+            var article = await _context.Articles
+                .Include(a => a.Category)
+                .Include(a => a.Tags)
+                .Include(a => a.InlineMedia)
+                .FirstOrDefaultAsync(a => a.ArticleId == articleId && a.AuthorId == userId);
+
+            if (article == null)
+            {
+                return null;
+            }
+
+            return new ArticleEditViewModel
+            {
+                ArticleId = article.ArticleId,
+                Title = article.Title,
+                Slug = article.Slug,
+                Summary = article.Summary,
+                Content = article.Content,
+                ThumbnailImage = article.ThumbnailImage,
+                CategoryId = article.CategoryId,
+                Status = article.Status,
+                ScheduledPublishDate = article.ScheduledPublishDate,
+                AudioUrl = article.AudioUrl,
+                VideoUrl = article.VideoUrl,
+                VideoTitle = article.VideoTitle,
+                CreatedAt = article.CreatedAt,
+                UpdatedAt = article.UpdatedAt,
+                Tags = article.Tags.Select(t => t.TagName).ToList(),
+                Videos = article.InlineMedia.Where(m => m.MediaType == "video")
+                          .OrderBy(m => m.DisplayOrder)
+                          .Select(m => new MediaLinkViewModel { Url = m.Url, Title = m.Title })
+                          .ToList(),
+                Images = article.InlineMedia.Where(m => m.MediaType == "image")
+                          .OrderBy(m => m.DisplayOrder)
+                          .Select(m => new MediaLinkViewModel { Url = m.Url, Title = m.Title })
+                          .ToList()
+            };
+        }
+
+        public async Task<bool> UpdateArticleAsync(int articleId, ArticleEditViewModel model, int userId, string status)
+        {
+            var article = await _context.Articles
+                .Include(a => a.Tags)
+                .FirstOrDefaultAsync(a => a.ArticleId == articleId && a.AuthorId == userId);
+
+            if (article == null)
+            {
+                return false;
+            }
+
+            if (article.Status != "Draft" && article.Status != "Rejected")
+            {
+                return false;
+            }
+
+            // Decode potentially HTML-encoded inputs
+            var decodedTitle = WebUtility.HtmlDecode(model.Title ?? string.Empty);
+            var decodedSummary = WebUtility.HtmlDecode(model.Summary ?? string.Empty);
+            var decodedVideoTitle = string.IsNullOrWhiteSpace(model.VideoTitle) ? null : WebUtility.HtmlDecode(model.VideoTitle);
+
+            article.Title = decodedTitle;
+            article.Slug = GenerateSlug(decodedTitle);
+            article.Summary = decodedSummary;
+            article.Content = model.Content;
+            article.ThumbnailImage = model.ThumbnailImage;
+            article.CategoryId = model.CategoryId;
+            article.Status = status;
+            article.ScheduledPublishDate = model.ScheduledPublishDate;
+            article.AudioUrl = ConvertGoogleDriveAudioUrl(model.AudioUrl);
+            article.VideoUrl = model.VideoUrl;
+            article.VideoTitle = decodedVideoTitle;
+            article.UpdatedAt = DateTime.Now;
+
+            // Update tags
+            article.Tags.Clear();
+            if (model.Tags != null && model.Tags.Any())
+            {
+                await AddTagsToArticleAsync(article.ArticleId, model.Tags);
+            }
+
+            // Upsert inline media
+            await UpsertInlineMediaAsync(article.ArticleId, model.Videos, model.Images);
+
+            if (status == "Pending")
+            {
+                var approval = new ArticleApproval
+                {
+                    ArticleId = article.ArticleId,
+                    SubmittedByUserId = userId,
+                    Status = "Pending",
+                    SubmittedAt = DateTime.Now
+                };
+                _context.ArticleApprovals.Add(approval);
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        private async Task UpsertInlineMediaAsync(int articleId, List<MediaLinkViewModel> videos, List<MediaLinkViewModel> images)
+        {
+            // Remove current then add again (simpler approach)
+            var existing = _context.ArticleInlineMedia.Where(m => m.ArticleId == articleId);
+            _context.ArticleInlineMedia.RemoveRange(existing);
+            await _context.SaveChangesAsync();
+
+            int order = 0;
+            foreach (var v in videos.Where(v => !string.IsNullOrWhiteSpace(v.Url)))
+            {
+                _context.ArticleInlineMedia.Add(new ArticleInlineMedia
+                {
+                    ArticleId = articleId,
+                    MediaType = "video",
+                    Url = v.Url!,
+                    Title = string.IsNullOrWhiteSpace(v.Title) ? null : WebUtility.HtmlDecode(v.Title),
+                    DisplayOrder = order++,
+                    CreatedAt = DateTime.Now
+                });
+            }
+            foreach (var i in images.Where(i => !string.IsNullOrWhiteSpace(i.Url)))
+            {
+                _context.ArticleInlineMedia.Add(new ArticleInlineMedia
+                {
+                    ArticleId = articleId,
+                    MediaType = "image",
+                    Url = i.Url!,
+                    Title = string.IsNullOrWhiteSpace(i.Title) ? null : WebUtility.HtmlDecode(i.Title),
+                    DisplayOrder = order++,
+                    CreatedAt = DateTime.Now
+                });
+            }
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<bool> DeleteArticleAsync(int articleId, int userId)
+        {
+            var article = await _context.Articles
+                .FirstOrDefaultAsync(a => a.ArticleId == articleId && a.AuthorId == userId);
+
+            if (article == null)
+            {
+                return false;
+            }
+
+            // Only allow deleting Draft articles
+            if (article.Status != "Draft")
+            {
+                return false;
+            }
+
+            _context.Articles.Remove(article);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<ArticleApproval?> GetLatestApprovalAsync(int articleId)
+        {
+            return await _context.ArticleApprovals
+                .Include(aa => aa.ReviewedByUser)
+                .Where(aa => aa.ArticleId == articleId)
+                .OrderByDescending(aa => aa.SubmittedAt)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<IEnumerable<ApprovalHistoryViewModel>> GetApprovalHistoryAsync(int articleId)
+        {
+            return await _context.ArticleApprovals
+                .Include(aa => aa.ReviewedByUser)
+                .Where(aa => aa.ArticleId == articleId)
+                .OrderByDescending(aa => aa.SubmittedAt)
+                .Select(aa => new ApprovalHistoryViewModel
+                {
+                    ApprovalId = aa.ApprovalId,
+                    Status = aa.Status,
+                    ReviewNote = aa.ReviewNote,
+                    ReviewerName = aa.ReviewedByUser != null ? aa.ReviewedByUser.FullName : null,
+                    SubmittedAt = aa.SubmittedAt,
+                    ReviewedAt = aa.ReviewedAt
+                })
+                .ToListAsync();
+        }
+
+        public async Task<string> UploadImageAsync(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                throw new ArgumentException("File không hợp lệ");
+            }
+
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+
+            if (!allowedExtensions.Contains(extension))
+            {
+                throw new ArgumentException("Chỉ chấp nhận file ảnh (.jpg, .jpeg, .png, .gif, .webp)");
+            }
+
+            var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads", "articles");
+            Directory.CreateDirectory(uploadsFolder);
+
+            var uniqueFileName = $"{Guid.NewGuid()}{extension}";
+            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(fileStream);
+            }
+
+            return $"/uploads/articles/{uniqueFileName}";
+        }
+
+        private async Task AddTagsToArticleAsync(int articleId, List<string> tagNames)
+        {
+            var article = await _context.Articles
+                .Include(a => a.Tags)
+                .FirstOrDefaultAsync(a => a.ArticleId == articleId);
+
+            if (article == null) return;
+
+            foreach (var tagName in tagNames)
+            {
+                var tag = await _context.Tags.FirstOrDefaultAsync(t => t.TagName == tagName);
+                if (tag == null)
+                {
+                    tag = new Tag
+                    {
+                        TagName = tagName,
+                        Slug = GenerateSlug(tagName),
+                        CreatedAt = DateTime.Now
+                    };
+                    _context.Tags.Add(tag);
+                    await _context.SaveChangesAsync();
+                }
+
+                if (!article.Tags.Contains(tag))
+                {
+                    article.Tags.Add(tag);
+                }
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        private string GenerateSlug(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return string.Empty;
+
+            // Convert to lowercase
+            text = text.ToLowerInvariant();
+
+            // Replace Vietnamese characters
+            text = text.Replace("à", "a").Replace("á", "a").Replace("ạ", "a").Replace("ả", "a").Replace("ã", "a")
+                       .Replace("â", "a").Replace("ầ", "a").Replace("ấ", "a").Replace("ậ", "a").Replace("ổ", "a").Replace("ỗ", "a")
+                       .Replace("ă", "a").Replace("ằ", "a").Replace("ắ", "a").Replace("ặ", "a").Replace("ẳ", "a").Replace("ẵ", "a")
+                       .Replace("è", "e").Replace("é", "e").Replace("ẹ", "e").Replace("ẻ", "e").Replace("ẽ", "e")
+                       .Replace("ê", "e").Replace("ề", "e").Replace("ế", "e").Replace("ệ", "e").Replace("ể", "e").Replace("ễ", "e")
+                       .Replace("ì", "i").Replace("í", "i").Replace("ị", "i").Replace("ỉ", "i").Replace("ĩ", "i")
+                       .Replace("ò", "o").Replace("ó", "o").Replace("ọ", "o").Replace("ỏ", "o").Replace("õ", "o")
+                       .Replace("ô", "o").Replace("ồ", "o").Replace("ố", "o").Replace("ộ", "o").Replace("ổ", "o").Replace("ỗ", "o")
+                       .Replace("ơ", "o").Replace("ờ", "o").Replace("ớ", "o").Replace("ợ", "o").Replace("ở", "o").Replace("ỡ", "o")
+                       .Replace("ù", "u").Replace("ú", "u").Replace("ụ", "u").Replace("ủ", "u").Replace("ũ", "u")
+                       .Replace("ư", "u").Replace("ừ", "u").Replace("ứ", "u").Replace("ự", "u").Replace("ử", "u").Replace("ữ", "u")
+                       .Replace("ỳ", "y").Replace("ý", "y").Replace("ỵ", "y").Replace("ỷ", "y").Replace("ỹ", "y")
+                       .Replace("đ", "d");
+
+            // Remove invalid characters
+            text = Regex.Replace(text, @"[^a-z0-9\s-]", "");
+
+            // Convert multiple spaces/hyphens into one space
+            text = Regex.Replace(text, @"[\s-]+", " ").Trim();
+
+            // Replace spaces with hyphens
+            text = Regex.Replace(text, @"\s", "-");
+
+            // Add timestamp to make it unique
+            text = $"{text}-{DateTime.Now:yyyyMMddHHmmss}";
+
+            return text;
+        }
+
+        /// <summary>
+        /// Convert Google Drive share URL to direct playable URL
+        /// </summary>
+        private string? ConvertGoogleDriveAudioUrl(string? audioUrl)
+        {
+            if (string.IsNullOrWhiteSpace(audioUrl))
+                return audioUrl;
+
+            // If not a Google Drive URL, return as-is
+            if (!audioUrl.Contains("drive.google.com"))
+                return audioUrl;
+
+            // Extract FILE_ID from various Google Drive URL formats
+            string? fileId = null;
+
+            // Format 1: https://drive.google.com/file/d/FILE_ID/view
+            var match1 = Regex.Match(audioUrl, @"/file/d/([^/\?]+)");
+            if (match1.Success)
+            {
+                fileId = match1.Groups[1].Value;
+            }
+
+            // Format 2: https://drive.google.com/open?id=FILE_ID
+            if (string.IsNullOrEmpty(fileId))
+            {
+                var match2 = Regex.Match(audioUrl, @"[?&]id=([^&]+)");
+                if (match2.Success)
+                {
+                    fileId = match2.Groups[1].Value;
+                }
+            }
+
+            // If FILE_ID found, convert to direct playable URL
+            if (!string.IsNullOrEmpty(fileId))
+            {
+                // Use 'export=open' for inline playback (not forced download)
+                return $"https://drive.google.com/uc?export=open&id={fileId}";
+            }
+
+            // If already in direct format or can't extract, return original
+            return audioUrl;
+        }
+    }
+}

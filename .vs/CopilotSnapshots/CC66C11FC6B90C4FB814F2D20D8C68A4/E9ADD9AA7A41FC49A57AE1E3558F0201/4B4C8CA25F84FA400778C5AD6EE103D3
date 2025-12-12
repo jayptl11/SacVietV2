@@ -1,0 +1,204 @@
+﻿@* Partial View: Article Sidebar (Category, Thumbnail, Schedule, Tags) *@
+@{
+    var categories = ViewData["Categories"] as IEnumerable<SacViet.Models.Category>;
+    var thumbnailImage = ViewData["ThumbnailImage"] as string;
+    var scheduledPublishDate = ViewData["ScheduledPublishDate"] as DateTime?;
+    var tags = ViewData["Tags"] as List<string>;
+    var canEdit = ViewData["CanEdit"] as bool? ?? true;
+    
+    // Get CategoryId from Model
+    var model = Model as dynamic;
+    var categoryId = model?.CategoryId ?? 0;
+}
+
+<!-- Category Card -->
+<div class="sidebar-card mb-4">
+    <div class="sidebar-card-header">
+        <h6 class="mb-0">
+            <i class="fas fa-folder text-warning me-2"></i>Danh mục <span class="text-danger">*</span>
+        </h6>
+    </div>
+    <div class="sidebar-card-body">
+        @if (canEdit)
+        {
+            <select name="CategoryId" class="form-select-modern" required>
+                <option value="">-- Chọn danh mục --</option>
+                @if (categories != null)
+                {
+                    @foreach (var category in categories.Where(c => c.ParentCategoryId == null))
+                    {
+                        @* Check if parent category has subcategories *@
+                        var hasSubCategories = categories.Any(c => c.ParentCategoryId == category.CategoryId);
+                        
+                        @if (hasSubCategories)
+                        {
+                            @* Parent with subcategories - DISABLED *@
+                            <option value="@category.CategoryId" disabled selected="@(categoryId == category.CategoryId)" class="parent-category">
+                                📁 @category.CategoryName (Chọn danh mục con bên dưới)
+                            </option>
+                        }
+                        else
+                        {
+                            @* Parent without subcategories - ENABLED *@
+                            <option value="@category.CategoryId" selected="@(categoryId == category.CategoryId)">
+                                📁 @category.CategoryName
+                            </option>
+                        }
+                        
+                        @* Subcategories - Always ENABLED *@
+                        @foreach (var subCategory in categories.Where(c => c.ParentCategoryId == category.CategoryId))
+                        {
+                            <option value="@subCategory.CategoryId" selected="@(categoryId == subCategory.CategoryId)">
+                                  └─ @subCategory.CategoryName
+                            </option>
+                        }
+                    }
+                }
+            </select>
+        }
+        else
+        {
+            <select name="CategoryId" class="form-select-modern" disabled>
+                <option value="">-- Chọn danh mục --</option>
+                @if (categories != null)
+                {
+                    @foreach (var category in categories.Where(c => c.ParentCategoryId == null))
+                    {
+                        var hasSubCategories = categories.Any(c => c.ParentCategoryId == category.CategoryId);
+                        
+                        @if (hasSubCategories)
+                        {
+                            <option value="@category.CategoryId" disabled selected="@(categoryId == category.CategoryId)" class="parent-category">
+                                📁 @category.CategoryName (Danh mục cha)
+                            </option>
+                        }
+                        else
+                        {
+                            <option value="@category.CategoryId" selected="@(categoryId == category.CategoryId)">
+                                📁 @category.CategoryName
+                            </option>
+                        }
+                        
+                        @foreach (var subCategory in categories.Where(c => c.ParentCategoryId == category.CategoryId))
+                        {
+                            <option value="@subCategory.CategoryId" selected="@(categoryId == subCategory.CategoryId)">
+                                  └─ @subCategory.CategoryName
+                            </option>
+                        }
+                    }
+                }
+            </select>
+        }
+        <span class="validation-message"></span>
+        <small class="form-hint">
+            <i class="fas fa-info-circle me-1"></i>
+            <strong>Lưu ý:</strong> Nếu danh mục có danh mục con, vui lòng chọn danh mục con
+        </small>
+    </div>
+</div>
+
+<!-- Thumbnail Card -->
+<div class="sidebar-card mb-4" id="thumbnail-card">
+    <div class="sidebar-card-header">
+        <h6 class="mb-0">
+            <i class="fas fa-image text-info me-2"></i>Ảnh đại diện
+            <span class="text-danger ms-2" title="Bắt buộc khi gửi duyệt">*</span>
+        </h6>
+    </div>
+    <div class="sidebar-card-body">
+        <div id="thumbnail-preview" class="thumbnail-preview" style="@(!string.IsNullOrEmpty(thumbnailImage) ? "" : "display: none;")">
+            <img id="thumbnail-img" src="@thumbnailImage" alt="Thumbnail" />
+            @if (canEdit)
+            {
+                <button type="button" class="btn-remove-thumbnail" onclick="removeThumbnail()">
+                    <i class="fas fa-times"></i>
+                </button>
+            }
+        </div>
+        <div id="thumbnail-upload" class="thumbnail-upload" style="@(string.IsNullOrEmpty(thumbnailImage) ? "" : "display: none;")">
+            @if (canEdit)
+            {
+                <!-- Upload file option -->
+                <div class="upload-area" onclick="document.getElementById('thumbnail-file').click()">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Chọn ảnh hoặc kéo thả vào đây</p>
+                    <small>JPG, PNG, GIF (Max 5MB)</small>
+                </div>
+                <input type="file" id="thumbnail-file" accept="image/*" style="display: none;" 
+                       onchange="uploadThumbnail('@Url.Action("UploadImage", "Writer")')" />
+                
+                <!-- OR divider -->
+                <div class="text-center my-3">
+                    <small class="text-muted">── HOẶC ──</small>
+                </div>
+                
+                <!-- Set by URL option -->
+                <div class="url-input-group">
+                    <input type="url" id="thumbnail-url-input" class="form-control form-control-sm" 
+                           placeholder="Paste URL hình ảnh vào đây..." />
+                    <button type="button" class="btn btn-sm btn-primary mt-2 w-100" onclick="setThumbnailByUrl()">
+                        <i class="fas fa-link me-1"></i>Dùng URL này
+                    </button>
+                </div>
+            }
+            else
+            {
+                <p class="text-muted text-center">Không có ảnh</p>
+            }
+        </div>
+        <input type="hidden" name="ThumbnailImage" id="thumbnail-url" value="@thumbnailImage" />
+        <small class="form-hint mt-2">
+            <i class="fas fa-exclamation-triangle text-warning me-1"></i>
+            <strong>Bắt buộc:</strong> Cần có ảnh đại diện để gửi duyệt
+        </small>
+    </div>
+</div>
+
+<!-- Scheduled Publish Card -->
+<div class="sidebar-card mb-4">
+    <div class="sidebar-card-header">
+        <h6 class="mb-0">
+            <i class="fas fa-clock text-success me-2"></i>Hẹn giờ đăng
+        </h6>
+    </div>
+    <div class="sidebar-card-body">
+        @if (canEdit)
+        {
+            <input name="ScheduledPublishDate" type="datetime-local" class="form-control-modern" 
+                   value="@(scheduledPublishDate?.ToString("yyyy-MM-ddTHH:mm"))" />
+        }
+        else
+        {
+            <input name="ScheduledPublishDate" type="datetime-local" class="form-control-modern" 
+                   value="@(scheduledPublishDate?.ToString("yyyy-MM-ddTHH:mm"))" readonly />
+        }
+        <small class="form-hint">
+            <i class="fas fa-info-circle me-1"></i>
+            Bài viết sẽ tự động đăng sau khi duyệt
+        </small>
+    </div>
+</div>
+
+<!-- Tags Card -->
+<div class="sidebar-card">
+    <div class="sidebar-card-header">
+        <h6 class="mb-0">
+            <i class="fas fa-tags text-danger me-2"></i>Thẻ Tags
+        </h6>
+    </div>
+    <div class="sidebar-card-body">
+        @if (canEdit)
+        {
+            <input type="text" id="tags-input" class="form-control-modern" 
+                   placeholder="Nhập tag và nhấn Enter..." />
+        }
+        <div id="tags-container" class="tags-container mt-3"></div>
+        @if (canEdit)
+        {
+            <small class="form-hint">
+                <i class="fas fa-keyboard me-1"></i>
+                Nhấn Enter để thêm tag
+            </small>
+        }
+    </div>
+</div>

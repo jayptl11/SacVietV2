@@ -1,0 +1,68 @@
+﻿@* Partial View: Article Content Form Fields *@
+@using SacViet.ViewModels
+
+@* Accept both Create and Edit ViewModels *@
+@model object
+
+<div class="content-card mb-4">
+    <div class="content-card-header">
+        <h5 class="mb-0">
+            <i class="fas fa-file-alt text-primary me-2"></i>
+            Nội dung bài viết
+        </h5>
+    </div>
+    <div class="content-card-body">
+        <!-- Title -->
+        <div class="form-group-modern mb-4">
+            <label class="form-label-modern">
+                <i class="fas fa-heading me-2"></i>Tiêu đề <span class="text-danger">*</span>
+            </label>
+            <input name="Title" 
+                   value="@(Model is ArticleEditViewModel edit ? edit.Title : (Model as ArticleCreateViewModel)?.Title)" 
+                   class="form-control-modern"
+                   placeholder="Nhập tiêu đề hấp dẫn cho bài viết..."
+                   required
+                   maxlength="500" />
+            <span class="validation-message"></span>
+            <small class="form-hint">Tiêu đề nên ngắn gọn, súc tích và thu hút</small>
+        </div>
+
+        <!-- Summary -->
+        <div class="form-group-modern mb-4">
+            <label class="form-label-modern">
+                <i class="fas fa-align-left me-2"></i>Tóm tắt
+            </label>
+            <textarea name="Summary" 
+                      class="form-control-modern" 
+                      rows="3"
+                      placeholder="Viết tóm tắt ngắn gọn về nội dung bài viết..."
+                      maxlength="1000">@(Model is ArticleEditViewModel editSum ? editSum.Summary : (Model as ArticleCreateViewModel)?.Summary)</textarea>
+            <span class="validation-message"></span>
+            <small class="form-hint">Tóm tắt giúp người đọc nắm nhanh nội dung</small>
+        </div>
+
+        <!-- Content -->
+        <div class="form-group-modern">
+            <label class="form-label-modern">
+                <i class="fas fa-paragraph me-2"></i>Nội dung <span class="text-danger">*</span>
+            </label>
+            <textarea name="Content" 
+                      id="editor" 
+                      class="form-control-modern" 
+                      rows="10"
+                      required>@(Model is ArticleEditViewModel editContent ? editContent.Content : (Model as ArticleCreateViewModel)?.Content)</textarea>
+            <span class="validation-message"></span>
+        </div>
+    </div>
+</div>
+
+<!-- Tips Card -->
+<div class="tips-card-horizontal">
+    <div class="tips-icon">
+        <i class="fas fa-lightbulb"></i>
+    </div>
+    <div class="tips-content">
+        <h6>Mẹo viết bài hiệu quả</h6>
+        <p>• Dùng tiêu đề ngắn gọn, dễ hiểu • Chia nhỏ đoạn văn • Thêm hình ảnh minh họa</p>
+    </div>
+</div>

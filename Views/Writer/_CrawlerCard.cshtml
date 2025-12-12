@@ -1,0 +1,29 @@
+﻿@* Partial View: Web Crawler Card *@
+<div class="crawler-card mb-4">
+    <div class="crawler-card-header">
+        <h5 class="mb-0">
+            <i class="fas fa-magic text-danger me-2"></i>
+            <strong>Tự động lấy nội dung từ link</strong>
+        </h5>
+    </div>
+    <div class="crawler-card-body">
+        <div class="crawler-input-group">
+            <input type="url" id="crawl-url" class="form-control-crawler" 
+                   placeholder="Paste link bài báo vào đây (VD: https://example.com/bai-viet)..." />
+            <button type="button" class="btn-crawl" onclick="startCrawl('@Url.Action("CrawlUrl", "Writer")')">
+                <i class="fas fa-download me-2"></i>Lấy nội dung
+            </button>
+        </div>
+        <div id="crawl-status" class="crawl-status mt-3" style="display: none;"></div>
+        <div class="crawl-hint mt-2">
+            <i class="fas fa-info-circle text-primary me-2"></i>
+            <small>Hệ thống sẽ tự động lấy tiêu đề, nội dung, hình ảnh từ link bạn cung cấp. 
+            Bạn có thể chỉnh sửa lại sau khi lấy.</small>
+        </div>
+        <div class="crawl-warning mt-2">
+            <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+            <small><strong>Lưu ý:</strong> Chức năng này chỉ nên dùng để tham khảo. 
+            Hãy viết lại nội dung theo cách của bạn và ghi rõ nguồn.</small>
+        </div>
+    </div>
+</div>

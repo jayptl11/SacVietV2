@@ -1,0 +1,100 @@
+﻿using System.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
+using SacViet.Models;
+using SacViet.Services;
+using SacViet.ViewModels;
+
+namespace SacViet.Controllers
+{
+    public class HomeController : Controller
+    {
+        private readonly ILogger<HomeController> _logger;
+        private readonly INewsService _newsService;
+
+        public HomeController(ILogger<HomeController> logger, INewsService newsService)
+        {
+            _logger = logger;
+            _newsService = newsService;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            try
+            {
+                // L?y t?t c? các danh m?c (bao g?m c? danh m?c con)
+                var navigationCategories = await _newsService.GetNavigationCategoriesAsync();
+                
+                // L?y t?t c? các danh m?c (c? chính và con) ?? hi?n th? bài vi?t
+                var allCategories = await _newsService.GetAllCategoriesAsync();
+                
+                // L?y t?t c? các category ID (bao g?m c? danh m?c chính và danh m?c con)
+                var allCategoryIds = allCategories
+                    .Select(c => c.CategoryId)
+                    .ToList();
+                
+                // L?y bài vi?t cho t?t c? các danh m?c
+                var articlesByCategory = await _newsService.GetArticlesByCategoriesForHomeAsync(allCategoryIds, 6);
+                
+                var viewModel = new HomePageViewModel
+                {
+                    FeaturedArticles = await _newsService.GetFeaturedArticlesAsync(),
+                    LatestArticles = await _newsService.GetLatestArticlesAsync(),
+                    MostViewedTodayArticles = await _newsService.GetMostViewedArticlesTodayAsync(5),
+                    NavigationCategories = navigationCategories,
+                    AllCategories = allCategories, // Thêm t?t c? danh m?c ?? s? d?ng trong view
+                    ArticlesByCategory = articlesByCategory
+                };
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "L?i khi t?i trang ch?");
+                // Return empty view model if there's an error
+                return View(new HomePageViewModel());
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Search(string keyword, int? categoryId, int? authorId, DateTime? fromDate, DateTime? toDate, int page = 1)
+        {
+            try
+            {
+                var (articles, totalCount) = await _newsService.SearchArticlesAsync(keyword, categoryId, authorId, fromDate, toDate, page, 10);
+                var categories = await _newsService.GetNavigationCategoriesAsync();
+
+                var viewModel = new SearchViewModel
+                {
+                    Keyword = keyword,
+                    CategoryId = categoryId,
+                    AuthorId = authorId,
+                    FromDate = fromDate,
+                    ToDate = toDate,
+                    Page = page,
+                    PageSize = 10,
+                    TotalCount = totalCount,
+                    Articles = articles,
+                    Categories = categories
+                };
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "L?i khi tìm ki?m");
+                return View(new SearchViewModel());
+            }
+        }
+
+        public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+    }
+}

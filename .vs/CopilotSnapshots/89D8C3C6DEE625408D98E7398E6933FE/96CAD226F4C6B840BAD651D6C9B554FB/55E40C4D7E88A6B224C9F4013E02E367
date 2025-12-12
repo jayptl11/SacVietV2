@@ -1,0 +1,647 @@
+﻿using HtmlAgilityPack;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Net;
+using System.Linq;
+
+namespace SacViet.Services
+{
+    public class WebCrawlerService : IWebCrawlerService
+    {
+        private readonly IWebHostEnvironment _environment;
+        private readonly HttpClient _httpClient;
+
+        public WebCrawlerService(IWebHostEnvironment environment)
+        {
+            _environment = environment;
+            _httpClient = new HttpClient();
+            _httpClient.Timeout = TimeSpan.FromSeconds(30);
+            _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+            _httpClient.DefaultRequestHeaders.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
+            _httpClient.DefaultRequestHeaders.Add("Accept-Language", "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7");
+        }
+
+        public async Task<CrawledContentResult> CrawlArticleAsync(string url)
+        {
+            var result = new CrawledContentResult
+            {
+                SourceUrl = url,
+                ImageUrls = new List<string>()
+            };
+
+            try
+            {
+                // Validate URL
+                if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+                {
+                    result.ErrorMessage = "URL không hợp lệ";
+                    return result;
+                }
+
+                // Download HTML
+                var html = await _httpClient.GetStringAsync(url);
+                
+                var htmlDoc = new HtmlDocument();
+                htmlDoc.LoadHtml(html);
+
+                // Extract title - try multiple common selectors
+                result.Title = ExtractTitle(htmlDoc);
+
+                // Extract summary/description
+                result.Summary = ExtractSummary(htmlDoc);
+
+                // Extract all images URLs first (before processing content)
+                result.ImageUrls = ExtractAllImageUrls(htmlDoc, uri);
+
+                // Extract main content with images (keep original URLs)
+                result.Content = ExtractContentWithImages(htmlDoc, uri);
+
+                // Extract thumbnail image
+                result.ThumbnailUrl = ExtractThumbnail(htmlDoc, uri);
+
+                // If no thumbnail found, use first image from content
+                if (string.IsNullOrWhiteSpace(result.ThumbnailUrl) && result.ImageUrls.Any())
+                {
+                    result.ThumbnailUrl = result.ImageUrls.First();
+                }
+
+                // Mark as success if we got at least title and content
+                result.Success = !string.IsNullOrWhiteSpace(result.Title) 
+                              && !string.IsNullOrWhiteSpace(result.Content);
+
+                if (!result.Success)
+                {
+                    result.ErrorMessage = "Không thể trích xuất đủ nội dung từ trang web";
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                result.ErrorMessage = $"Lỗi kết nối: {ex.Message}";
+            }
+            catch (TaskCanceledException)
+            {
+                result.ErrorMessage = "Timeout: Trang web phản hồi quá chậm";
+            }
+            catch (Exception ex)
+            {
+                result.ErrorMessage = $"Lỗi: {ex.Message}";
+            }
+
+            return result;
+        }
+
+        public async Task<string> DownloadAndSaveImageAsync(string imageUrl, string articleTitle)
+        {
+            try
+            {
+                // Validate URL
+                if (!Uri.TryCreate(imageUrl, UriKind.Absolute, out var uri))
+                {
+                    throw new ArgumentException("URL hình ?nh không h?p l?");
+                }
+
+                // Download image
+                var imageBytes = await _httpClient.GetByteArrayAsync(imageUrl);
+
+                // Get extension from URL or default to .jpg
+                var extension = Path.GetExtension(uri.LocalPath);
+                if (string.IsNullOrEmpty(extension) || extension.Length > 5)
+                {
+                    extension = ".jpg";
+                }
+
+                // Create uploads folder
+                var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads", "crawled");
+                Directory.CreateDirectory(uploadsFolder);
+
+                // Generate unique filename
+                var fileName = $"{Guid.NewGuid()}{extension}";
+                var filePath = Path.Combine(uploadsFolder, fileName);
+
+                // Save file
+                await File.WriteAllBytesAsync(filePath, imageBytes);
+
+                return $"/uploads/crawled/{fileName}";
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Không th? t?i hình ?nh: {ex.Message}");
+            }
+        }
+
+        private string? ExtractTitle(HtmlDocument doc)
+        {
+            // Try common title selectors in order of priority
+            var titleSelectors = new[]
+            {
+                "//meta[@property='og:title']/@content",
+                "//meta[@name='og:title']/@content",
+                "//meta[@property='twitter:title']/@content",
+                "//meta[@name='twitter:title']/@content",
+                "//meta[@name='title']/@content",
+                "//h1[@class='title']",
+                "//h1[@class='article-title']",
+                "//h1[@class='post-title']",
+                "//h1[@class='entry-title']",
+                "//h1[@itemprop='headline']",
+                "//article//h1[1]",
+                "//main//h1[1]",
+                ".content h1:first-of-type",
+                "//h1[1]",
+                "//title"
+            };
+
+            foreach (var selector in titleSelectors)
+            {
+                try
+                {
+                    var node = doc.DocumentNode.SelectSingleNode(selector);
+                    if (node != null)
+                    {
+                        var title = node.Attributes["content"]?.Value ?? node.InnerText;
+                        title = CleanText(title);
+                        
+                        if (!string.IsNullOrWhiteSpace(title) && title.Length > 5)
+                        {
+                            // Remove site name from title
+                            title = Regex.Replace(title, @"\s*[-|–—]\s*[^-|–—]+$", "").Trim();
+                            return WebUtility.HtmlDecode(title);
+                        }
+                    }
+                }
+                catch { }
+            }
+
+            return null;
+        }
+
+        private string? ExtractSummary(HtmlDocument doc)
+        {
+            // Try common meta description selectors
+            var summarySelectors = new[]
+            {
+                "//meta[@property='og:description']/@content",
+                "//meta[@name='og:description']/@content",
+                "//meta[@name='description']/@content",
+                "//meta[@property='twitter:description']/@content",
+                "//meta[@name='twitter:description']/@content",
+                "//meta[@itemprop='description']/@content",
+                "//div[@class='article-sapo']",
+                "//div[@class='article-summary']",
+                "//div[@class='post-excerpt']",
+                "//div[@class='sapo']",
+                "//div[@class='summary']",
+                "//p[@class='lead']",
+                "//p[@class='intro']",
+                "//article//p[1]"
+            };
+
+            foreach (var selector in summarySelectors)
+            {
+                try
+                {
+                    var node = doc.DocumentNode.SelectSingleNode(selector);
+                    if (node != null)
+                    {
+                        var summary = node.Attributes["content"]?.Value ?? node.InnerText;
+                        summary = CleanText(summary);
+                        
+                        if (!string.IsNullOrWhiteSpace(summary) && summary.Length > 20 && summary.Length < 2000)
+                        {
+                            return WebUtility.HtmlDecode(summary);
+                        }
+                    }
+                }
+                catch { }
+            }
+
+            return null;
+        }
+
+        private string? ExtractContentWithImages(HtmlDocument doc, Uri baseUri)
+        {
+            // Try common content selectors
+            var contentSelectors = new[]
+            {
+                "//article[@class='fck_detail']",
+                "//div[@class='fck_detail']",
+                "//div[@class='detail-content']",
+                "//article[@class='article-content']",
+                "//article[@class='post-content']",
+                "//div[@class='article-content']",
+                "//div[@class='post-content']",
+                "//div[@class='entry-content']",
+                "//div[@class='content-detail']",
+                "//div[@class='article-body']",
+                "//div[@class='post-body']",
+                "//div[@itemprop='articleBody']",
+                "//div[@class='content']",
+                "//article[contains(@class, 'content')]",
+                "//main//article[1]",
+                "//article[1]",
+                "//main[1]"
+            };
+
+            foreach (var selector in contentSelectors)
+            {
+                try
+                {
+                    var node = doc.DocumentNode.SelectSingleNode(selector);
+                    if (node != null)
+                    {
+                        // Remove unwanted elements
+                        RemoveUnwantedElements(node);
+
+                        // Process all images - convert to absolute URLs
+                        ProcessImages(node, baseUri);
+
+                        // Get HTML content
+                        var content = node.InnerHtml.Trim();
+                        
+                        if (!string.IsNullOrWhiteSpace(content) && content.Length > 200)
+                        {
+                            // Clean up the HTML
+                            content = CleanHtml(content);
+                            return content;
+                        }
+                    }
+                }
+                catch { }
+            }
+
+            return null;
+        }
+
+        private void RemoveUnwantedElements(HtmlNode node)
+        {
+            // List of unwanted elements
+            var unwantedSelectors = new[]
+            {
+                ".//script",
+                ".//style",
+                ".//noscript",
+                ".//iframe[@src[contains(., 'facebook')]]",
+                ".//iframe[@src[contains(., 'twitter')]]",
+                ".//*[@class='advertisement']",
+                ".//*[@class='ads']",
+                ".//*[@class='social-share']",
+                ".//*[@class='related']",
+                ".//*[@class='comment']",
+                ".//*[@id='comment']",
+                ".//*[@class='sidebar']",
+                ".//*[@class='footer']",
+                ".//*[@class='header']",
+                ".//*[@class='navigation']",
+                ".//*[@class='breadcrumb']"
+            };
+
+            foreach (var selector in unwantedSelectors)
+            {
+                try
+                {
+                    var nodes = node.SelectNodes(selector);
+                    if (nodes != null)
+                    {
+                        foreach (var unwantedNode in nodes.ToList())
+                        {
+                            unwantedNode.Remove();
+                        }
+                    }
+                }
+                catch { }
+            }
+        }
+
+        private void ProcessImages(HtmlNode node, Uri baseUri)
+        {
+            var imgNodes = node.SelectNodes(".//img");
+            if (imgNodes == null) return;
+
+            foreach (var img in imgNodes)
+            {
+                try
+                {
+                    // Try multiple image source attributes in priority order
+                    var src = img.GetAttributeValue("data-original", "")       // VNExpress, etc
+                           ?? img.GetAttributeValue("data-src", "")             // Common lazy load
+                           ?? img.GetAttributeValue("data-lazy-src", "")        // Alternative lazy load
+                           ?? img.GetAttributeValue("data-srcset", "")?.Split(',').FirstOrDefault()?.Split(' ').FirstOrDefault()  // Srcset
+                           ?? img.GetAttributeValue("src", "");                 // Standard src
+
+                    // Clean up the URL
+                    if (!string.IsNullOrWhiteSpace(src))
+                    {
+                        src = src.Trim();
+                        
+                        // Remove query parameters that might break image loading
+                        var queryIndex = src.IndexOf('?');
+                        if (queryIndex > 0 && src.Length > queryIndex + 50) // Keep if query is short
+                        {
+                            // Keep essential parameters like width, height
+                            var essentialParams = new[] { "width", "height", "w", "h", "quality", "q" };
+                            var uri = new Uri(src, UriKind.RelativeOrAbsolute);
+                            
+                            if (uri.IsAbsoluteUri)
+                            {
+                                var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+                                var keepParams = query.AllKeys
+                                    .Where(k => essentialParams.Any(p => k?.ToLower().Contains(p) == true))
+                                    .ToDictionary(k => k, k => query[k]);
+                                
+                                if (keepParams.Any())
+                                {
+                                    var newQuery = string.Join("&", keepParams.Select(kv => $"{kv.Key}={kv.Value}"));
+                                    src = $"{uri.GetLeftPart(UriPartial.Path)}?{newQuery}";
+                                }
+                                else
+                                {
+                                    src = uri.GetLeftPart(UriPartial.Path);
+                                }
+                            }
+                        }
+                    }
+
+                    if (string.IsNullOrWhiteSpace(src)) continue;
+
+                    // Convert to absolute URL
+                    var absoluteUrl = MakeAbsoluteUrl(src, baseUri);
+                    if (!string.IsNullOrWhiteSpace(absoluteUrl))
+                    {
+                        // Set absolute URL to src
+                        img.SetAttributeValue("src", absoluteUrl);
+
+                        // Remove all lazy loading and data attributes to clean up HTML
+                        var attrsToRemove = new[] { 
+                            "data-src", "data-original", "data-lazy-src", "data-srcset",
+                            "data-thumb-src", "data-width", "data-height", "data-sub-html",
+                            "data-caption", "data-id", "loading", "decoding"
+                        };
+                        
+                        foreach (var attr in attrsToRemove)
+                        {
+                            img.Attributes.Remove(attr);
+                        }
+
+                        // Get alt text from various sources
+                        var alt = img.GetAttributeValue("alt", "");
+                        if (string.IsNullOrWhiteSpace(alt))
+                        {
+                            alt = img.GetAttributeValue("title", "")
+                               ?? img.GetAttributeValue("data-caption", "")
+                               ?? "";
+                            
+                            if (!string.IsNullOrWhiteSpace(alt))
+                            {
+                                img.SetAttributeValue("alt", CleanText(alt));
+                            }
+                        }
+
+                        // Clean up style attribute but keep essential styling
+                        var currentStyle = img.GetAttributeValue("style", "");
+                        if (!currentStyle.Contains("max-width") && !currentStyle.Contains("width: 100"))
+                        {
+                            var essentialStyle = "max-width: 100%; height: auto; display: block;";
+                            img.SetAttributeValue("style", string.IsNullOrWhiteSpace(currentStyle) 
+                                ? essentialStyle 
+                                : $"{currentStyle}; {essentialStyle}");
+                        }
+
+                        // Remove problematic attributes that might cause display issues
+                        img.Attributes.Remove("width");
+                        img.Attributes.Remove("height");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Log but don't fail - just skip this image
+                    Console.WriteLine($"Error processing image: {ex.Message}");
+                }
+            }
+        }
+
+        private string? ExtractThumbnail(HtmlDocument doc, Uri baseUri)
+        {
+            // Try common thumbnail selectors in priority order
+            var thumbnailSelectors = new[]
+            {
+                "//meta[@property='og:image']/@content",
+                "//meta[@name='og:image']/@content",
+                "//meta[@property='twitter:image']/@content",
+                "//meta[@name='twitter:image']/@content",
+                "//meta[@itemprop='image']/@content",
+                "//link[@rel='image_src']/@href"
+            };
+
+            // First, try to get from meta tags
+            foreach (var selector in thumbnailSelectors)
+            {
+                try
+                {
+                    var node = doc.DocumentNode.SelectSingleNode(selector);
+                    if (node != null)
+                    {
+                        var imageUrl = node.InnerText.Trim();
+                        if (!string.IsNullOrWhiteSpace(imageUrl))
+                        {
+                            var absoluteUrl = MakeAbsoluteUrl(imageUrl, baseUri);
+                            if (!string.IsNullOrWhiteSpace(absoluteUrl) && IsValidImageUrl(absoluteUrl))
+                            {
+                                return absoluteUrl;
+                            }
+                        }
+                    }
+                }
+                catch { }
+            }
+
+            // Fallback: Try to find first image in article content
+            var contentSelectors = new[]
+            {
+                "//article[@class='fck_detail']//img[1]",
+                "//div[@class='fck_detail']//img[1]",
+                "//div[@class='detail-content']//img[1]",
+                "//article[@class='article-content']//img[1]",
+                "//div[@class='article-content']//img[1]",
+                "//div[@class='post-content']//img[1]",
+                "//div[@class='entry-content']//img[1]",
+                "//article//img[1]",
+                "//main//img[1]"
+            };
+
+            foreach (var selector in contentSelectors)
+            {
+                try
+                {
+                    var imgNode = doc.DocumentNode.SelectSingleNode(selector);
+                    if (imgNode != null)
+                    {
+                        // Try multiple attributes
+                        var imageUrl = imgNode.GetAttributeValue("data-original", "")
+                                    ?? imgNode.GetAttributeValue("data-src", "")
+                                    ?? imgNode.GetAttributeValue("src", "");
+
+                        if (!string.IsNullOrWhiteSpace(imageUrl))
+                        {
+                            var absoluteUrl = MakeAbsoluteUrl(imageUrl, baseUri);
+                            if (!string.IsNullOrWhiteSpace(absoluteUrl) && IsValidImageUrl(absoluteUrl))
+                            {
+                                return absoluteUrl;
+                            }
+                        }
+                    }
+                }
+                catch { }
+            }
+
+            return null;
+        }
+
+        private bool IsValidImageUrl(string url)
+        {
+            if (string.IsNullOrWhiteSpace(url))
+                return false;
+
+            // Check if URL ends with common image extensions or contains image indicators
+            var lowerUrl = url.ToLower();
+            var imageExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp" };
+            var imageIndicators = new[] { "image", "img", "photo", "picture" };
+
+            return imageExtensions.Any(ext => lowerUrl.Contains(ext))
+                || imageIndicators.Any(ind => lowerUrl.Contains(ind));
+        }
+
+        private string? MakeAbsoluteUrl(string url, Uri baseUri)
+        {
+            if (string.IsNullOrWhiteSpace(url))
+                return null;
+
+            url = url.Trim();
+
+            // Remove data: URLs
+            if (url.StartsWith("data:"))
+                return null;
+
+            // If already absolute, return as is
+            if (Uri.TryCreate(url, UriKind.Absolute, out var absoluteUri))
+                return absoluteUri.ToString();
+
+            // Handle protocol-relative URLs (//example.com/image.jpg)
+            if (url.StartsWith("//"))
+            {
+                return $"{baseUri.Scheme}:{url}";
+            }
+
+            // Handle absolute path (/images/photo.jpg)
+            if (url.StartsWith("/"))
+            {
+                return $"{baseUri.Scheme}://{baseUri.Host}{url}";
+            }
+
+            // Handle relative URLs
+            try
+            {
+                var combined = new Uri(baseUri, url);
+                return combined.ToString();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private string CleanHtml(string html)
+        {
+            if (string.IsNullOrWhiteSpace(html))
+                return string.Empty;
+
+            // Remove comments
+            html = Regex.Replace(html, "<!--.*?-->", "", RegexOptions.Singleline);
+
+            // Remove inline event handlers (onclick, onload, etc.)
+            html = Regex.Replace(html, @"\s*on\w+\s*=\s*[""'][^""']*[""']", "", RegexOptions.IgnoreCase);
+
+            // Remove all <a> tags AND their content (delete both tag and text inside)
+            html = Regex.Replace(html, 
+                @"<a\s+[^>]*href\s*=\s*[""'][^""']*[""'][^>]*>.*?</a>", 
+                "", 
+                RegexOptions.IgnoreCase | RegexOptions.Singleline);
+
+            // Clean up excessive whitespace but preserve structure
+            html = Regex.Replace(html, @"\s+", " ");
+            html = Regex.Replace(html, @">\s+<", "><");
+
+            // Remove empty paragraphs and divs
+            html = Regex.Replace(html, @"<p>\s*</p>", "", RegexOptions.IgnoreCase);
+            html = Regex.Replace(html, @"<div>\s*</div>", "", RegexOptions.IgnoreCase);
+
+            return html.Trim();
+        }
+
+        private string CleanText(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return string.Empty;
+
+            // Remove excessive whitespace
+            text = Regex.Replace(text, @"\s+", " ");
+            text = text.Trim();
+
+            return text;
+        }
+
+        private List<string> ExtractAllImageUrls(HtmlDocument doc, Uri baseUri)
+        {
+            var imageUrls = new List<string>();
+
+            try
+            {
+                // Find all images in common content areas
+                var contentSelectors = new[]
+                {
+                    "//article[@class='fck_detail']//img",
+                    "//div[@class='fck_detail']//img",
+                    "//div[@class='detail-content']//img",
+                    "//article[@class='article-content']//img",
+                    "//div[@class='article-content']//img",
+                    "//div[@class='post-content']//img",
+                    "//div[@class='entry-content']//img",
+                    "//article//img",
+                    "//main//img"
+                };
+
+                foreach (var selector in contentSelectors)
+                {
+                    var imgNodes = doc.DocumentNode.SelectNodes(selector);
+                    if (imgNodes != null && imgNodes.Any())
+                    {
+                        foreach (var img in imgNodes)
+                        {
+                            // Try multiple attributes
+                            var src = img.GetAttributeValue("data-original", "")
+                                   ?? img.GetAttributeValue("data-src", "")
+                                   ?? img.GetAttributeValue("src", "");
+
+                            if (!string.IsNullOrWhiteSpace(src))
+                            {
+                                var absoluteUrl = MakeAbsoluteUrl(src, baseUri);
+                                if (!string.IsNullOrWhiteSpace(absoluteUrl) 
+                                    && IsValidImageUrl(absoluteUrl) 
+                                    && !imageUrls.Contains(absoluteUrl))
+                                {
+                                    imageUrls.Add(absoluteUrl);
+                                }
+                            }
+                        }
+
+                        // If we found images with this selector, stop trying others
+                        if (imageUrls.Any())
+                            break;
+                    }
+                }
+            }
+            catch { }
+
+            return imageUrls;
+        }
+    }
+}

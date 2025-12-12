@@ -1,0 +1,191 @@
+﻿# 🔧 Hướng dẫn khắc phục lỗi "Không thấy bài viết của danh mục con"
+
+## 🎯 Nguyên nhân
+
+❌ **VẤN ĐỀ CHÍNH**: Status trong database là `"published"` (chữ thường) nhưng code kiểm tra `"Published"` (chữ P viết hoa)
+
+Từ ảnh database bạn gửi:
+```
+ArticleID | Title           | Status     | CategoryID
+4         | Lễ hội Đèn Hứng | published  | 2
+5         | Phú Quốc mua... | published  | 8
+6         | Phố Hà Nội...   | published  | 3
+```
+
+Trong khi Repository check:
+```csharp
+.Where(a => a.Status == "Published" && a.PublishedAt <= DateTime.Now)
+```
+
+## ✅ Giải pháp
+
+### Bước 1: Kiểm tra trạng thái bài viết
+
+Chạy script kiểm tra:
+```sql
+-- File: SQL_Scripts/Check_Articles_Status.sql
+```
+
+Script này sẽ hiển thị:
+- ✅ Tổng số bài viết theo danh mục
+- ✅ Số lượng bài `Published` vs `published`
+- ✅ Chi tiết bài viết CategoryID 2 và 3
+- ✅ Kiểm tra PublishedAt có NULL hoặc tương lai không
+
+### Bước 2: Sửa Status
+
+Chạy script fix:
+```sql
+-- File: SQL_Scripts/Fix_Article_Status.sql
+```
+
+Script này sẽ:
+```sql
+UPDATE Articles 
+SET Status = 'Published' 
+WHERE Status = 'published';
+```
+
+### Bước 3: Refresh website
+
+1. **Không cần restart app** (vì chỉ sửa database)
+2. Mở browser và refresh trang chủ (Ctrl + F5)
+3. Scroll xuống để xem các section theo danh mục
+
+## 📊 Cấu trúc dữ liệu hiện tại
+
+Từ ảnh database của bạn, các bài viết đã có:
+
+### CategoryID 2 (Trong nước):
+- ✅ Lễ hội Đèn Hứng
+- ✅ (và các bài khác...)
+
+### CategoryID 3 (Thế giới):
+- ✅ Phú Quốc mua sắm
+- ✅ Phố Hà Nội
+- ✅ Nghề nhân
+- ✅ Áo dài Việt Nam
+- ✅ Lễ hội hoa anh đào
+- ✅ Sa Pa mùa lá
+- ✅ Bánh mì Việt Nam
+- ✅ Chùa Một Cột
+
+### CategoryID 5, 6, 7, 8, 9:
+- ✅ Các bài viết khác
+
+## 🔍 Troubleshooting
+
+### Vấn đề: Sau khi fix Status vẫn không thấy bài viết
+
+**Giải pháp:**
+
+1. **Kiểm tra PublishedAt:**
+```sql
+SELECT ArticleId, Title, Status, PublishedAt
+FROM Articles
+WHERE CategoryId IN (2, 3)
+  AND PublishedAt > GETDATE();
+```
+
+Nếu có bài viết, update:
+```sql
+UPDATE Articles
+SET PublishedAt = GETDATE()
+WHERE PublishedAt > GETDATE();
+```
+
+2. **Kiểm tra bài viết NULL:**
+```sql
+SELECT ArticleId, Title, Status, PublishedAt
+FROM Articles
+WHERE CategoryId IN (2, 3)
+  AND PublishedAt IS NULL;
+```
+
+Nếu có, update:
+```sql
+UPDATE Articles
+SET PublishedAt = GETDATE()
+WHERE PublishedAt IS NULL 
+  AND Status = 'Published';
+```
+
+3. **Clear cache browser:**
+   - Nhấn `Ctrl + Shift + Delete`
+   - Chọn "Cached images and files"
+   - Clear
+
+4. **Kiểm tra console browser:**
+   - Nhấn `F12`
+   - Vào tab Console
+   - Xem có lỗi JavaScript không
+
+### Vấn đề: Một số bài hiển thị, một số không
+
+**Nguyên nhân:** PublishedAt ở tương lai hoặc NULL
+
+**Giải pháp:**
+```sql
+-- Update tất cả bài có Status = 'Published' nhưng PublishedAt không hợp lệ
+UPDATE Articles
+SET PublishedAt = CASE 
+    WHEN PublishedAt IS NULL THEN CreatedAt
+    WHEN PublishedAt > GETDATE() THEN GETDATE()
+    ELSE PublishedAt
+END
+WHERE Status = 'Published'
+  AND (PublishedAt IS NULL OR PublishedAt > GETDATE());
+```
+
+## 🎯 Kết quả mong đợi
+
+Sau khi chạy script fix, trang chủ sẽ hiển thị:
+
+1. **Section "Trong nước"** (id="category-trong-nuoc") với các bài viết có CategoryID = 2
+2. **Section "Thế giới"** (id="category-the-gioi") với các bài viết có CategoryID = 3
+3. **Các section khác** nếu có bài viết trong CategoryID tương ứng
+
+Mỗi section hiển thị:
+- ✅ Breadcrumb (nếu là danh mục con): "Nhịp văn hóa / Trong nước"
+- ✅ Tiêu đề danh mục
+- ✅ Tối đa 6 bài viết (hoặc ít hơn nếu không đủ)
+- ✅ Nút "Xem thêm" link đến trang category
+
+## 📝 Query để kiểm tra sau khi fix
+
+```sql
+-- Kiểm tra số lượng bài viết sẽ hiển thị trên trang chủ
+SELECT 
+    c.CategoryId,
+    c.CategoryName,
+    c.Slug,
+    COUNT(a.ArticleId) AS [Số bài sẽ hiển thị]
+FROM Categories c
+LEFT JOIN Articles a ON c.CategoryId = a.CategoryId 
+    AND a.Status = 'Published' 
+    AND a.PublishedAt <= GETDATE()
+GROUP BY c.CategoryId, c.CategoryName, c.Slug
+HAVING COUNT(a.ArticleId) > 0
+ORDER BY c.DisplayOrder;
+```
+
+Nếu query trên trả về kết quả > 0 cho CategoryID 2 và 3, nghĩa là đã fix thành công!
+
+## 🚀 Script bổ sung (nếu cần thêm bài viết)
+
+Nếu sau khi fix vẫn muốn thêm bài viết mẫu cho các danh mục khác, sử dụng:
+```sql
+-- File: SQL_Scripts/Insert_Sample_Articles_For_Subcategories.sql
+```
+
+**Lưu ý:** Script này CHỈ thêm bài viết NẾU danh mục chưa có bài viết nào.
+
+---
+
+💡 **TÓM TẮT:**
+1. Chạy `Check_Articles_Status.sql` để kiểm tra
+2. Chạy `Fix_Article_Status.sql` để sửa Status
+3. Refresh browser (Ctrl + F5)
+4. Xem kết quả trên trang chủ
+
+**Status phải là `"Published"` (chữ P viết hoa) để hiển thị!** 🎯

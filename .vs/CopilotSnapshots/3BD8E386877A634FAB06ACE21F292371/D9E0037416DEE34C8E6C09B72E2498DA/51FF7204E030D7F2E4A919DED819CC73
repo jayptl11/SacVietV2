@@ -1,0 +1,173 @@
+﻿-- ============================================
+-- FIX CHECK CONSTRAINT FOR ARTICLES STATUS
+-- ============================================
+
+-- 1. Kiểm tra constraint hiện tại
+PRINT '========================================';
+PRINT 'Checking current constraint...';
+PRINT '========================================';
+
+SELECT 
+    OBJECT_NAME(object_id) AS ConstraintName,
+    definition
+FROM sys.check_constraints
+WHERE parent_object_id = OBJECT_ID('Articles')
+AND definition LIKE '%Status%';
+
+-- 2. Drop constraint cũ (nếu có)
+IF EXISTS (
+    SELECT * FROM sys.check_constraints 
+    WHERE name = 'CK_Articles_Status' 
+    AND parent_object_id = OBJECT_ID('Articles')
+)
+BEGIN
+    PRINT '';
+    PRINT 'Dropping old constraint CK_Articles_Status...';
+    ALTER TABLE Articles DROP CONSTRAINT CK_Articles_Status;
+    PRINT 'Old constraint dropped.';
+END
+
+-- 3. Thêm constraint mới với TẤT CẢ các status (bao gồm cả Approved)
+PRINT '';
+PRINT 'Creating new constraint with all status values...';
+
+ALTER TABLE Articles
+ADD CONSTRAINT CK_Articles_Status 
+CHECK (Status IN ('Draft', 'Pending', 'Approved', 'Published', 'Rejected', 'Scheduled', 'Archived'));
+
+PRINT 'New constraint created successfully!';
+PRINT '';
+PRINT 'Allowed Status Values:';
+PRINT '  - Draft      (Nháp)';
+PRINT '  - Pending    (Chờ duyệt)';
+PRINT '  - Approved   (Đã duyệt, chờ đăng) ← NEW!';
+PRINT '  - Published  (Đã đăng)';
+PRINT '  - Rejected   (Từ chối)';
+PRINT '  - Scheduled  (Đã lên lịch) ← Existing';
+PRINT '  - Archived   (Lưu trữ) ← Existing';
+
+-- 4. Verify constraint
+PRINT '';
+PRINT '========================================';
+PRINT 'Verifying new constraint:';
+PRINT '========================================';
+
+SELECT 
+    OBJECT_NAME(object_id) AS ConstraintName,
+    definition
+FROM sys.check_constraints
+WHERE parent_object_id = OBJECT_ID('Articles')
+AND definition LIKE '%Status%';
+
+-- 5. Test với các status hợp lệ
+PRINT '';
+PRINT '========================================';
+PRINT 'Testing all status values:';
+PRINT '========================================';
+
+-- Get a test article
+DECLARE @TestArticleID INT = (SELECT TOP 1 ArticleID FROM Articles ORDER BY ArticleID DESC);
+DECLARE @OriginalStatus NVARCHAR(50) = (SELECT Status FROM Articles WHERE ArticleID = @TestArticleID);
+
+IF @TestArticleID IS NOT NULL
+BEGIN
+    PRINT 'Test ArticleID: ' + CAST(@TestArticleID AS NVARCHAR(10));
+    PRINT 'Original Status: ' + ISNULL(@OriginalStatus, 'NULL');
+    PRINT '';
+
+    -- Test Draft
+    BEGIN TRY
+        UPDATE Articles SET Status = 'Draft' WHERE ArticleID = @TestArticleID;
+        PRINT '✓ Draft - OK';
+    END TRY
+    BEGIN CATCH
+        PRINT '✗ Draft - FAILED: ' + ERROR_MESSAGE();
+    END CATCH
+
+    -- Test Pending
+    BEGIN TRY
+        UPDATE Articles SET Status = 'Pending' WHERE ArticleID = @TestArticleID;
+        PRINT '✓ Pending - OK';
+    END TRY
+    BEGIN CATCH
+        PRINT '✗ Pending - FAILED: ' + ERROR_MESSAGE();
+    END CATCH
+
+    -- Test Approved (NEW!)
+    BEGIN TRY
+        UPDATE Articles SET Status = 'Approved' WHERE ArticleID = @TestArticleID;
+        PRINT '✓ Approved - OK (NEW STATUS!)';
+    END TRY
+    BEGIN CATCH
+        PRINT '✗ Approved - FAILED: ' + ERROR_MESSAGE();
+    END CATCH
+
+    -- Test Published
+    BEGIN TRY
+        UPDATE Articles SET Status = 'Published' WHERE ArticleID = @TestArticleID;
+        PRINT '✓ Published - OK';
+    END TRY
+    BEGIN CATCH
+        PRINT '✗ Published - FAILED: ' + ERROR_MESSAGE();
+    END CATCH
+
+    -- Test Rejected
+    BEGIN TRY
+        UPDATE Articles SET Status = 'Rejected' WHERE ArticleID = @TestArticleID;
+        PRINT '✓ Rejected - OK';
+    END TRY
+    BEGIN CATCH
+        PRINT '✗ Rejected - FAILED: ' + ERROR_MESSAGE();
+    END CATCH
+
+    -- Test Scheduled
+    BEGIN TRY
+        UPDATE Articles SET Status = 'Scheduled' WHERE ArticleID = @TestArticleID;
+        PRINT '✓ Scheduled - OK';
+    END TRY
+    BEGIN CATCH
+        PRINT '✗ Scheduled - FAILED: ' + ERROR_MESSAGE();
+    END CATCH
+
+    -- Test Archived
+    BEGIN TRY
+        UPDATE Articles SET Status = 'Archived' WHERE ArticleID = @TestArticleID;
+        PRINT '✓ Archived - OK';
+    END TRY
+    BEGIN CATCH
+        PRINT '✗ Archived - FAILED: ' + ERROR_MESSAGE();
+    END CATCH
+
+    -- Restore original status
+    UPDATE Articles SET Status = @OriginalStatus WHERE ArticleID = @TestArticleID;
+    PRINT '';
+    PRINT 'Test article restored to original status: ' + @OriginalStatus;
+END
+ELSE
+BEGIN
+    PRINT 'No articles found for testing.';
+END
+
+PRINT '';
+PRINT '========================================';
+PRINT 'All status values tested successfully!';
+PRINT '========================================';
+
+-- 6. Hiển thị các status hiện có trong database
+PRINT '';
+PRINT '========================================';
+PRINT 'Current Status Distribution:';
+PRINT '========================================';
+
+SELECT 
+    ISNULL(Status, '(NULL)') AS Status,
+    COUNT(*) AS Count,
+    CAST(ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM Articles), 2) AS DECIMAL(5,2)) AS Percentage
+FROM Articles
+GROUP BY Status
+ORDER BY COUNT(*) DESC;
+
+PRINT '';
+PRINT '========================================';
+PRINT 'Constraint fix completed successfully!';
+PRINT '========================================';

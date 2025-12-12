@@ -1,0 +1,597 @@
+﻿// Writer Article Form JavaScript
+// Shared functions for Create & Edit Article pages
+
+// === SCHEDULED PUBLISH DEFAULT ===
+function initScheduledPublish() {
+    const scheduledInput = document.querySelector('input[name="ScheduledPublishDate"]');
+
+    if (scheduledInput && !scheduledInput.value) {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+
+        scheduledInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+}
+
+// === THUMBNAIL MANAGEMENT ===
+function uploadThumbnail(uploadImageUrl) {
+    const fileInput = document.getElementById('thumbnail-file');
+    const file = fileInput.files[0];
+
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+        alert('Ảnh quá lớn! Vui lòng chọn ảnh nhỏ hơn 5MB');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    fetch(uploadImageUrl, {
+        method: 'POST',
+        body: formData
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('thumbnail-url').value = data.url;
+                document.getElementById('thumbnail-img').src = data.url;
+                document.getElementById('thumbnail-preview').style.display = 'block';
+                document.getElementById('thumbnail-upload').style.display = 'none';
+
+                // Hide error banner when thumbnail uploaded
+                onThumbnailUploaded();
+            } else {
+                alert(data.message || 'Upload thất bại');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra khi upload ảnh');
+        });
+}
+
+function removeThumbnail() {
+    document.getElementById('thumbnail-url').value = '';
+    document.getElementById('thumbnail-img').src = '';
+    document.getElementById('thumbnail-preview').style.display = 'none';
+    document.getElementById('thumbnail-upload').style.display = 'block';
+    document.getElementById('thumbnail-file').value = '';
+    document.getElementById('thumbnail-url-input').value = '';
+}
+
+function setThumbnailByUrl() {
+    const urlInput = document.getElementById('thumbnail-url-input');
+    const imageUrl = urlInput.value.trim();
+
+    if (!imageUrl) {
+        alert('Vui lòng nhập URL hình ảnh');
+        return;
+    }
+
+    try {
+        new URL(imageUrl);
+    } catch (e) {
+        alert('URL không hợp lệ');
+        return;
+    }
+
+    document.getElementById('thumbnail-url').value = imageUrl;
+    document.getElementById('thumbnail-img').src = imageUrl;
+    document.getElementById('thumbnail-preview').style.display = 'block';
+    document.getElementById('thumbnail-upload').style.display = 'none';
+
+    // Hide error banner when thumbnail set
+    onThumbnailUploaded();
+}
+
+// === TAGS MANAGEMENT ===
+let tags = [];
+
+function initTagsInput() {
+    const tagsInput = document.getElementById('tags-input');
+    const tagsContainer = document.getElementById('tags-container');
+
+    if (tagsInput) {
+        tagsInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const tag = this.value.trim();
+                if (tag && !tags.includes(tag)) {
+                    tags.push(tag);
+                    renderTags();
+                    this.value = '';
+                }
+            }
+        });
+    }
+}
+
+function renderTags() {
+    const tagsContainer = document.getElementById('tags-container');
+    if (tagsContainer) {
+        tagsContainer.innerHTML = '';
+        tags.forEach((tag, index) => {
+            const badge = document.createElement('span');
+            badge.className = 'tag-badge';
+            badge.innerHTML = `
+                ${tag}
+                <i class="fas fa-times" onclick="removeTag(${index})"></i>
+                <input type="hidden" name="Tags" value="${tag}" />
+            `;
+            tagsContainer.appendChild(badge);
+        });
+    }
+}
+
+function removeTag(index) {
+    tags.splice(index, 1);
+    renderTags();
+}
+
+// === CKEDITOR MANAGEMENT ===
+function initCKEditor(uploadImageUrl) {
+    CKEDITOR.replace('editor', {
+        height: 450,
+        filebrowserUploadUrl: uploadImageUrl,
+        filebrowserImageUploadUrl: uploadImageUrl,
+        filebrowserUploadMethod: 'form',
+        toolbar: [
+            { name: 'document', items: ['Source', '-', 'NewPage', 'Preview', 'Print'] },
+            { name: 'clipboard', items: ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo', 'Redo'] },
+            { name: 'editing', items: ['Find', 'Replace', '-', 'SelectAll'] },
+            '/',
+            { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat'] },
+            { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', 'CreateDiv', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'] },
+            { name: 'links', items: ['Link', 'Unlink', 'Anchor'] },
+            { name: 'insert', items: ['Image', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar', 'PageBreak', 'Iframe'] },
+            '/',
+            { name: 'styles', items: ['Styles', 'Format', 'Font', 'FontSize'] },
+            { name: 'colors', items: ['TextColor', 'BGColor'] },
+            { name: 'tools', items: ['Maximize', 'ShowBlocks'] }
+        ]
+    });
+}
+
+function updateCKEditorBeforeSubmit() {
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function (e) {
+            for (var instance in CKEDITOR.instances) {
+                CKEDITOR.instances[instance].updateElement();
+            }
+        });
+    }
+}
+
+// === WEB CRAWLER ===
+function startCrawl(crawlUrl) {
+    const urlInput = document.getElementById('crawl-url');
+    const url = urlInput.value.trim();
+    const statusDiv = document.getElementById('crawl-status');
+    const btnCrawl = document.querySelector('.btn-crawl');
+
+    if (!url) {
+        alert('Vui lòng nhập URL bài báo');
+        return;
+    }
+
+    try {
+        new URL(url);
+    } catch (e) {
+        alert('URL không hợp lệ. Vui lòng nhập URL đầy đủ (bắt đầu với http:// hoặc https://)');
+        return;
+    }
+
+    // CLEAR OLD DATA BEFORE CRAWLING - NEW BEHAVIOR
+    console.log('🗑️ Clearing old data before crawl...');
+
+    // Clear old thumbnail
+    var thumbnailUrlInput = document.getElementById('thumbnail-url');
+    var thumbnailImg = document.getElementById('thumbnail-img');
+    var thumbnailPreview = document.getElementById('thumbnail-preview');
+    var thumbnailUpload = document.getElementById('thumbnail-upload');
+
+    if (thumbnailUrlInput) thumbnailUrlInput.value = '';
+    if (thumbnailImg) thumbnailImg.src = '';
+    if (thumbnailPreview) thumbnailPreview.style.display = 'none';
+    if (thumbnailUpload) thumbnailUpload.style.display = 'block';
+
+    console.log('✅ Old thumbnail cleared');
+
+    // Show loading
+    statusDiv.className = 'crawl-status loading';
+    statusDiv.style.display = 'block';
+    statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang lấy nội dung từ trang web... (có thể mất 5-10 giây)';
+    btnCrawl.disabled = true;
+    btnCrawl.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang xử lý...';
+
+    // Call API
+    fetch(crawlUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+        },
+        body: JSON.stringify({ url: url })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                statusDiv.className = 'crawl-status success';
+                statusDiv.innerHTML = '<i class="fas fa-check-circle me-2"></i>✅ Lấy nội dung thành công! Đang điền vào form...';
+
+                // Fill form - ONLY if data exists
+                if (data.title) {
+                    document.querySelector('input[name="Title"]').value = data.title;
+                }
+                if (data.summary) {
+                    document.querySelector('textarea[name="Summary"]').value = data.summary;
+                }
+                if (data.content) {
+                    CKEDITOR.instances.editor.setData(data.content);
+                }
+
+                // AUTO SET THUMBNAIL - Priority: thumbnailUrl > first imageUrl
+                var thumbnailToSet = data.thumbnailUrl
+                    || (data.imageUrls && data.imageUrls.length > 0 ? data.imageUrls[0] : null);
+
+                if (thumbnailToSet) {
+                    console.log('🖼️ Setting new thumbnail:', thumbnailToSet);
+
+                    // Set thumbnail URL to hidden input
+                    if (thumbnailUrlInput) {
+                        thumbnailUrlInput.value = thumbnailToSet;
+                    }
+
+                    // Set thumbnail image preview
+                    if (thumbnailImg) {
+                        thumbnailImg.src = thumbnailToSet;
+
+                        // Handle image load error
+                        thumbnailImg.onerror = function () {
+                            console.error('❌ Failed to load thumbnail image:', thumbnailToSet);
+                            // Try next image if available
+                            if (data.imageUrls && data.imageUrls.length > 1) {
+                                var nextImage = data.imageUrls[1];
+                                console.log('🔄 Trying next image:', nextImage);
+                                thumbnailImg.src = nextImage;
+                                if (thumbnailUrlInput) {
+                                    thumbnailUrlInput.value = nextImage;
+                                }
+                            }
+                        };
+                    }
+
+                    // Show preview, hide upload area
+                    if (thumbnailPreview) {
+                        thumbnailPreview.style.display = 'block';
+                    }
+                    if (thumbnailUpload) {
+                        thumbnailUpload.style.display = 'none';
+                    }
+
+                    console.log('✅ New thumbnail set successfully');
+                } else {
+                    console.warn('⚠️ No thumbnail available from crawler - thumbnail remains empty');
+                }
+
+                // Add source note
+                setTimeout(() => {
+                    const currentContent = CKEDITOR.instances.editor.getData();
+                    const sourceNote = `
+<hr>
+<p style="background-color: #fff3cd; padding: 10px; border-left: 4px solid #ffc107;">
+    <strong>📌 Nguồn tham khảo:</strong> 
+    <a href="${data.sourceUrl}" target="_blank" rel="noopener">${data.sourceUrl}</a>
+</p>`;
+                    CKEDITOR.instances.editor.setData(currentContent + sourceNote);
+                }, 1000);
+
+                // Update status with thumbnail info
+                var thumbnailStatus = thumbnailToSet
+                    ? '✅ Đã tự động set'
+                    : '❌ Không tìm thấy';
+
+                statusDiv.innerHTML = `
+                <i class="fas fa-check-circle me-2"></i>
+                ✅ <strong>Hoàn tất!</strong><br>
+                <small>
+                    • Tiêu đề: ${data.title ? '✅' : '❌'}<br>
+                    • Tóm tắt: ${data.summary ? '✅' : '❌'}<br>
+                    • Nội dung: ${data.content ? '✅ (Đã bao gồm hình ảnh)' : '❌'}<br>
+                    • Ảnh đại diện: ${thumbnailStatus}
+                </small>
+            `;
+
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 5000);
+
+            } else {
+                statusDiv.className = 'crawl-status error';
+                statusDiv.innerHTML = `
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <strong>Không thể lấy nội dung</strong><br>
+                <small>${data.message || 'Lỗi không xác định'}</small><br>
+                <small style="color: #666;">💡 Gợi ý: Thử với trang web khác hoặc nhập thủ công</small>
+            `;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            statusDiv.className = 'crawl-status error';
+            statusDiv.innerHTML = `
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <strong>Lỗi kết nối</strong><br>
+            <small>Không thể kết nối tới server. Vui lòng thử lại.</small>
+        `;
+        })
+        .finally(() => {
+            btnCrawl.disabled = false;
+            btnCrawl.innerHTML = '<i class="fas fa-download me-2"></i>Lấy nội dung';
+        });
+}
+
+// === INITIALIZATION ===
+document.addEventListener('DOMContentLoaded', function () {
+    initScheduledPublish();
+    initTagsInput();
+    initThumbnailValidation();
+    initCategoryChangeListener(); // NEW: Listen to category changes
+});
+
+// === CATEGORY CHANGE HANDLER ===
+function initCategoryChangeListener() {
+    const categorySelect = document.querySelector('select[name="CategoryId"]');
+    const audioCard = document.getElementById('audio-card');
+
+    if (!categorySelect || !audioCard) return;
+
+    // Check on page load
+    checkCategoryAndShowAudio();
+
+    // Listen to category changes
+    categorySelect.addEventListener('change', checkCategoryAndShowAudio);
+}
+
+function checkCategoryAndShowAudio() {
+    const categorySelect = document.querySelector('select[name="CategoryId"]');
+    const audioCard = document.getElementById('audio-card');
+
+    if (!categorySelect || !audioCard) return;
+
+    const selectedOption = categorySelect.options[categorySelect.selectedIndex];
+    const categoryName = selectedOption.text.toLowerCase();
+
+    // Show audio card if "podcast" is in category name
+    if (categoryName.includes('podcast')) {
+        audioCard.style.display = 'block';
+        console.log('✅ Audio card shown for Podcast category');
+    } else {
+        audioCard.style.display = 'none';
+        console.log('ℹ️ Audio card hidden (not Podcast category)');
+    }
+}
+
+// === AUDIO URL MANAGEMENT ===
+function setAudioUrl() {
+    const urlInput = document.getElementById('audio-url-input');
+    const audioUrl = urlInput.value.trim();
+
+    if (!audioUrl) {
+        alert('Vui lòng nhập URL file âm thanh');
+        return;
+    }
+
+    // Validate URL
+    try {
+        new URL(audioUrl);
+    } catch (e) {
+        alert('URL không hợp lệ. Vui lòng nhập URL đầy đủ từ Google Drive');
+        return;
+    }
+
+    // Convert Google Drive share link to direct link
+    let directUrl = audioUrl;
+    if (audioUrl.includes('drive.google.com')) {
+        directUrl = convertGoogleDriveUrl(audioUrl);
+        console.log('Original URL:', audioUrl);
+        console.log('Converted URL:', directUrl);
+    }
+
+    // Set audio URL
+    document.getElementById('audio-url').value = directUrl;
+
+    // Update audio player
+    const audioPlayer = document.getElementById('audio-player');
+    const audioSource = document.getElementById('audio-source');
+    if (audioPlayer && audioSource) {
+        audioSource.src = directUrl;
+        audioPlayer.load();
+
+        // Try to play to test if URL works
+        audioPlayer.play().then(() => {
+            console.log('✅ Audio loaded successfully!');
+            audioPlayer.pause(); // Pause immediately after test
+            audioPlayer.currentTime = 0; // Reset to start
+        }).catch((error) => {
+            console.error('❌ Audio failed to load:', error);
+            alert('⚠️ Không thể tải file âm thanh.\n\nVui lòng kiểm tra:\n1. File có đúng định dạng audio (MP3, WAV, etc.)\n2. Quyền chia sẻ đã được bật\n3. Link có thể truy cập công khai\n\n💡 Thử mở link trong tab mới để test:\n' + directUrl);
+        });
+    }
+
+    // Show preview, hide input
+    document.getElementById('audio-preview').style.display = 'block';
+    document.getElementById('audio-upload').style.display = 'none';
+
+    console.log('✅ Audio URL set:', directUrl);
+}
+
+function removeAudio() {
+    // Clear audio URL
+    document.getElementById('audio-url').value = '';
+    document.getElementById('audio-url-input').value = '';
+
+    // Clear audio player
+    const audioPlayer = document.getElementById('audio-player');
+    const audioSource = document.getElementById('audio-source');
+    if (audioPlayer && audioSource) {
+        audioSource.src = '';
+        audioPlayer.load();
+    }
+
+    // Hide preview, show input
+    document.getElementById('audio-preview').style.display = 'none';
+    document.getElementById('audio-upload').style.display = 'block';
+
+    console.log('🗑️ Audio removed');
+}
+
+// Convert Google Drive share link to direct link
+function convertGoogleDriveUrl(url) {
+    // Example input formats:
+    // 1. https://drive.google.com/file/d/FILE_ID/view?usp=sharing
+    // 2. https://drive.google.com/open?id=FILE_ID
+    // 3. https://drive.google.com/uc?id=FILE_ID&export=download (already direct)
+
+    // Extract FILE_ID from various formats
+    let fileId = null;
+
+    // Format 1: /file/d/FILE_ID/
+    const match1 = url.match(/\/file\/d\/([^\/\?]+)/);
+    if (match1) {
+        fileId = match1[1];
+    }
+
+    // Format 2: ?id=FILE_ID or &id=FILE_ID
+    if (!fileId) {
+        const match2 = url.match(/[?&]id=([^&]+)/);
+        if (match2) {
+            fileId = match2[1];
+        }
+    }
+
+    // If we found FILE_ID, convert to direct download link
+    if (fileId) {
+        // IMPORTANT: For audio/video, use 'preview' mode instead of 'download'
+        // This allows inline playback without forcing download
+        return `https://drive.google.com/uc?export=open&id=${fileId}`;
+    }
+
+    // If can't extract ID or already in correct format, return as-is
+    return url;
+}
+
+// === THUMBNAIL VALIDATION FOR SUBMIT ===
+function initThumbnailValidation() {
+    const form = document.querySelector('form');
+    if (!form) return;
+
+    form.addEventListener('submit', function (e) {
+        // Check which button was clicked
+        const submitter = e.submitter;
+        if (!submitter) return;
+
+        const action = submitter.value;
+
+        // Only validate thumbnail for "submit" action, not "draft"
+        if (action === 'submit') {
+            const thumbnailUrl = document.getElementById('thumbnail-url')?.value;
+
+            if (!thumbnailUrl || thumbnailUrl.trim() === '') {
+                e.preventDefault();
+
+                // Show error alert
+                showThumbnailError();
+
+                // Scroll to thumbnail section
+                scrollToThumbnail();
+
+                console.error('❌ Validation failed: Thumbnail required for submit');
+                return false;
+            }
+        }
+
+        console.log('✅ Validation passed for action:', action);
+    });
+}
+
+// Show thumbnail error with visual feedback
+function showThumbnailError() {
+    // Show alert dialog
+    alert('⚠️ Vui lòng chọn ảnh đại diện trước khi gửi duyệt!\n\n' +
+        'Bạn có thể:\n' +
+        '• Upload ảnh từ máy tính\n' +
+        '• Dán URL ảnh\n' +
+        '• Hoặc lưu nháp để thêm ảnh sau');
+
+    // Show error banner
+    const thumbnailCard = document.getElementById('thumbnail-card');
+    if (thumbnailCard) {
+        // Create error banner if not exists
+        let errorBanner = thumbnailCard.querySelector('.thumbnail-error-banner');
+        if (!errorBanner) {
+            errorBanner = document.createElement('div');
+            errorBanner.className = 'thumbnail-error-banner';
+            errorBanner.innerHTML = `
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Bắt buộc:</strong> Vui lòng chọn ảnh đại diện để gửi duyệt
+                <button type="button" class="btn-close-banner" onclick="closeThumbnailError()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            thumbnailCard.insertBefore(errorBanner, thumbnailCard.firstChild);
+        }
+
+        // Show banner with animation
+        errorBanner.style.display = 'flex';
+        errorBanner.classList.add('shake-animation');
+
+        // Remove shake animation after it completes
+        setTimeout(() => {
+            errorBanner.classList.remove('shake-animation');
+        }, 500);
+    }
+}
+
+// Scroll to thumbnail section
+function scrollToThumbnail() {
+    const thumbnailCard = document.getElementById('thumbnail-card');
+    if (thumbnailCard) {
+        thumbnailCard.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+        });
+
+        // Highlight thumbnail card
+        thumbnailCard.style.border = '3px solid #dc3545';
+        thumbnailCard.style.boxShadow = '0 0 20px rgba(220, 53, 69, 0.3)';
+
+        setTimeout(() => {
+            thumbnailCard.style.border = '';
+            thumbnailCard.style.boxShadow = '';
+        }, 3000);
+    }
+}
+
+// Close thumbnail error banner
+function closeThumbnailError() {
+    const errorBanner = document.querySelector('.thumbnail-error-banner');
+    if (errorBanner) {
+        errorBanner.style.display = 'none';
+    }
+}
+
+// Auto-hide error banner when thumbnail is uploaded
+function onThumbnailUploaded() {
+    const errorBanner = document.querySelector('.thumbnail-error-banner');
+    if (errorBanner) {
+        errorBanner.style.display = 'none';
+    }
+}

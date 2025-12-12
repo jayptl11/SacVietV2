@@ -1,0 +1,208 @@
+﻿// Article Details JavaScript Functions
+
+// Anti-forgery token helper
+function getAntiForgeryToken() {
+    const el = document.querySelector('input[name="__RequestVerificationToken"]');
+    return el ? el.value : '';
+}
+
+// Social sharing functionality
+function shareWindow(url) {
+    window.open(url, 'share', 'width=550,height=450,scrollbars=yes,resizable=yes');
+    return false;
+}
+
+// Copy to clipboard
+function copyToClipboard(url) {
+    navigator.clipboard.writeText(url).then(function() {
+        const button = event.target.closest('button');
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-check me-1"></i>Đã sao chép!';
+        button.classList.remove('btn-outline-secondary');
+        button.classList.add('btn-success');
+        
+        setTimeout(function() {
+            button.innerHTML = originalText;
+            button.classList.remove('btn-success');
+            button.classList.add('btn-outline-secondary');
+        }, 2000);
+    }).catch(function(err) {
+        console.error('Could not copy text: ', err);
+    });
+}
+
+// Text size adjustment
+let currentSize = 1.1;
+function changeTextSize(action) {
+    const content = document.getElementById('articleContent');
+    if (action === 'increase' && currentSize < 1.6) {
+        currentSize += 0.1;
+    } else if (action === 'decrease' && currentSize > 0.8) {
+        currentSize -= 0.1;
+    }
+    content.style.fontSize = currentSize + 'rem';
+}
+
+// Reply form toggle
+function toggleReplyForm(commentId) {
+    const form = document.getElementById('replyForm' + commentId);
+    if (form.style.display === 'none' || form.style.display === '') {
+        form.style.display = 'block';
+        form.querySelector('textarea').focus();
+    } else {
+        form.style.display = 'none';
+    }
+}
+
+// Show notification function
+function showNotification(message, type = 'info') {
+    // Remove existing notifications
+    const existingNotifications = document.querySelectorAll('.comment-notification');
+    existingNotifications.forEach(notification => notification.remove());
+
+    const notification = document.createElement('div');
+    notification.className = `comment-notification alert alert-${type} alert-dismissible fade show`;
+    
+    const iconClass = type === 'success' ? 'fas fa-check-circle' : 
+                     type === 'warning' ? 'fas fa-exclamation-triangle' : 
+                     type === 'danger' ? 'fas fa-exclamation-circle' : 'fas fa-info-circle';
+    
+    notification.innerHTML = `
+        <i class="${iconClass} me-2"></i>${message}
+        <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+// Update comment count
+function updateCommentCount() {
+    const commentCountElements = document.querySelectorAll('#commentCountDisplay, #commentCountHeader');
+    const commentsContainer = document.querySelector('#commentsListContainer .comments-list');
+    const comments = commentsContainer ? commentsContainer.querySelectorAll('.comment') : [];
+    
+    commentCountElements.forEach(element => {
+        element.textContent = comments.length;
+    });
+}
+
+// Create comment HTML
+function createCommentHTML(comment) {
+    const avatarHTML = comment.userAvatar && comment.userAvatar !== '' 
+        ? `<img src="${comment.userAvatar}" class="rounded-circle" alt="${comment.userName}" style="width: 40px; height: 40px; object-fit: cover;">`
+        : `<div class="avatar-placeholder bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; font-size: 1.2rem;">${comment.userName.substring(0, 1).toUpperCase()}</div>`;
+
+    const articleId = window.currentArticleId || document.getElementById('mainCommentForm')?.getAttribute('data-article-id') || '';
+    const token = getAntiForgeryToken();
+
+    return `
+        <div class="comment mb-4 p-3 border rounded" data-comment-id="${comment.commentId}">
+            <div class="comment-header d-flex align-items-center mb-2">
+                <div class="comment-avatar me-3">
+                    ${avatarHTML}
+                </div>
+                <div class="comment-meta">
+                    <h6 class="mb-0">${comment.userName}</h6>
+                    <small class="text-muted">
+                        <i class="fas fa-clock me-1"></i>
+                        ${comment.createdAt}
+                    </small>
+                </div>
+            </div>
+            <div class="comment-content">
+                <p class="mb-2">${comment.content}</p>
+            </div>
+            <div class="replies-container mt-3 ms-5"></div>
+            <div class="reply-form mt-3" style="display: none;" id="replyForm${comment.commentId}">
+                <form class="comment-form-ajax reply-form-ajax" data-article-id="${articleId}" data-parent-id="${comment.commentId}">
+                    <input type="hidden" name="__RequestVerificationToken" value="${token}">
+                    <div class="mb-2">
+                        <textarea name="content" class="form-control form-control-sm comment-textarea" rows="2" placeholder="Trả lời bình luận..." required></textarea>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-sm btn-outline-danger submit-comment-btn">
+                            <i class="fas fa-paper-plane me-1"></i>Gửi
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleReplyForm(${comment.commentId})">
+                            <i class="fas fa-times me-1"></i>Hủy
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <button class="btn btn-sm btn-link text-decoration-none p-0 mt-2" onclick="toggleReplyForm(${comment.commentId})">
+                <i class="fas fa-reply me-1"></i>Trả lời
+            </button>
+        </div>
+    `;
+}
+
+// Create reply HTML
+function createReplyHTML(reply) {
+    const avatarHTML = reply.userAvatar && reply.userAvatar !== '' 
+        ? `<img src="${reply.userAvatar}" class="rounded-circle" alt="${reply.userName}" style="width: 30px; height: 30px; object-fit: cover;">`
+        : `<div class="avatar-placeholder bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 30px; height: 30px; font-size: 0.9rem;">${reply.userName.substring(0, 1).toUpperCase()}</div>`;
+
+    return `
+        <div class="reply mb-3 p-3 bg-light rounded">
+            <div class="reply-header d-flex align-items-center mb-2">
+                <div class="reply-avatar me-2">
+                    ${avatarHTML}
+                </div>
+                <div class="reply-meta">
+                    <h6 class="mb-0 small">${reply.userName}</h6>
+                    <small class="text-muted">
+                        ${reply.createdAt}
+                    </small>
+                </div>
+            </div>
+            <div class="reply-content">
+                <p class="mb-0 small">${reply.content}</p>
+            </div>
+        </div>
+    `;
+}
+
+function addCommentToDOM(comment) {
+    if (comment.parentCommentId) {
+        // It's a reply
+        const parentComment = document.querySelector(`[data-comment-id="${comment.parentCommentId}"]`);
+        if (parentComment) {
+            const repliesContainer = parentComment.querySelector('.replies-container');
+            const replyHTML = createReplyHTML(comment);
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = replyHTML;
+            const replyElement = tempDiv.firstElementChild;
+            replyElement.classList.add('fade-in');
+            repliesContainer.appendChild(replyElement);
+        }
+    } else {
+        // It's a new comment
+        const commentsContainer = document.querySelector('#commentsListContainer');
+        const noCommentsMsg = commentsContainer.querySelector('.no-comments');
+        
+        if (noCommentsMsg) {
+            noCommentsMsg.remove();
+            commentsContainer.innerHTML = '<div class="comments-list"></div>';
+        }
+        
+        const commentsList = commentsContainer.querySelector('.comments-list');
+        if (!commentsList) {
+            commentsContainer.innerHTML = '<div class="comments-list"></div>';
+        }
+        
+        const updatedCommentsList = commentsContainer.querySelector('.comments-list');
+        const commentHTML = createCommentHTML(comment);
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = commentHTML;
+        const commentElement = tempDiv.firstElementChild;
+        commentElement.classList.add('fade-in');
+        updatedCommentsList.insertBefore(commentElement, updatedCommentsList.firstChild);
+    }
+}

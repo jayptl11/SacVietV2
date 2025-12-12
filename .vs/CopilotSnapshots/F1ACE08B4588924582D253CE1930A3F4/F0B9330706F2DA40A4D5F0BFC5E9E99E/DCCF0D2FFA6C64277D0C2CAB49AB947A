@@ -1,0 +1,96 @@
+﻿@model SacViet.Models.Article
+@using System.Text.RegularExpressions
+
+<!-- Article Image -->
+@if (!string.IsNullOrEmpty(Model.ThumbnailImage))
+{
+    <div class="article-image mb-4">
+        <img src="@Model.ThumbnailImage" class="img-fluid w-100 rounded" alt="@Model.Title">
+    </div>
+}
+
+@{
+    // Render content with support for media tokens
+    var raw = Model.Content ?? string.Empty;
+
+    // Normalize plain [SV-VIDEO] to token with no attributes (will use Model.VideoUrl if present)
+    raw = Regex.Replace(raw, @"(<p[^>]*>\s*)?\[\s*SV-VIDEO\s*\](\s*</p>)?", "[SV-VIDEO]", RegexOptions.IgnoreCase);
+
+    // Split using custom markers while keeping text pieces
+    // We'll parse step-by-step: replace tokens with placeholders, then iterate
+    const string VPlaceholder = "##SVTOKEN_VIDEO##";
+    const string IPlaceholder = "##SVTOKEN_IMAGE##";
+
+    var videos = new List<(string? Url, string? Title)>();
+    var images = new List<string>();
+
+    // VIDEO token with attributes: [SV-VIDEO url="..." title="..."]
+    raw = Regex.Replace(raw, @"\[SV-VIDEO(?:\s+url=""(?<url>[^""]+)"")?(?:\s+title=""(?<title>[^""]*)"")?\s*\]", m =>
+    {
+        var url = m.Groups["url"].Success ? m.Groups["url"].Value : (Model.VideoUrl ?? string.Empty);
+        var title = m.Groups["title"].Success ? m.Groups["title"].Value : (Model.VideoTitle ?? string.Empty);
+        videos.Add((string.IsNullOrWhiteSpace(url) ? null : url, string.IsNullOrWhiteSpace(title) ? null : title));
+        return VPlaceholder;
+    }, RegexOptions.IgnoreCase);
+
+    // IMAGE token: [SV-IMAGE url="..."]
+    raw = Regex.Replace(raw, @"\[SV-IMAGE\s+url=""(?<url>[^""]+)""\s*\]", m =>
+    {
+        images.Add(m.Groups["url"].Value);
+        return IPlaceholder;
+    }, RegexOptions.IgnoreCase);
+
+    // Split text around placeholders
+    var parts = Regex.Split(raw, $"({Regex.Escape(VPlaceholder)}|{Regex.Escape(IPlaceholder)})");
+    var vIndex = 0;
+    var iIndex = 0;
+}
+
+<div class="article-content" id="articleContent">
+    @foreach (var part in parts)
+    {
+        if (part == VPlaceholder)
+        {
+            var info = vIndex < videos.Count ? videos[vIndex++] : (Url: Model.VideoUrl, Title: Model.VideoTitle);
+            if (!string.IsNullOrWhiteSpace(info.Url))
+            {
+                // Create a shallow Article clone to pass proper url/title into partial
+                var clone = new SacViet.Models.Article
+                {
+                    VideoUrl = info.Url,
+                    VideoTitle = info.Title
+                };
+                @await Html.PartialAsync("_VideoPlayer", clone)
+            }
+        }
+        else if (part == IPlaceholder)
+        {
+            var url = iIndex < images.Count ? images[iIndex++] : null;
+            if (!string.IsNullOrWhiteSpace(url))
+            {
+                <figure class="my-3">
+                    <img src="@url" alt="image" class="img-fluid rounded" />
+                </figure>
+            }
+        }
+        else
+        {
+            @Html.Raw(part)
+        }
+    }
+</div>
+
+<!-- Article Tags -->
+@if (Model.Tags.Any())
+{
+    <div class="article-tags mt-4 pt-3 border-top no-print">
+        <h6 class="mb-2">Từ khóa:</h6>
+        @foreach (var tag in Model.Tags)
+        {
+            <a href="@Url.Action("Search", "Home", new { keyword = tag.TagName })" 
+               class="badge bg-outline-danger me-2 mb-2 text-decoration-none">
+                @tag.TagName
+            </a>
+        }
+    </div>
+}

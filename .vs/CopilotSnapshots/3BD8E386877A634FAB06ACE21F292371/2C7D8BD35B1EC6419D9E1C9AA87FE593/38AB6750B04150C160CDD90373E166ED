@@ -1,0 +1,19 @@
+﻿using SacViet.Models;
+
+namespace SacViet.Services
+{
+    public interface INewsService
+    {
+        Task<IEnumerable<Article>> GetFeaturedArticlesAsync();
+        Task<IEnumerable<Article>> GetLatestArticlesAsync();
+        Task<IEnumerable<Article>> GetMostViewedTodayAsync(int count = 5);
+        Task<IEnumerable<Article>> GetSidebarArticlesAsync(int count = 10, IEnumerable<int> excludeArticleIds = null);
+        Task<IEnumerable<Category>> GetNavigationCategoriesAsync();
+        Task<IEnumerable<Category>> GetAllCategoriesAsync(); // Thêm method m?i
+        Task<Article?> GetArticleDetailsAsync(string slug);
+        Task<IEnumerable<Article>> GetRelatedArticlesAsync(int articleId, int categoryId);
+        Task<(IEnumerable<Article> Articles, int TotalCount)> SearchArticlesAsync(string keyword, int? categoryId = null, int? authorId = null, DateTime? fromDate = null, DateTime? toDate = null, int page = 1, int pageSize = 10);
+        Task<(IEnumerable<Article> Articles, int TotalCount)> GetArticlesByCategoryAsync(int categoryId, int page = 1, int pageSize = 10);
+        Task<Dictionary<int, IEnumerable<Article>>> GetArticlesByCategoriesForHomeAsync(IEnumerable<int> categoryIds, int articlesPerCategory = 6);
+    }
+}

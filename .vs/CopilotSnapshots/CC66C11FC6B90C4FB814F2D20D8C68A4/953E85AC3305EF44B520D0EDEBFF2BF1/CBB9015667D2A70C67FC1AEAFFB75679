@@ -1,0 +1,155 @@
+﻿@* Partial View: Article Sidebar (Category, Thumbnail, Schedule, Tags, Actions) *@
+@using SacViet.ViewModels
+@using SacViet.Models
+
+@model object
+@{
+    var categories = ViewBag.Categories as IEnumerable<Category>;
+    var isEditMode = ViewBag.IsEditMode ?? false;
+    
+    int categoryId = 0;
+    string? thumbnailImage = null;
+    DateTime? scheduledPublishDate = null;
+    
+    if (Model is ArticleEditViewModel edit)
+    {
+        categoryId = edit.CategoryId;
+        thumbnailImage = edit.ThumbnailImage;
+        scheduledPublishDate = edit.ScheduledPublishDate;
+    }
+    else if (Model is ArticleCreateViewModel create)
+    {
+        categoryId = create.CategoryId;
+        thumbnailImage = create.ThumbnailImage;
+        scheduledPublishDate = create.ScheduledPublishDate;
+    }
+}
+
+<!-- Category Card -->
+<div class="sidebar-card mb-4">
+    <div class="sidebar-card-header">
+        <h6 class="mb-0">
+            <i class="fas fa-folder text-warning me-2"></i>Danh mục
+        </h6>
+    </div>
+    <div class="sidebar-card-body">
+        <select name="CategoryId" class="form-select-modern">
+            <option value="">-- Chọn danh mục --</option>
+            @if (categories != null)
+            {
+                @foreach (var category in categories.Where(c => c.ParentCategoryId == null))
+                {
+                    <option value="@category.CategoryId" @(categoryId == category.CategoryId ? "selected" : "")>📁 @category.CategoryName</option>
+
+                    @foreach (var subCategory in categories.Where(c => c.ParentCategoryId == category.CategoryId))
+                    {
+                        <option value="@subCategory.CategoryId" @(categoryId == subCategory.CategoryId ? "selected" : "")>  └─ @subCategory.CategoryName</option>
+                    }
+                }
+            }
+        </select>
+        <span class="validation-message"></span>
+    </div>
+</div>
+
+<!-- Thumbnail Card -->
+<div class="sidebar-card mb-4">
+    <div class="sidebar-card-header">
+        <h6 class="mb-0">
+            <i class="fas fa-image text-info me-2"></i>Ảnh đại diện
+        </h6>
+    </div>
+    <div class="sidebar-card-body">
+        <div id="thumbnail-preview" class="thumbnail-preview" style="display: none;">
+            <img id="thumbnail-img" src="" alt="Thumbnail" />
+            <button type="button" class="btn-remove-thumbnail" onclick="removeThumbnail()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="thumbnail-upload" class="thumbnail-upload">
+            <!-- Upload file option -->
+            <div class="upload-area" onclick="document.getElementById('thumbnail-file').click()">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>Chọn ảnh hoặc kéo thả vào đây</p>
+                <small>JPG, PNG, GIF (Max 5MB)</small>
+            </div>
+            <input type="file" id="thumbnail-file" accept="image/*" style="display: none;" 
+                   onchange="uploadThumbnail('@Url.Action("UploadImage", "Writer")')" />
+            
+            <!-- OR divider -->
+            <div class="text-center my-3">
+                <small class="text-muted">── HOẶC ──</small>
+            </div>
+            
+            <!-- Set by URL option -->
+            <div class="url-input-group">
+                <input type="url" id="thumbnail-url-input" class="form-control form-control-sm" 
+                       placeholder="Paste URL hình ảnh vào đây..." />
+                <button type="button" class="btn btn-sm btn-primary mt-2 w-100" onclick="setThumbnailByUrl()">
+                    <i class="fas fa-link me-1"></i>Dùng URL này
+                </button>
+            </div>
+        </div>
+        <input type="hidden" name="ThumbnailImage" id="thumbnail-url" value="@thumbnailImage" />
+    </div>
+</div>
+
+<!-- Scheduled Publish Card -->
+<div class="sidebar-card mb-4">
+    <div class="sidebar-card-header">
+        <h6 class="mb-0">
+            <i class="fas fa-clock text-success me-2"></i>Hẹn giờ đăng
+        </h6>
+    </div>
+    <div class="sidebar-card-body">
+        <input name="ScheduledPublishDate" type="datetime-local" class="form-control-modern" 
+               value="@(scheduledPublishDate?.ToString("yyyy-MM-ddTHH:mm"))" />
+        <small class="form-hint">
+            <i class="fas fa-info-circle me-1"></i>
+            Bài viết sẽ tự động đăng sau khi duyệt
+        </small>
+    </div>
+</div>
+
+<!-- Tags Card -->
+<div class="sidebar-card mb-4">
+    <div class="sidebar-card-header">
+        <h6 class="mb-0">
+            <i class="fas fa-tags text-danger me-2"></i>Thẻ Tags
+        </h6>
+    </div>
+    <div class="sidebar-card-body">
+        <input type="text" id="tags-input" class="form-control-modern"
+               placeholder="Nhập tag và nhấn Enter..." />
+        <div id="tags-container" class="tags-container mt-3"></div>
+        <small class="form-hint">
+            <i class="fas fa-keyboard me-1"></i>
+            Nhấn Enter để thêm tag
+        </small>
+    </div>
+</div>
+
+<!-- Actions Card -->
+<div class="action-card">
+    <div class="action-card-header">
+        <h6 class="mb-0">
+            <i class="fas fa-cog me-2"></i>Hành động
+        </h6>
+    </div>
+    <div class="action-card-body">
+        <button type="submit" name="action" value="submit" class="action-btn action-btn-primary">
+            <i class="fas fa-paper-plane"></i>
+            <div>
+                <strong>Gửi để duyệt</strong>
+                <small>Gửi cho Admin xét duyệt</small>
+            </div>
+        </button>
+        <button type="submit" name="action" value="draft" class="action-btn action-btn-secondary">
+            <i class="fas fa-save"></i>
+            <div>
+                <strong>Lưu nháp</strong>
+                <small>Lưu để chỉnh sửa sau</small>
+            </div>
+        </button>
+    </div>
+</div>

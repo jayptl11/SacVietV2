@@ -1,0 +1,53 @@
+﻿using Microsoft.EntityFrameworkCore;
+using SacViet.Models;
+using SacViet.Repositories;
+using SacViet.Services;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+builder.Services.AddControllersWithViews();
+
+// Add Entity Framework
+builder.Services.AddDbContext<SacVietContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Register repositories
+builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+
+// Register services
+builder.Services.AddScoped<INewsService, NewsService>();
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
+
+app.UseAuthorization();
+
+app.MapControllerRoute(
+    name: "article",
+    pattern: "bai-viet/{slug}",
+    defaults: new { controller = "Article", action = "Details" });
+
+app.MapControllerRoute(
+    name: "category",
+    pattern: "category/{categorySlug:regex(^[a-z0-9-]+$)}",
+    defaults: new { controller = "Category", action = "Index" });
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.Run();

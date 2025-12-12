@@ -1,0 +1,115 @@
+using SacViet.Models;
+using SacViet.Repositories;
+
+namespace SacViet.Services
+{
+    public class NewsService : INewsService
+    {
+        private readonly IArticleRepository _articleRepository;
+        private readonly ICategoryRepository _categoryRepository;
+
+        public NewsService(IArticleRepository articleRepository, ICategoryRepository categoryRepository)
+        {
+            _articleRepository = articleRepository;
+            _categoryRepository = categoryRepository;
+        }
+
+        public async Task<IEnumerable<Article>> GetFeaturedArticlesAsync()
+        {
+            return await _articleRepository.GetFeaturedArticlesAsync(5);
+        }
+
+        public async Task<IEnumerable<Article>> GetLatestArticlesAsync()
+        {
+            return await _articleRepository.GetLatestArticlesAsync(12);
+        }
+
+        public async Task<IEnumerable<Article>> GetMostViewedTodayAsync(int count = 5)
+        {
+            return await _articleRepository.GetMostViewedTodayAsync(count);
+        }
+
+        public async Task<IEnumerable<Article>> GetSidebarArticlesAsync(int count = 10, IEnumerable<int> excludeArticleIds = null)
+        {
+            return await _articleRepository.GetSidebarArticlesAsync(count, excludeArticleIds);
+        }
+
+        public async Task<IEnumerable<Category>> GetNavigationCategoriesAsync()
+        {
+            return await _categoryRepository.GetMainCategoriesAsync();
+        }
+
+        public async Task<IEnumerable<Category>> GetAllCategoriesAsync()
+        {
+            return await _categoryRepository.GetAllCategoriesAsync();
+        }
+
+        public async Task<Article?> GetArticleDetailsAsync(string slug)
+        {
+            return await _articleRepository.GetArticleBySlugAsync(slug);
+        }
+
+        public async Task<Article?> GetArticleByIdAsync(int articleId)
+        {
+            return await _articleRepository.GetArticleByIdAsync(articleId);
+        }
+
+        public async Task<IEnumerable<Article>> GetRelatedArticlesAsync(int articleId, int categoryId)
+        {
+            var articles = await _articleRepository.GetArticlesByCategoryAsync(categoryId, 1, 6);
+            return articles.Where(a => a.ArticleId != articleId).Take(4);
+        }
+
+        public async Task<(IEnumerable<Article> Articles, int TotalCount)> SearchArticlesAsync(string keyword, int? categoryId = null, int? authorId = null, DateTime? fromDate = null, DateTime? toDate = null, int page = 1, int pageSize = 10)
+        {
+            var articles = await _articleRepository.SearchArticlesAsync(keyword, categoryId, authorId, fromDate, toDate, page, pageSize);
+            var totalCount = await _articleRepository.GetSearchResultsCountAsync(keyword, categoryId, authorId, fromDate, toDate);
+            
+            return (articles, totalCount);
+        }
+
+        public async Task<(IEnumerable<Article> Articles, int TotalCount)> GetArticlesByCategoryAsync(int categoryId, int page = 1, int pageSize = 10)
+        {
+            var articles = await _articleRepository.GetArticlesByCategoryAsync(categoryId, page, pageSize);
+            var totalCount = await _articleRepository.GetArticlesCountByCategoryAsync(categoryId);
+            
+            return (articles, totalCount);
+        }
+
+        public async Task<Dictionary<int, IEnumerable<Article>>> GetArticlesByCategoriesForHomeAsync(IEnumerable<int> categoryIds, int articlesPerCategory = 6)
+        {
+            var result = new Dictionary<int, IEnumerable<Article>>();
+            
+            foreach (var categoryId in categoryIds)
+            {
+                var articles = await _articleRepository.GetArticlesByCategoryAsync(categoryId, 1, articlesPerCategory);
+                if (articles.Any())
+                {
+                    result[categoryId] = articles;
+                }
+            }
+            
+            return result;
+        }
+
+        public async Task IncrementArticleViewCountAsync(int articleId)
+        {
+            await _articleRepository.IncrementViewCountAsync(articleId);
+        }
+
+        public async Task<IEnumerable<Comment>> GetArticleCommentsAsync(int articleId)
+        {
+            return await _articleRepository.GetArticleCommentsAsync(articleId);
+        }
+
+        public async Task<Comment?> AddCommentAsync(int articleId, int userId, string content, int? parentCommentId = null)
+        {
+            return await _articleRepository.AddCommentAsync(articleId, userId, content, parentCommentId);
+        }
+
+        public async Task<int> GetCommentCountAsync(int articleId)
+        {
+            return await _articleRepository.GetCommentCountAsync(articleId);
+        }
+    }
+}

@@ -1,0 +1,82 @@
+﻿-- ============================================
+-- FIX CHECK CONSTRAINT FOR ARTICLES STATUS
+-- ============================================
+
+-- 1. Kiểm tra constraint hiện tại
+SELECT 
+    OBJECT_NAME(object_id) AS ConstraintName,
+    definition
+FROM sys.check_constraints
+WHERE parent_object_id = OBJECT_ID('Articles')
+AND definition LIKE '%Status%';
+
+-- 2. Drop constraint cũ (nếu có)
+IF EXISTS (
+    SELECT * FROM sys.check_constraints 
+    WHERE name = 'CK_Articles_Status' 
+    AND parent_object_id = OBJECT_ID('Articles')
+)
+BEGIN
+    PRINT 'Dropping old constraint CK_Articles_Status...';
+    ALTER TABLE Articles DROP CONSTRAINT CK_Articles_Status;
+    PRINT 'Old constraint dropped.';
+END
+
+-- 3. Thêm constraint mới với "Approved" status
+ALTER TABLE Articles
+ADD CONSTRAINT CK_Articles_Status 
+CHECK (Status IN ('Draft', 'Pending', 'Approved', 'Published', 'Rejected'));
+
+PRINT 'New constraint created with Approved status included.';
+
+-- 4. Verify constraint
+SELECT 
+    OBJECT_NAME(object_id) AS ConstraintName,
+    definition
+FROM sys.check_constraints
+WHERE parent_object_id = OBJECT_ID('Articles')
+AND definition LIKE '%Status%';
+
+-- 5. Test với các status hợp lệ
+PRINT '========================================';
+PRINT 'Testing valid status values:';
+PRINT '========================================';
+
+-- Test Draft
+DECLARE @TestArticleID INT = (SELECT TOP 1 ArticleID FROM Articles ORDER BY ArticleID DESC);
+PRINT 'Testing Draft status...';
+UPDATE Articles SET Status = 'Draft' WHERE ArticleID = @TestArticleID;
+PRINT 'OK: Draft status works';
+
+-- Test Pending
+PRINT 'Testing Pending status...';
+UPDATE Articles SET Status = 'Pending' WHERE ArticleID = @TestArticleID;
+PRINT 'OK: Pending status works';
+
+-- Test Approved
+PRINT 'Testing Approved status...';
+UPDATE Articles SET Status = 'Approved' WHERE ArticleID = @TestArticleID;
+PRINT 'OK: Approved status works';
+
+-- Test Published
+PRINT 'Testing Published status...';
+UPDATE Articles SET Status = 'Published' WHERE ArticleID = @TestArticleID;
+PRINT 'OK: Published status works';
+
+-- Test Rejected
+PRINT 'Testing Rejected status...';
+UPDATE Articles SET Status = 'Rejected' WHERE ArticleID = @TestArticleID;
+PRINT 'OK: Rejected status works';
+
+PRINT '========================================';
+PRINT 'All status values tested successfully!';
+PRINT '========================================';
+
+-- 6. Hiển thị các status hiện có trong database
+SELECT 
+    Status,
+    COUNT(*) AS Count
+FROM Articles
+WHERE Status IS NOT NULL
+GROUP BY Status
+ORDER BY Status;

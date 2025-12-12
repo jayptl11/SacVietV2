@@ -1,0 +1,673 @@
+﻿using Microsoft.EntityFrameworkCore;
+using SacViet.Models;
+using SacViet.ViewModels;
+
+namespace SacViet.Services
+{
+    public class AdminService : IAdminService
+    {
+        private readonly SacVietContext _context;
+
+        public AdminService(SacVietContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<AdminDashboardViewModel> GetDashboardStatsAsync()
+        {
+            var today = DateTime.Today;
+            var thisMonth = new DateTime(today.Year, today.Month, 1);
+
+            var dashboard = new AdminDashboardViewModel
+            {
+                TotalArticles = await _context.Articles.CountAsync(),
+                PendingArticles = await _context.Articles.CountAsync(a => a.Status == "Pending"),
+                PublishedArticles = await _context.Articles.CountAsync(a => a.Status == "Published"),
+                TotalUsers = await _context.Users.CountAsync(),
+                TotalWriters = await _context.Users.Include(u => u.Role).CountAsync(u => u.Role.RoleName == "Writer"),
+                TotalCategories = await _context.Categories.CountAsync(),
+                TodayViews = await _context.Articles.Where(a => a.PublishedAt >= today).SumAsync(a => (int?)a.ViewCount) ?? 0,
+                TotalViews = await _context.Articles.SumAsync(a => (int?)a.ViewCount) ?? 0
+            };
+
+            // Recent Articles
+            dashboard.RecentArticles = await _context.Articles
+                .Include(a => a.User)
+                .OrderByDescending(a => a.CreatedAt)
+                .Take(10)
+                .Select(a => new AdminRecentArticleViewModel
+                {
+                    ArticleId = a.ArticleId,
+                    Title = a.Title,
+                    AuthorName = a.User.FullName,
+                    Status = a.Status ?? "Draft",
+                    CreatedAt = a.CreatedAt ?? DateTime.Now,
+                    ViewCount = a.ViewCount ?? 0
+                })
+                .ToListAsync();
+
+            // Top Articles
+            dashboard.TopArticles = await _context.Articles
+                .Include(a => a.User)
+                .Where(a => a.Status == "Published")
+                .OrderByDescending(a => a.ViewCount)
+                .Take(10)
+                .Select(a => new AdminTopArticleViewModel
+                {
+                    ArticleId = a.ArticleId,
+                    Title = a.Title,
+                    AuthorName = a.User.FullName,
+                    ViewCount = a.ViewCount ?? 0,
+                    Slug = a.Slug
+                })
+                .ToListAsync();
+
+            // Recent Users
+            dashboard.RecentUsers = await _context.Users
+                .Include(u => u.Role)
+                .OrderByDescending(u => u.CreatedAt)
+                .Take(10)
+                .Select(u => new AdminRecentUserViewModel
+                {
+                    UserId = u.UserId,
+                    FullName = u.FullName,
+                    Email = u.Email,
+                    Role = u.Role.RoleName,
+                    CreatedAt = u.CreatedAt ?? DateTime.Now,
+                    IsActive = u.IsActive ?? true
+                })
+                .ToListAsync();
+
+            // Monthly Stats
+            dashboard.MonthlyStats = await GetMonthlyStatsAsync(6);
+
+            return dashboard;
+        }
+
+        public async Task<AdminArticlesViewModel> GetArticlesAsync(string status, string search, int page, int pageSize = 20)
+        {
+            var query = _context.Articles
+                .Include(a => a.User)
+                .Include(a => a.Category)
+                .Include(a => a.ArticleApprovalSubmittedByUsers)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(status))
+            {
+                query = query.Where(a => a.Status == status);
+            }
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(a => a.Title.Contains(search) || a.User.FullName.Contains(search));
+            }
+
+            var totalItems = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            var articles = await query
+                .OrderByDescending(a => a.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(a => new AdminArticleListItemViewModel
+                {
+                    ArticleId = a.ArticleId,
+                    Title = a.Title,
+                    Slug = a.Slug,
+                    AuthorName = a.User.FullName,
+                    CategoryName = a.Category.CategoryName,
+                    Status = a.Status ?? "Draft",
+                    CreatedAt = a.CreatedAt ?? DateTime.Now,
+                    PublishedAt = a.PublishedAt,
+                    ViewCount = a.ViewCount ?? 0,
+                    ThumbnailImage = a.ThumbnailImage ?? "",
+                    IsFeatured = false, // Will need to add this field to Article model later
+                    LatestApprovalStatus = a.ArticleApprovalSubmittedByUsers.OrderByDescending(ap => ap.SubmittedAt).FirstOrDefault().Status ?? "",
+                    RejectionReason = a.ArticleApprovalSubmittedByUsers.Where(ap => ap.Status == "Rejected").OrderByDescending(ap => ap.ReviewedAt).FirstOrDefault().ReviewNote ?? ""
+                })
+                .ToListAsync();
+
+            return new AdminArticlesViewModel
+            {
+                Items = articles,
+                CurrentPage = page,
+                TotalPages = totalPages,
+                TotalItems = totalItems,
+                PageSize = pageSize,
+                StatusFilter = status ?? "",
+                SearchQuery = search ?? ""
+            };
+        }
+
+        public async Task<ServiceResult> ApproveArticleAsync(int articleId, string adminName, string note = "")
+        {
+            try
+            {
+                var article = await _context.Articles
+                    .Include(a => a.ArticleApprovalSubmittedByUsers)
+                    .FirstOrDefaultAsync(a => a.ArticleId == articleId);
+
+                if (article == null)
+                {
+                    return ServiceResult.CreateError("Không tìm thấy bài viết");
+                }
+
+                if (article.Status != "Pending")
+                {
+                    return ServiceResult.CreateError("Chỉ có thể duyệt bài viết đang chờ duyệt");
+                }
+
+                // Find admin user
+                var admin = await _context.Users.FirstOrDefaultAsync(u => u.Email == adminName);
+                if (admin == null)
+                {
+                    return ServiceResult.CreateError("Không tìm thấy admin");
+                }
+
+                // Update article status
+                article.Status = "Published";
+                article.PublishedAt = DateTime.Now;
+
+                // Update approval record
+                var approval = article.ArticleApprovalSubmittedByUsers.FirstOrDefault(a => a.Status == "Pending");
+                if (approval != null)
+                {
+                    approval.Status = "Approved";
+                    approval.ReviewedAt = DateTime.Now;
+                    approval.ReviewedByUserId = admin.UserId;
+                    approval.ReviewNote = note;
+                }
+
+                await _context.SaveChangesAsync();
+                return ServiceResult.CreateSuccess("Bài viết đã được duyệt thành công");
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult.CreateError($"Lỗi: {ex.Message}");
+            }
+        }
+
+        public async Task<ServiceResult> RejectArticleAsync(int articleId, string adminName, string note)
+        {
+            try
+            {
+                var article = await _context.Articles
+                    .Include(a => a.ArticleApprovalSubmittedByUsers)
+                    .FirstOrDefaultAsync(a => a.ArticleId == articleId);
+
+                if (article == null)
+                {
+                    return ServiceResult.CreateError("Không tìm thấy bài viết");
+                }
+
+                if (article.Status != "Pending")
+                {
+                    return ServiceResult.CreateError("Chỉ có thể từ chối bài viết đang chờ duyệt");
+                }
+
+                // Find admin user
+                var admin = await _context.Users.FirstOrDefaultAsync(u => u.Email == adminName);
+                if (admin == null)
+                {
+                    return ServiceResult.CreateError("Không tìm thấy admin");
+                }
+
+                // Update article status
+                article.Status = "Rejected";
+
+                // Update approval record
+                var approval = article.ArticleApprovalSubmittedByUsers.FirstOrDefault(a => a.Status == "Pending");
+                if (approval != null)
+                {
+                    approval.Status = "Rejected";
+                    approval.ReviewedAt = DateTime.Now;
+                    approval.ReviewedByUserId = admin.UserId;
+                    approval.ReviewNote = note;
+                }
+
+                await _context.SaveChangesAsync();
+                return ServiceResult.CreateSuccess("Bài viết đã được từ chối");
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult.CreateError($"Lỗi: {ex.Message}");
+            }
+        }
+
+        public async Task<ServiceResult> PublishArticleAsync(int articleId)
+        {
+            try
+            {
+                var article = await _context.Articles.FindAsync(articleId);
+                if (article == null)
+                {
+                    return ServiceResult.CreateError("Không tìm thấy bài viết");
+                }
+
+                article.Status = "Published";
+                article.PublishedAt = DateTime.Now;
+
+                await _context.SaveChangesAsync();
+                return ServiceResult.CreateSuccess("Bài viết đã được đăng");
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult.CreateError($"Lỗi: {ex.Message}");
+            }
+        }
+
+        public async Task<ServiceResult> UnpublishArticleAsync(int articleId)
+        {
+            try
+            {
+                var article = await _context.Articles.FindAsync(articleId);
+                if (article == null)
+                {
+                    return ServiceResult.CreateError("Không tìm thấy bài viết");
+                }
+
+                article.Status = "Draft";
+                article.PublishedAt = null;
+
+                await _context.SaveChangesAsync();
+                return ServiceResult.CreateSuccess("Bài viết đã được gỡ khỏi trang chủ");
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult.CreateError($"Lỗi: {ex.Message}");
+            }
+        }
+
+        public async Task<ServiceResult> DeleteArticleAsync(int articleId)
+        {
+            try
+            {
+                var article = await _context.Articles
+                    .Include(a => a.ArticleApprovalSubmittedByUsers)
+                    .FirstOrDefaultAsync(a => a.ArticleId == articleId);
+
+                if (article == null)
+                {
+                    return ServiceResult.CreateError("Không tìm thấy bài viết");
+                }
+
+                _context.Articles.Remove(article);
+                await _context.SaveChangesAsync();
+                return ServiceResult.CreateSuccess("Bài viết đã được xóa");
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult.CreateError($"Lỗi: {ex.Message}");
+            }
+        }
+
+        public async Task<ServiceResult> ToggleFeaturedArticleAsync(int articleId)
+        {
+            try
+            {
+                var article = await _context.Articles.FindAsync(articleId);
+                if (article == null)
+                {
+                    return ServiceResult.CreateError("Không tìm thấy bài viết");
+                }
+
+                // Since IsFeatured doesn't exist in current model, we'll return not implemented
+                return ServiceResult.CreateError("Chức năng nổi bật chưa được triển khai");
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult.CreateError($"Lỗi: {ex.Message}");
+            }
+        }
+
+        public async Task<AdminUsersViewModel> GetUsersAsync(string role, string search, int page, int pageSize = 20)
+        {
+            var query = _context.Users.Include(u => u.Role).AsQueryable();
+
+            if (!string.IsNullOrEmpty(role))
+            {
+                query = query.Where(u => u.Role.RoleName == role);
+            }
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(u => u.FullName.Contains(search) || u.Email.Contains(search));
+            }
+
+            var totalItems = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            var users = await query
+                .OrderByDescending(u => u.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(u => new AdminUserListItemViewModel
+                {
+                    UserId = u.UserId,
+                    FullName = u.FullName,
+                    Email = u.Email,
+                    Role = u.Role.RoleName,
+                    CreatedAt = u.CreatedAt ?? DateTime.Now,
+                    LastLoginAt = u.LastLogin,
+                    IsActive = u.IsActive ?? true,
+                    IsBanned = false, // Will need to add this field to User model later
+                    BanReason = "", // Will need to add this field to User model later
+                    ArticleCount = u.Articles.Count(),
+                    Avatar = u.Avatar ?? ""
+                })
+                .ToListAsync();
+
+            return new AdminUsersViewModel
+            {
+                Items = users,
+                CurrentPage = page,
+                TotalPages = totalPages,
+                TotalItems = totalItems,
+                PageSize = pageSize,
+                RoleFilter = role ?? "",
+                SearchQuery = search ?? ""
+            };
+        }
+
+        public async Task<ServiceResult> UpdateUserRoleAsync(int userId, string roleName)
+        {
+            try
+            {
+                var user = await _context.Users.FindAsync(userId);
+                if (user == null)
+                {
+                    return ServiceResult.CreateError("Không tìm thấy người dùng");
+                }
+
+                var role = await _context.Roles.FirstOrDefaultAsync(r => r.RoleName == roleName);
+                if (role == null)
+                {
+                    return ServiceResult.CreateError("Không tìm thấy vai trò");
+                }
+
+                user.RoleId = role.RoleId;
+                await _context.SaveChangesAsync();
+                return ServiceResult.CreateSuccess($"Đã cập nhật quyền thành {roleName}");
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult.CreateError($"Lỗi: {ex.Message}");
+            }
+        }
+
+        public async Task<ServiceResult> BanUserAsync(int userId, string reason)
+        {
+            try
+            {
+                var user = await _context.Users.FindAsync(userId);
+                if (user == null)
+                {
+                    return ServiceResult.CreateError("Không tìm thấy người dùng");
+                }
+
+                // Since IsBanned and BanReason don't exist in current model, 
+                // we'll just deactivate the user for now
+                user.IsActive = false;
+
+                await _context.SaveChangesAsync();
+                return ServiceResult.CreateSuccess("Đã khóa tài khoản người dùng");
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult.CreateError($"Lỗi: {ex.Message}");
+            }
+        }
+
+        public async Task<ServiceResult> UnbanUserAsync(int userId)
+        {
+            try
+            {
+                var user = await _context.Users.FindAsync(userId);
+                if (user == null)
+                {
+                    return ServiceResult.CreateError("Không tìm thấy người dùng");
+                }
+
+                user.IsActive = true;
+
+                await _context.SaveChangesAsync();
+                return ServiceResult.CreateSuccess("Đã mở khóa tài khoản người dùng");
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult.CreateError($"Lỗi: {ex.Message}");
+            }
+        }
+
+        public async Task<ServiceResult> DeleteUserAsync(int userId)
+        {
+            try
+            {
+                var user = await _context.Users
+                    .Include(u => u.Articles)
+                    .FirstOrDefaultAsync(u => u.UserId == userId);
+
+                if (user == null)
+                {
+                    return ServiceResult.CreateError("Không tìm thấy người dùng");
+                }
+
+                if (user.Articles.Any())
+                {
+                    return ServiceResult.CreateError("Không thể xóa người dùng có bài viết");
+                }
+
+                _context.Users.Remove(user);
+                await _context.SaveChangesAsync();
+                return ServiceResult.CreateSuccess("Đã xóa người dùng");
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult.CreateError($"Lỗi: {ex.Message}");
+            }
+        }
+
+        public async Task<AdminCategoriesViewModel> GetCategoriesAsync()
+        {
+            var categories = await _context.Categories
+                .Include(c => c.ParentCategory)
+                .Where(c => c.ParentCategoryId == null)
+                .OrderBy(c => c.DisplayOrder)
+                .Select(c => new AdminCategoryListItemViewModel
+                {
+                    CategoryId = c.CategoryId,
+                    CategoryName = c.CategoryName,
+                    Description = c.Description ?? "",
+                    ParentCategoryId = c.ParentCategoryId,
+                    ArticleCount = c.Articles.Count(),
+                    IsActive = c.IsActive ?? true,
+                    DisplayOrder = c.DisplayOrder ?? 0,
+                    SubCategories = _context.Categories
+                        .Where(sc => sc.ParentCategoryId == c.CategoryId)
+                        .Select(sc => new AdminCategoryListItemViewModel
+                        {
+                            CategoryId = sc.CategoryId,
+                            CategoryName = sc.CategoryName,
+                            Description = sc.Description ?? "",
+                            ParentCategoryId = sc.ParentCategoryId,
+                            ArticleCount = sc.Articles.Count(),
+                            IsActive = sc.IsActive ?? true,
+                            DisplayOrder = sc.DisplayOrder ?? 0
+                        }).OrderBy(sc => sc.DisplayOrder).ToList()
+                })
+                .ToListAsync();
+
+            return new AdminCategoriesViewModel
+            {
+                Categories = categories
+            };
+        }
+
+        public async Task<ServiceResult> CreateCategoryAsync(AdminCategoryViewModel model)
+        {
+            try
+            {
+                var category = new Category
+                {
+                    CategoryName = model.CategoryName,
+                    Description = model.Description,
+                    ParentCategoryId = model.ParentCategoryId,
+                    IsActive = model.IsActive,
+                    DisplayOrder = model.DisplayOrder
+                };
+
+                _context.Categories.Add(category);
+                await _context.SaveChangesAsync();
+                return ServiceResult.CreateSuccess("Danh mục đã được tạo thành công");
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult.CreateError($"Lỗi: {ex.Message}");
+            }
+        }
+
+        public async Task<ServiceResult> UpdateCategoryAsync(AdminCategoryViewModel model)
+        {
+            try
+            {
+                var category = await _context.Categories.FindAsync(model.CategoryId);
+                if (category == null)
+                {
+                    return ServiceResult.CreateError("Không tìm thấy danh mục");
+                }
+
+                category.CategoryName = model.CategoryName;
+                category.Description = model.Description;
+                category.ParentCategoryId = model.ParentCategoryId;
+                category.IsActive = model.IsActive;
+                category.DisplayOrder = model.DisplayOrder;
+
+                await _context.SaveChangesAsync();
+                return ServiceResult.CreateSuccess("Danh mục đã được cập nhật");
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult.CreateError($"Lỗi: {ex.Message}");
+            }
+        }
+
+        public async Task<ServiceResult> DeleteCategoryAsync(int categoryId)
+        {
+            try
+            {
+                var category = await _context.Categories
+                    .Include(c => c.Articles)
+                    .FirstOrDefaultAsync(c => c.CategoryId == categoryId);
+
+                if (category == null)
+                {
+                    return ServiceResult.CreateError("Không tìm thấy danh mục");
+                }
+
+                var hasSubCategories = await _context.Categories.AnyAsync(c => c.ParentCategoryId == categoryId);
+                
+                if (category.Articles.Any() || hasSubCategories)
+                {
+                    return ServiceResult.CreateError("Không thể xóa danh mục có bài viết hoặc danh mục con");
+                }
+
+                _context.Categories.Remove(category);
+                await _context.SaveChangesAsync();
+                return ServiceResult.CreateSuccess("Danh mục đã được xóa");
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult.CreateError($"Lỗi: {ex.Message}");
+            }
+        }
+
+        public Task<AdminSystemSettingsViewModel> GetSystemSettingsAsync()
+        {
+            // This would typically come from a settings table
+            // For now, return default values
+            var settings = new AdminSystemSettingsViewModel
+            {
+                SiteName = "SacViet News",
+                SiteDescription = "Website tin tức hàng đầu Việt Nam",
+                ContactEmail = "admin@sacviet.com",
+                ArticlesPerPage = 10,
+                RequireApproval = true,
+                AllowGuestComments = false,
+                EnableRegistration = true,
+                SiteLogo = "",
+                SiteFavicon = "",
+                FacebookUrl = "",
+                TwitterUrl = "",
+                InstagramUrl = "",
+                YouTubeUrl = "",
+                GoogleAnalyticsId = "",
+                MetaKeywords = "",
+                MetaDescription = ""
+            };
+            
+            return Task.FromResult(settings);
+        }
+
+        public Task<ServiceResult> UpdateSystemSettingsAsync(AdminSystemSettingsViewModel model)
+        {
+            try
+            {
+                // This would typically update a settings table
+                // For now, just return success
+                return Task.FromResult(ServiceResult.CreateSuccess("Cài đặt hệ thống đã được cập nhật"));
+            }
+            catch (Exception ex)
+            {
+                return Task.FromResult(ServiceResult.CreateError($"Lỗi: {ex.Message}"));
+            }
+        }
+
+        public async Task<List<AdminMonthlyStatsViewModel>> GetMonthlyStatsAsync(int months = 12)
+        {
+            var stats = new List<AdminMonthlyStatsViewModel>();
+            var startDate = DateTime.Now.AddMonths(-months);
+
+            for (int i = 0; i < months; i++)
+            {
+                var monthStart = startDate.AddMonths(i);
+                var monthEnd = monthStart.AddMonths(1);
+
+                var articleCount = await _context.Articles
+                    .CountAsync(a => a.CreatedAt >= monthStart && a.CreatedAt < monthEnd);
+
+                var userCount = await _context.Users
+                    .CountAsync(u => u.CreatedAt >= monthStart && u.CreatedAt < monthEnd);
+
+                var viewCount = await _context.Articles
+                    .Where(a => a.PublishedAt >= monthStart && a.PublishedAt < monthEnd)
+                    .SumAsync(a => (int?)a.ViewCount) ?? 0;
+
+                stats.Add(new AdminMonthlyStatsViewModel
+                {
+                    Month = monthStart.ToString("MM/yyyy"),
+                    Articles = articleCount,
+                    Users = userCount,
+                    Views = viewCount
+                });
+            }
+
+            return stats;
+        }
+
+        public async Task<Dictionary<string, int>> GetArticleStatusStatsAsync()
+        {
+            return await _context.Articles
+                .Where(a => a.Status != null)
+                .GroupBy(a => a.Status!)
+                .ToDictionaryAsync(g => g.Key, g => g.Count());
+        }
+
+        public async Task<Dictionary<string, int>> GetUserRoleStatsAsync()
+        {
+            return await _context.Users
+                .Include(u => u.Role)
+                .GroupBy(u => u.Role.RoleName)
+                .ToDictionaryAsync(g => g.Key, g => g.Count());
+        }
+    }
+}

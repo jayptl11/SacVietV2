@@ -1,0 +1,35 @@
+/* VietnamPlus-style CSS - Modular Structure */
+
+/* Import all CSS modules in order of dependency */
+@import url('./variables.css');
+@import url('./typography.css');
+@import url('./layout.css');
+@import url('./navigation.css');
+@import url('./components.css');
+@import url('./timeline.css');
+@import url('./cards.css');
+@import url('./animations.css');
+@import url('./responsive.css');
+@import url('./utilities.css');
+
+/* 
+   CSS Organization Structure:
+   
+   1. variables.css     - CSS custom properties and root variables
+   2. typography.css    - Font imports and typography system
+   3. layout.css        - Basic layout, body, and container styles
+   4. navigation.css    - Navbar, category menu, and mobile navigation
+   5. components.css    - Reusable components like buttons, badges, forms
+   6. timeline.css      - Latest news timeline specific styles
+   7. cards.css         - News cards and article cards
+   8. animations.css    - Animations and transitions
+   9. responsive.css    - Media queries and responsive design
+   10. utilities.css    - Utility classes and helper styles
+   
+   This modular approach makes it easier to:
+   - Find and edit specific styles
+   - Maintain and debug CSS
+   - Add new features without conflicts
+   - Override specific sections when needed
+   - Collaborate with multiple developers
+*/

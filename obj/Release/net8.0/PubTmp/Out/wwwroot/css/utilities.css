@@ -1,0 +1,34 @@
+/* Utility Classes and Helper Styles */
+
+/* Focus visible for accessibility */
+*:focus-visible {
+    outline: 2px solid var(--primary-red);
+    outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+    .top-navbar,
+    .category-menu,
+    .sidebar-widget,
+    footer,
+    .btn,
+    .offcanvas,
+    .scroll-to-top,
+    .reading-progress,
+    .toast-notification {
+        display: none !important;
+    }
+
+    .main-content {
+        padding-top: 0 !important;
+    }
+
+    .logo-section {
+        display: block !important;
+    }
+
+    body {
+        font-family: var(--font-content) !important;
+    }
+}

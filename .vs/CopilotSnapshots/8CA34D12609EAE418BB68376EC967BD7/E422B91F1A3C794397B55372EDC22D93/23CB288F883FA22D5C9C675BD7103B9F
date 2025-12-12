@@ -1,0 +1,169 @@
+﻿@model SacViet.ViewModels.HomePageViewModel
+@{
+    ViewData["Title"] = "Trang chủ";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <!-- Left Sidebar - Small News -->
+        <div class="col-lg-3">
+            <div class="left-sidebar">
+                @if (Model.LatestArticles.Any())
+                {
+                    @foreach (var article in Model.LatestArticles.Take(3))
+                    {
+                        <div class="sidebar-news-item mb-4">
+                            <div class="news-image-small mb-2">
+                                <img src="@(string.IsNullOrEmpty(article.ThumbnailImage) ? "/images/placeholder-article.jpg" : article.ThumbnailImage)" 
+                                     class="img-fluid w-100" alt="@article.Title" style="height: 150px; object-fit: cover;">
+                            </div>
+                            <h6 class="news-title-small mb-2">
+                                <a href="@Url.Action("Details", "Article", new { slug = article.Slug })" class="text-dark text-decoration-none">
+                                    @article.Title
+                                </a>
+                            </h6>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+
+        <!-- Main Center Content - Featured Article -->
+        <div class="col-lg-6">
+            @if (Model.FeaturedArticles.Any())
+            {
+                var mainArticle = Model.FeaturedArticles.First();
+                <div class="main-featured-article mb-4">
+                    <div class="featured-image mb-3">
+                        <img src="@(string.IsNullOrEmpty(mainArticle.ThumbnailImage) ? "/images/placeholder-article.jpg" : mainArticle.ThumbnailImage)" 
+                             class="img-fluid w-100" alt="@mainArticle.Title" style="height: 450px; object-fit: cover;">
+                    </div>
+                    <h2 class="main-title mb-3">
+                        <a href="@Url.Action("Details", "Article", new { slug = mainArticle.Slug })" class="text-dark text-decoration-none">
+                            @mainArticle.Title
+                        </a>
+                    </h2>
+                    <div class="main-meta mb-3">
+                        <small class="text-danger me-3">
+                            <i class="fas fa-clock me-1"></i>@mainArticle.PublishedAt?.ToString("dd/MM/yyyy HH:mm")
+                        </small>
+                    </div>
+                    <p class="main-summary text-muted mb-3">@mainArticle.Summary</p>
+                    
+                    <!-- Sub bullets -->
+                    <ul class="sub-headlines list-unstyled">
+                        @foreach (var subArticle in Model.FeaturedArticles.Skip(1).Take(2))
+                        {
+                            <li class="mb-2">
+                                <i class="fas fa-plus text-danger me-2" style="font-size: 0.8rem;"></i>
+                                <a href="@Url.Action("Details", "Article", new { slug = subArticle.Slug })" class="text-dark">
+                                    @subArticle.Title
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+
+                <!-- Secondary Articles -->
+                <div class="secondary-articles">
+                    <div class="row g-3">
+                        @foreach (var article in Model.LatestArticles.Skip(3).Take(3))
+                        {
+                            <div class="col-md-12 mb-3">
+                                <div class="row g-2">
+                                    <div class="col-5">
+                                        <img src="@(string.IsNullOrEmpty(article.ThumbnailImage) ? "/images/placeholder-article.jpg" : article.ThumbnailImage)" 
+                                             class="img-fluid w-100" alt="@article.Title" style="height: 120px; object-fit: cover;">
+                                    </div>
+                                    <div class="col-7">
+                                        <h6 class="mb-2">
+                                            <a href="@Url.Action("Details", "Article", new { slug = article.Slug })" class="text-dark text-decoration-none">
+                                                @article.Title
+                                            </a>
+                                        </h6>
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock me-1"></i>@article.PublishedAt?.ToString("dd/MM/yyyy HH:mm")
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Right Sidebar - Latest News -->
+        <div class="col-lg-3">
+            <div class="right-sidebar">
+                <div class="latest-news-box">
+                    <h5 class="sidebar-title text-danger mb-3 pb-2 border-bottom">
+                        <i class="fas fa-fire me-2"></i>TIN MỚI NHẤT
+                    </h5>
+                    
+                    @if (Model.LatestArticles.Any())
+                    {
+                        @for (int i = 0; i < Math.Min(8, Model.LatestArticles.Count()); i++)
+                        {
+                            var article = Model.LatestArticles.ElementAt(i);
+                            <div class="latest-news-item d-flex mb-3 pb-3 border-bottom">
+                                <div class="latest-number text-danger me-3 fw-bold" style="min-width: 30px;">
+                                    <i class="fas fa-circle me-1" style="font-size: 0.4rem; vertical-align: middle;"></i>
+                                    <small>@article.PublishedAt?.ToString("dd/MM/yyyy HH:mm")</small>
+                                </div>
+                                <div class="latest-content">
+                                    <h6 class="mb-0">
+                                        <a href="@Url.Action("Details", "Article", new { slug = article.Slug })" class="text-dark text-decoration-none latest-link">
+                                            @article.Title
+                                        </a>
+                                    </h6>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+
+                <!-- Comment Box -->
+                <div class="comment-box bg-light p-3 mt-4">
+                    <h6 class="text-danger mb-3">
+                        <i class="fas fa-comments me-2"></i>BÌNH LUẬN
+                    </h6>
+                    <p class="small text-muted mb-0">Để lại ý kiến của bạn về các bài viết</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Additional Sections -->
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <h4 class="section-heading text-uppercase text-danger mb-4 pb-2 border-bottom">
+                Tin nổi bật khác
+            </h4>
+        </div>
+    </div>
+    <div class="row g-4">
+        @foreach (var article in Model.LatestArticles.Skip(6).Take(6))
+        {
+            <div class="col-md-4">
+                <div class="news-card-home">
+                    <div class="news-image-home mb-2">
+                        <img src="@(string.IsNullOrEmpty(article.ThumbnailImage) ? "/images/placeholder-article.jpg" : article.ThumbnailImage)" 
+                             class="img-fluid w-100" alt="@article.Title" style="height: 200px; object-fit: cover;">
+                    </div>
+                    <h5 class="news-card-title mb-2">
+                        <a href="@Url.Action("Details", "Article", new { slug = article.Slug })" class="text-dark text-decoration-none">
+                            @article.Title
+                        </a>
+                    </h5>
+                    <p class="news-card-summary text-muted small mb-2">@article.Summary</p>
+                    <small class="text-muted">
+                        <i class="fas fa-clock me-1"></i>@article.PublishedAt?.ToString("dd/MM/yyyy")
+                    </small>
+                </div>
+            </div>
+        }
+    </div>
+</div>

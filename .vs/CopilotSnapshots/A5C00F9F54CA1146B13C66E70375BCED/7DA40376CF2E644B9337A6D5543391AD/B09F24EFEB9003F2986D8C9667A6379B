@@ -1,0 +1,162 @@
+﻿// FIX: Modal Backdrop Cleanup - AGGRESSIVE VERSION
+// This will FORCE remove backdrops and fix button clicks
+
+console.log('🔧 Loading video-embed-fix.js - Aggressive backdrop cleanup');
+
+// Function to FORCE cleanup backdrops
+function aggressiveCleanupBackdrop() {
+    console.log('🧹 Running aggressive backdrop cleanup...');
+    
+    // 1. Remove ALL modal backdrops
+    const backdrops = document.querySelectorAll('.modal-backdrop');
+    console.log(`Found ${backdrops.length} backdrop(s) to remove`);
+    backdrops.forEach(backdrop => {
+        backdrop.remove();
+    });
+    
+    // 2. Reset body classes and styles
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+    document.body.style.removeProperty('overflow');
+    document.body.style.removeProperty('padding-right');
+    
+    // 3. Force z-index on action buttons
+    const actionBtns = document.querySelectorAll('.action-btn');
+    actionBtns.forEach(btn => {
+        btn.style.zIndex = '9999';
+        btn.style.position = 'relative';
+        btn.style.pointerEvents = 'auto';
+    });
+    
+    // 4. Force z-index on action card
+    const actionCard = document.querySelector('.action-card');
+    if (actionCard) {
+        actionCard.style.zIndex = '9999';
+        actionCard.style.position = 'relative';
+    }
+    
+    console.log('✅ Aggressive cleanup complete');
+}
+
+// Run cleanup on page load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('📄 DOM loaded - initializing modal cleanup');
+    
+    // Initial cleanup
+    aggressiveCleanupBackdrop();
+    
+    // Setup modal event listeners
+    const videoModal = document.getElementById('videoEmbedModal');
+    
+    if (videoModal) {
+        console.log('🎬 Found video modal - setting up event listeners');
+        
+        // When modal is fully hidden
+        videoModal.addEventListener('hidden.bs.modal', function () {
+            console.log('🚪 Modal hidden event fired');
+            setTimeout(aggressiveCleanupBackdrop, 100);
+            setTimeout(aggressiveCleanupBackdrop, 500);
+            setTimeout(aggressiveCleanupBackdrop, 1000); // Triple cleanup to be sure
+        });
+        
+        // When modal starts to hide
+        videoModal.addEventListener('hide.bs.modal', function () {
+            console.log('🚪 Modal hide event fired');
+            setTimeout(aggressiveCleanupBackdrop, 50);
+        });
+        
+        // Also cleanup when clicking outside modal
+        videoModal.addEventListener('click', function(e) {
+            if (e.target === videoModal) {
+                console.log('🖱️ Clicked outside modal');
+                const modal = bootstrap.Modal.getInstance(videoModal);
+                if (modal) {
+                    modal.hide();
+                }
+                setTimeout(aggressiveCleanupBackdrop, 300);
+            }
+        });
+    }
+    
+    // Cleanup every 2 seconds (aggressive polling)
+    setInterval(function() {
+        const backdrops = document.querySelectorAll('.modal-backdrop');
+        if (backdrops.length > 0 && !document.querySelector('.modal.show')) {
+            console.log('⚠️ Found lingering backdrop(s) - cleaning up');
+            aggressiveCleanupBackdrop();
+        }
+    }, 2000);
+    
+    // Listen to all clicks on buttons
+    document.querySelectorAll('.action-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            console.log('🔘 Button clicked:', this.textContent.trim());
+            // Cleanup before button action
+            aggressiveCleanupBackdrop();
+        }, true); // Use capture phase
+    });
+});
+
+// Override insertVideoIntoCKEditor to add aggressive cleanup
+const originalInsertVideo = window.insertVideoIntoCKEditor;
+window.insertVideoIntoCKEditor = function() {
+    console.log('📹 insertVideoIntoCKEditor called');
+    
+    // Call original function if exists
+    if (originalInsertVideo && typeof originalInsertVideo === 'function') {
+        originalInsertVideo();
+    } else {
+        // Inline implementation
+        const videoUrl = document.getElementById('embed-video-url').value.trim();
+        const videoTitle = document.getElementById('embed-video-title').value.trim();
+        
+        if (!videoUrl || !videoTitle) {
+            alert('Vui lòng nhập đầy đủ thông tin!');
+            return;
+        }
+        
+        try {
+            new URL(videoUrl);
+        } catch (e) {
+            alert('URL không hợp lệ!');
+            return;
+        }
+        
+        // Generate and insert HTML
+        if (typeof createVideoEmbedHTML === 'function' && CKEDITOR.instances.editor) {
+            const embedHTML = createVideoEmbedHTML(videoUrl, videoTitle);
+            CKEDITOR.instances.editor.insertHtml(embedHTML);
+            
+            // Clear inputs
+            document.getElementById('embed-video-url').value = '';
+            document.getElementById('embed-video-title').value = '';
+            
+            // Show success
+            alert('✅ Video đã được chèn vào bài viết!');
+        }
+    }
+    
+    // Close modal
+    const modalElement = document.getElementById('videoEmbedModal');
+    if (modalElement) {
+        const modal = bootstrap.Modal.getInstance(modalElement);
+        if (modal) {
+            modal.hide();
+        }
+    }
+    
+    // AGGRESSIVE cleanup after insert
+    setTimeout(aggressiveCleanupBackdrop, 100);
+    setTimeout(aggressiveCleanupBackdrop, 500);
+    setTimeout(aggressiveCleanupBackdrop, 1000);
+    setTimeout(aggressiveCleanupBackdrop, 2000);
+    
+    console.log('✅ Video inserted and cleanup scheduled');
+};
+
+// Expose cleanup function globally for manual debugging
+window.forceCleanupBackdrop = aggressiveCleanupBackdrop;
+
+console.log('✅ video-embed-fix.js loaded successfully');
+console.log('💡 You can manually run: forceCleanupBackdrop()');

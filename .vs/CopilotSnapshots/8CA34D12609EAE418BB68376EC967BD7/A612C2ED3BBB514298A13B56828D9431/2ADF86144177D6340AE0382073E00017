@@ -1,0 +1,287 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - SacViet</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/SacViet.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+</head>
+<body>
+    <!-- Top Red Bar - Sticky Navigation -->
+    <div class="top-navbar sticky-top bg-danger">
+        <div class="container-fluid px-3">
+            <div class="row align-items-center py-2">
+                <div class="col-3 col-md-2 d-flex align-items-center">
+                    <button class="btn btn-link text-white p-0 me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <button class="btn btn-link text-white p-0 d-none d-md-inline" type="button">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                </div>
+                
+                <div class="col-6 col-md-8 text-center">
+                    <a class="navbar-brand-compact" asp-controller="Home" asp-action="Index">
+                        <span class="logo-compact">SacViet<span class="text-white">+</span></span>
+                    </a>
+                </div>
+                
+                <div class="col-3 col-md-2 text-end">
+                    <div class="header-actions d-flex justify-content-end align-items-center">
+                        <button class="btn btn-link text-white p-0 me-2" type="button" data-bs-toggle="modal" data-bs-target="#searchModal">
+                            <i class="fas fa-search"></i>
+                        </button>
+                        <div class="dropdown d-none d-md-inline-block">
+                            <button class="btn btn-link text-white p-0 dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-globe"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#">Tiếng Việt</a></li>
+                                <li><a class="dropdown-item" href="#">English</a></li>
+                                <li><a class="dropdown-item" href="#">Français</a></li>
+                                <li><a class="dropdown-item" href="#">中文</a></li>
+                            </ul>
+                        </div>
+                        <button class="btn btn-link text-white p-0 ms-2 d-none d-md-inline" type="button">
+                            <i class="fas fa-user"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Desktop Navigation Menu (Hidden on mobile, shown below sticky header) -->
+    <nav class="desktop-navigation d-none d-lg-block border-bottom bg-white">
+        <div class="container">
+            <ul class="nav nav-pills nav-justified">
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Home" asp-action="Index">
+                        <i class="fas fa-home me-1"></i>Trang chủ
+                    </a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                        Nhịp văn hóa
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Trong nước</a></li>
+                        <li><a class="dropdown-item" href="#">Thế giới</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Du lịch</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Con người</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Ẩm thực</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Kiến trúc</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Thanh-Sắc</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                        Multimedia
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Podcast</a></li>
+                        <li><a class="dropdown-item" href="#">Video</a></li>
+                        <li><a class="dropdown-item" href="#">Infographic</a></li>
+                        <li><a class="dropdown-item" href="#">Longform</a></li>
+                        <li><a class="dropdown-item" href="#">eMagazine</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Mobile Offcanvas Menu -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileMenu">
+        <div class="offcanvas-header bg-danger text-white">
+            <h5 class="offcanvas-title">SacViet+</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body p-0">
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                    <a asp-controller="Home" asp-action="Index" class="text-decoration-none text-dark d-block">
+                        <i class="fas fa-home me-2 text-danger"></i>Trang chủ
+                    </a>
+                </li>
+                <li class="list-group-item">
+                    <a href="#nhipVanHoa" data-bs-toggle="collapse" class="text-decoration-none text-dark d-block">
+                        <i class="fas fa-music me-2 text-danger"></i>Nhịp văn hóa
+                        <i class="fas fa-chevron-down float-end"></i>
+                    </a>
+                    <div class="collapse ms-4" id="nhipVanHoa">
+                        <ul class="list-unstyled mt-2">
+                            <li><a href="#" class="text-decoration-none text-muted d-block py-1">Trong nước</a></li>
+                            <li><a href="#" class="text-decoration-none text-muted d-block py-1">Thế giới</a></li>
+                        </ul>
+                    </div>
+                </li>
+                <li class="list-group-item">
+                    <a href="#" class="text-decoration-none text-dark d-block">
+                        <i class="fas fa-plane me-2 text-danger"></i>Du lịch
+                    </a>
+                </li>
+                <li class="list-group-item">
+                    <a href="#" class="text-decoration-none text-dark d-block">
+                        <i class="fas fa-users me-2 text-danger"></i>Con người
+                    </a>
+                </li>
+                <li class="list-group-item">
+                    <a href="#" class="text-decoration-none text-dark d-block">
+                        <i class="fas fa-utensils me-2 text-danger"></i>Ẩm thực
+                    </a>
+                </li>
+                <li class="list-group-item">
+                    <a href="#" class="text-decoration-none text-dark d-block">
+                        <i class="fas fa-building me-2 text-danger"></i>Kiến trúc
+                    </a>
+                </li>
+                <li class="list-group-item">
+                    <a href="#" class="text-decoration-none text-dark d-block">
+                        <i class="fas fa-palette me-2 text-danger"></i>Thanh - Sắc
+                    </a>
+                </li>
+                <li class="list-group-item">
+                    <a href="#multimedia" data-bs-toggle="collapse" class="text-decoration-none text-dark d-block">
+                        <i class="fas fa-photo-video me-2 text-danger"></i>Multimedia
+                        <i class="fas fa-chevron-down float-end"></i>
+                    </a>
+                    <div class="collapse ms-4" id="multimedia">
+                        <ul class="list-unstyled mt-2">
+                            <li><a href="#" class="text-decoration-none text-muted d-block py-1">Podcast</a></li>
+                            <li><a href="#" class="text-decoration-none text-muted d-block py-1">Video</a></li>
+                            <li><a href="#" class="text-decoration-none text-muted d-block py-1">Infographic</a></li>
+                            <li><a href="#" class="text-decoration-none text-muted d-block py-1">Longform</a></li>
+                            <li><a href="#" class="text-decoration-none text-muted d-block py-1">eMagazine</a></li>
+                        </ul>
+                    </div>
+                </li>
+            </ul>
+            <div class="p-3 border-top mt-3">
+                <h6 class="text-muted">Ngôn ngữ</h6>
+                <div class="btn-group d-flex" role="group">
+                    <button type="button" class="btn btn-sm btn-outline-danger">VI</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary">EN</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary">FR</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary">CN</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Modal -->
+    <div class="modal fade" id="searchModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title">Tìm kiếm</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form asp-controller="Home" asp-action="Search" method="get">
+                        <div class="input-group input-group-lg">
+                            <input type="text" name="keyword" class="form-control" placeholder="Nhập từ khóa tìm kiếm..." autofocus>
+                            <button class="btn btn-danger" type="submit">
+                                <i class="fas fa-search"></i> Tìm kiếm
+                            </button>
+                        </div>
+                    </form>
+                    <div class="mt-3">
+                        <small class="text-muted">Gợi ý: văn hóa, du lịch, ẩm thực, kiến trúc...</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Date Bar (only visible on desktop) -->
+    <div class="date-bar bg-light border-bottom d-none d-md-block">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 py-1">
+                    <small class="text-muted">
+                        <i class="fas fa-calendar-alt me-1"></i>
+                        @DateTime.Now.ToString("dddd, dd/MM/yyyy")
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        @RenderBody()
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white mt-5">
+        <div class="container py-4">
+            <div class="row">
+                <div class="col-md-3 mb-3 mb-md-0">
+                    <h5 class="text-danger mb-3">SacViet</h5>
+                    <p class="small">Báo điện tử SacViet - Nơi hội tụ những giá trị văn hóa Việt Nam</p>
+                    <div class="social-links mt-3">
+                        <a href="#" class="text-white me-3"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-youtube"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3 mb-3 mb-md-0">
+                    <h6 class="mb-3">Chuyên mục</h6>
+                    <ul class="list-unstyled small">
+                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">Nhịp văn hóa</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">Du lịch</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">Con người</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">Ẩm thực</a></li>
+                    </ul>
+                </div>
+                <div class="col-6 col-md-3 mb-3 mb-md-0">
+                    <h6 class="mb-3">Multimedia</h6>
+                    <ul class="list-unstyled small">
+                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">Podcast</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">Video</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">Infographic</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">eMagazine</a></li>
+                    </ul>
+                </div>
+                <div class="col-12 col-md-3">
+                    <h6 class="mb-3">Liên hệ</h6>
+                    <p class="small mb-1"><i class="fas fa-map-marker-alt me-2"></i>Hà Nội, Việt Nam</p>
+                    <p class="small mb-1"><i class="fas fa-phone me-2"></i>(024) 123 4567</p>
+                    <p class="small mb-0"><i class="fas fa-envelope me-2"></i>info@sacviet.vn</p>
+                </div>
+            </div>
+            <hr class="my-3 bg-secondary">
+            <div class="row">
+                <div class="col-md-6 text-center text-md-start mb-2 mb-md-0">
+                    <small>&copy; 2025 SacViet. Bản quyền thuộc về SacViet.</small>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <small>
+                        <a href="#" class="text-white-50 me-3 text-decoration-none">Chính sách bảo mật</a>
+                        <a href="#" class="text-white-50 text-decoration-none">Điều khoản sử dụng</a>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

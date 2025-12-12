@@ -1,0 +1,14 @@
+﻿using SacViet.Models;
+
+namespace SacViet.ViewModels
+{
+    public class HomePageViewModel
+    {
+        public IEnumerable<Article> FeaturedArticles { get; set; } = new List<Article>();
+        public IEnumerable<Article> LatestArticles { get; set; } = new List<Article>();
+        public IEnumerable<Article> HotArticlesToday { get; set; } = new List<Article>(); // Bài viết hot trong ngày
+        public IEnumerable<Category> NavigationCategories { get; set; } = new List<Category>();
+        public IEnumerable<Category> AllCategories { get; set; } = new List<Category>(); // Thêm property mới
+        public Dictionary<int, IEnumerable<Article>> ArticlesByCategory { get; set; } = new Dictionary<int, IEnumerable<Article>>();
+    }
+}

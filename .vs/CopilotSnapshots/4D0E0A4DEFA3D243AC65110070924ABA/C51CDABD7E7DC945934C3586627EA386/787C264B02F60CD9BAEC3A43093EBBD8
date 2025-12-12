@@ -1,0 +1,221 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using SacViet.Services;
+using SacViet.ViewModels;
+using SacViet.Models;
+
+namespace SacViet.Controllers
+{
+    [Authorize(Roles = "Admin")]
+    public class AdminController : Controller
+    {
+        private readonly IAdminService _adminService;
+        private readonly IWriterService _writerService;
+        private readonly INewsService _newsService;
+
+        public AdminController(IAdminService adminService, IWriterService writerService, INewsService newsService)
+        {
+            _adminService = adminService;
+            _writerService = writerService;
+            _newsService = newsService;
+        }
+
+        // Dashboard
+        public async Task<IActionResult> Index()
+        {
+            var stats = await _adminService.GetDashboardStatsAsync();
+            return View(stats);
+        }
+
+        // Article Management
+        public async Task<IActionResult> Articles(string status = "", string search = "", int page = 1)
+        {
+            var articles = await _adminService.GetArticlesAsync(status, search, page);
+            ViewBag.CurrentStatus = status;
+            ViewBag.CurrentSearch = search;
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = articles.TotalPages;
+            return View(articles);
+        }
+
+        // View Article Details (for review)
+        public async Task<IActionResult> ViewArticle(int id)
+        {
+            var article = await _writerService.GetArticleByIdAsync(id);
+            if (article == null)
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy bài viết";
+                return RedirectToAction("Articles");
+            }
+
+            return View(article);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApproveArticle(int articleId, string note = "")
+        {
+            try
+            {
+                var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                {
+                    return Json(new { success = false, message = "Không thể xác thực người dùng" });
+                }
+
+                Console.WriteLine($"[ApproveArticle] ArticleId: {articleId}, AdminUserId: {userId}, Note: {note}");
+
+                var result = await _adminService.ApproveArticleAsync(articleId, userId, note);
+                
+                Console.WriteLine($"[ApproveArticle] Result: Success={result.Success}, Message={result.Message}");
+                
+                return Json(new { success = result.Success, message = result.Message });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ApproveArticle] Exception: {ex.Message}");
+                Console.WriteLine($"[ApproveArticle] InnerException: {ex.InnerException?.Message}");
+                Console.WriteLine($"[ApproveArticle] StackTrace: {ex.StackTrace}");
+                
+                return Json(new { success = false, message = $"Lỗi: {ex.InnerException?.Message ?? ex.Message}" });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RejectArticle(int articleId, string note)
+        {
+            try
+            {
+                var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                {
+                    return Json(new { success = false, message = "Không thể xác thực người dùng" });
+                }
+
+                var result = await _adminService.RejectArticleAsync(articleId, userId, note);
+                return Json(new { success = result.Success, message = result.Message });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> PublishArticle(int articleId)
+        {
+            try
+            {
+                var result = await _adminService.PublishArticleAsync(articleId);
+                return Json(new { success = result.Success, message = result.Message });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UnpublishArticle(int articleId)
+        {
+            try
+            {
+                var result = await _adminService.UnpublishArticleAsync(articleId);
+                return Json(new { success = result.Success, message = result.Message });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteArticle(int articleId)
+        {
+            try
+            {
+                var result = await _adminService.DeleteArticleAsync(articleId);
+                return Json(new { success = result.Success, message = result.Message });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
+            }
+        }
+
+        // User Management
+        public async Task<IActionResult> Users(string role = "", string search = "", int page = 1)
+        {
+            var users = await _adminService.GetUsersAsync(role, search, page);
+            ViewBag.CurrentRole = role;
+            ViewBag.CurrentSearch = search;
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = users.TotalPages;
+            return View(users);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateUserRole(int userId, string role)
+        {
+            try
+            {
+                var result = await _adminService.UpdateUserRoleAsync(userId, role);
+                return Json(new { success = result.Success, message = result.Message });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> BanUser(int userId, string reason)
+        {
+            try
+            {
+                var result = await _adminService.BanUserAsync(userId, reason);
+                return Json(new { success = result.Success, message = result.Message });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UnbanUser(int userId)
+        {
+            try
+            {
+                var result = await _adminService.UnbanUserAsync(userId);
+                return Json(new { success = result.Success, message = result.Message });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteUser(int userId)
+        {
+            try
+            {
+                var result = await _adminService.DeleteUserAsync(userId);
+                return Json(new { success = result.Success, message = result.Message });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
+            }
+        }
+    }
+}

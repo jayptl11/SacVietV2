@@ -1,0 +1,340 @@
+﻿@* Partial View: Article Content Form Fields *@
+@using SacViet.ViewModels
+
+@* Accept both Create and Edit ViewModels *@
+@model object
+
+@{
+    var createVm = Model as ArticleCreateViewModel;
+    var editVm = Model as ArticleEditViewModel;
+    var videos = (IList<MediaLinkViewModel>)(editVm?.Videos ?? createVm?.Videos ?? new List<MediaLinkViewModel>());
+    var images = (IList<MediaLinkViewModel>)(editVm?.Images ?? createVm?.Images ?? new List<MediaLinkViewModel>());
+}
+
+<div class="content-card mb-4">
+    <div class="content-card-header">
+        <h5 class="mb-0">
+            <i class="fas fa-file-alt text-primary me-2"></i>
+            Nội dung bài viết
+        </h5>
+    </div>
+    <div class="content-card-body">
+        <!-- Title -->
+        <div class="form-group-modern mb-4">
+            <label class="form-label-modern">
+                <i class="fas fa-heading me-2"></i>Tiêu đề <span class="text-danger">*</span>
+            </label>
+            <input name="Title" 
+                   value="@(Model is ArticleEditViewModel edit ? edit.Title : (Model as ArticleCreateViewModel)?.Title)" 
+                   class="form-control-modern"
+                   placeholder="Nhập tiêu đề hấp dẫn cho bài viết..."
+                   required
+                   maxlength="500" />
+            <span class="validation-message"></span>
+            <small class="form-hint">Tiêu đề nên ngắn gọn, súc tích và thu hút</small>
+        </div>
+
+        <!-- Summary -->
+        <div class="form-group-modern mb-4">
+            <label class="form-label-modern">
+                <i class="fas fa-align-left me-2"></i>Tóm tắt
+            </label>
+            <textarea name="Summary" 
+                      class="form-control-modern" 
+                      rows="3"
+                      placeholder="Viết tóm tắt ngắn gọn về nội dung bài viết..."
+                      maxlength="1000">@(Model is ArticleEditViewModel editSum ? editSum.Summary : (Model as ArticleCreateViewModel)?.Summary)</textarea>
+            <span class="validation-message"></span>
+            <small class="form-hint">Tóm tắt giúp người đọc nắm nhanh nội dung</small>
+        </div>
+
+        <!-- Content -->
+        <div class="form-group-modern">
+            <label class="form-label-modern">
+                <i class="fas fa-paragraph me-2"></i>Nội dung <span class="text-danger">*</span>
+            </label>
+            <textarea name="Content" 
+                      id="editor" 
+                      class="form-control-modern" 
+                      rows="10"
+                      required>@(Model is ArticleEditViewModel editContent ? editContent.Content : (Model as ArticleCreateViewModel)?.Content)</textarea>
+            <span class="validation-message"></span>
+        </div>
+
+        <!-- Multi Video Links -->
+        <div class="form-group-modern mt-4">
+            <label class="form-label-modern">
+                <i class="fas fa-video me-2"></i>Video (nhiều link, có thể nhập tiêu đề)
+            </label>
+            <div id="video-links">
+                @if (videos.Count == 0) { videos.Add(new MediaLinkViewModel()); }
+                @for (int i = 0; i < videos.Count; i++)
+                {
+                    <div class="row g-2 align-items-center mb-2 video-row">
+                        <div class="col-12 col-md-6">
+                            <input name="Videos[@i].Url" value="@videos[i]?.Url" class="form-control video-url-input" placeholder="Video URL (YouTube/Drive/mp4)" />
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <input name="Videos[@i].Title" value="@videos[i]?.Title" class="form-control" placeholder="Tiêu đề (tuỳ chọn)" />
+                        </div>
+                        <div class="col-12 col-md-2 text-end d-flex gap-2 justify-content-end">
+                            <button type="button" class="btn btn-outline-secondary btn-insert" title="Chèn vào nội dung" onclick="insertVideoRowToken(this)"><i class="fas fa-level-down-alt"></i></button>
+                            <button type="button" class="btn btn-outline-danger" title="Xoá" onclick="deleteVideoRow(this)"><i class="fas fa-trash"></i></button>
+                        </div>
+                        <div class="col-12"><div class="row-video-preview mt-2" style="display:none"></div></div>
+                    </div>
+                }
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="addVideoRow()"><i class="fas fa-plus"></i> Thêm link video</button>
+            <small class="form-hint d-block mt-1">Xem trước nhỏ sẽ xuất hiện khi nhập URL</small>
+        </div>
+
+        <!-- Multi Image Links -->
+        <div class="form-group-modern mt-4">
+            <label class="form-label-modern">
+                <i class="fas fa-image me-2"></i>Ảnh (nhiều link, có thể nhập tiêu đề)
+            </label>
+            <div id="image-links">
+                @if (images.Count == 0) { images.Add(new MediaLinkViewModel()); }
+                @for (int i = 0; i < images.Count; i++)
+                {
+                    <div class="row g-2 align-items-center mb-1 image-row">
+                        <div class="col-12 col-md-6">
+                            <input name="Images[@i].Url" value="@images[i]?.Url" class="form-control image-url-input" placeholder="Image URL hoặc chọn file..." />
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <input name="Images[@i].Title" value="@images[i]?.Title" class="form-control" placeholder="Tiêu đề (tuỳ chọn)" />
+                        </div>
+                        <div class="col-12 col-md-2 text-end d-flex gap-2 justify-content-end">
+                            <input type="file" accept="image/*" class="d-none row-image-file" />
+                            <button type="button" class="btn btn-outline-primary" title="Chọn ảnh từ máy" onclick="triggerUploadForRow(this)"><i class="fas fa-upload"></i></button>
+                            <button type="button" class="btn btn-outline-secondary btn-insert" title="Chèn vào nội dung" onclick="insertImageRowToken(this)"><i class="fas fa-level-down-alt"></i></button>
+                            <button type="button" class="btn btn-outline-danger" title="Xoá" onclick="deleteImageRow(this)"><i class="fas fa-trash"></i></button>
+                        </div>
+                        <div class="col-12"><div class="row-preview mt-2" style="display:none"></div></div>
+                    </div>
+                }
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="addImageRow()"><i class="fas fa-plus"></i> Thêm link ảnh</button>
+            <small class="form-hint d-block mt-1">Bạn có thể dán URL ảnh hoặc bấm biểu tượng tải lên để chọn ảnh từ máy</small>
+        </div>
+    </div>
+</div>
+
+<script>
+const uploadImageUrl = '@Url.Action("UploadImage","Writer")';
+
+function addVideoRow() {
+  const container = document.getElementById('video-links');
+  const row = document.createElement('div');
+  row.className = 'row g-2 align-items-center mb-2 video-row';
+  row.innerHTML = `
+    <div class="col-12 col-md-6"><input name="Videos[].Url" class="form-control video-url-input" placeholder="Video URL (YouTube/Drive/mp4)" /></div>
+    <div class="col-12 col-md-4"><input name="Videos[].Title" class="form-control" placeholder="Tiêu đề (tuỳ chọn)" /></div>
+    <div class="col-12 col-md-2 text-end d-flex gap-2 justify-content-end">
+        <button type=\"button\" class=\"btn btn-outline-secondary btn-insert\" title=\"Chèn vào nội dung\" onclick=\"insertVideoRowToken(this)\"><i class=\"fas fa-level-down-alt\"></i></button>
+        <button type=\"button\" class=\"btn btn-outline-danger\" title=\"Xoá\" onclick=\"deleteVideoRow(this)\"><i class=\"fas fa-trash\"></i></button>
+    </div>
+    <div class=\"col-12\"><div class=\"row-video-preview mt-2\" style=\"display:none\"></div></div>`;
+  container.appendChild(row);
+}
+function addImageRow() {
+  const container = document.getElementById('image-links');
+  const row = document.createElement('div');
+  row.className = 'row g-2 align-items-center mb-1 image-row';
+  row.innerHTML = `
+    <div class=\"col-12 col-md-6\"><input name=\"Images[].Url\" class=\"form-control image-url-input\" placeholder=\"Image URL hoặc chọn file...\" /></div>
+    <div class=\"col-12 col-md-4\"><input name=\"Images[].Title\" class=\"form-control\" placeholder=\"Tiêu đề (tuỳ chọn)\" /></div>
+    <div class=\"col-12 col-md-2 text-end d-flex gap-2 justify-content-end">
+        <input type=\"file\" accept=\"image/*\" class=\"d-none row-image-file\" />
+        <button type=\"button\" class=\"btn btn-outline-primary\" title=\"Chọn ảnh từ máy\" onclick=\"triggerUploadForRow(this)\"><i class=\"fas fa-upload\"></i></button>
+        <button type=\"button\" class=\"btn btn-outline-secondary btn-insert\" title=\"Chèn vào nội dung\" onclick=\"insertImageRowToken(this)\"><i class=\"fas fa-level-down-alt\"></i></button>
+        <button type=\"button\" class=\"btn btn-outline-danger\" title=\"Xoá\" onclick=\"deleteImageRow(this)\"><i class=\"fas fa-trash\"></i></button>
+    </div>
+    <div class=\"col-12\"><div class=\"row-preview mt-2\" style=\"display:none\"></div></div>`;
+  container.appendChild(row);
+}
+function markRowInserted(row) {
+  const btn = row.querySelector('.btn-insert');
+  if (btn) {
+    btn.disabled = true;
+    btn.classList.remove('btn-outline-secondary');
+    btn.classList.add('btn-success');
+    btn.innerHTML = '<i class="fas fa-check"></i> Đã chèn';
+  }
+  row.dataset.inserted = '1';
+}
+
+function ensureRowPreview(row) {
+  const box = row.querySelector('.row-preview');
+  if (box) return box;
+  const div = document.createElement('div');
+  div.className = 'row-preview mt-2';
+  row.appendChild(div);
+  return div;
+}
+function ensureVideoPreview(row) {
+  const box = row.querySelector('.row-video-preview');
+  if (box) return box;
+  const div = document.createElement('div');
+  div.className = 'row-video-preview mt-2';
+  row.appendChild(div);
+  return div;
+}
+
+function triggerUploadForRow(btn) {
+  const row = btn.closest('.image-row');
+  const fileInput = row.querySelector('.row-image-file');
+  if (!fileInput) return;
+  if (!fileInput._hooked) {
+    fileInput.addEventListener('change', function() {
+      const file = this.files && this.files[0];
+      if (!file) return;
+      if (file.size > 5 * 1024 * 1024) { alert('Ảnh quá lớn! (< 5MB)'); this.value = ''; return; }
+      const fd = new FormData();
+      fd.append('file', file);
+      fetch(uploadImageUrl, { method: 'POST', body: fd })
+        .then(r => r.ok ? r.json() : Promise.reject(r.statusText))
+        .then(d => {
+          if (d && d.success && d.url) {
+            const urlInput = row.querySelector("input[name*='Images'][name$='.Url']") || row.querySelector('.image-url-input');
+            if (urlInput) urlInput.value = d.url;
+            const prev = ensureRowPreview(row);
+            prev.innerHTML = `<img src="${d.url}" alt="preview" style="max-width:100%;max-height:160px;border-radius:8px;">`;
+            prev.style.display = 'block';
+          } else {
+            alert(d && d.message ? d.message : 'Upload ảnh thất bại');
+          }
+        })
+        .catch(e => { console.error(e); alert('Có lỗi khi upload ảnh'); })
+        .finally(() => { this.value = ''; });
+    });
+    fileInput._hooked = true;
+  }
+  fileInput.click();
+}
+
+function removeTokenFromEditorBy(type, url) {
+  const ed = (window.CKEDITOR && CKEDITOR.instances && CKEDITOR.instances.editor) ? CKEDITOR.instances.editor : null;
+  const ta = document.getElementById('editor');
+  let html = ed ? ed.getData() : (ta ? ta.value : '');
+  if (!html) return;
+  const esc = url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const tokenInner = `\\[${type}\\b[^\\]]*url=(?:\"|&quot;)${esc}(?:\"|&quot;)[^\\]]*\\]`;
+  const wrapper = new RegExp(`(?:<p[^>]*>\\s*)?${tokenInner}(?:\\s*</p>)?`, 'gi');
+  html = html.replace(wrapper, '');
+  html = html.replace(/<p>\s*<\/p>/gi, '');
+  if (ed) ed.setData(html); else if (ta) ta.value = html;
+}
+
+function insertVideoRowToken(btn) {
+  const row = btn.closest('.video-row');
+  const url = (row.querySelector("input[name*='Videos'][name$='.Url']")?.value || '').trim();
+  const title = (row.querySelector("input[name*='Videos'][name$='.Title']")?.value || '').trim();
+  if (!url) { alert('Vui lòng nhập Video URL'); return; }
+  if (btn.disabled) return; // already inserted
+  const token = title ? `[SV-VIDEO url="${url}" title="${title.replace(/"/g,'\\"')}"]` : `[SV-VIDEO url="${url}"]`;
+  if (window.insertTokenToEditor && window.insertTokenToEditor(token)) {
+    markRowInserted(row);
+  }
+}
+
+function insertImageRowToken(btn) {
+  const row = btn.closest('.image-row');
+  const url = (row.querySelector("input[name*='Images'][name$='.Url']")?.value || '').trim();
+  const title = (row.querySelector("input[name*='Images'][name$='.Title']")?.value || '').trim();
+  if (!url) { alert('Vui lòng nhập Image URL'); return; }
+  if (btn.disabled) return; // already inserted
+  const token = title ? `[SV-IMAGE url="${url}" title="${title.replace(/"/g,'\\"')}"]` : `[SV-IMAGE url="${url}"]`;
+  if (window.insertTokenToEditor && window.insertTokenToEditor(token)) {
+    markRowInserted(row);
+  }
+}
+
+function deleteVideoRow(btn) {
+  const row = btn.closest('.video-row');
+  const urlInput = row.querySelector("input[name*='Videos'][name$='.Url']");
+  const url = (urlInput && urlInput.value || '').trim();
+  if (url) removeTokenFromEditorBy('SV-VIDEO', url);
+  row.remove();
+}
+
+function deleteImageRow(btn) {
+  const row = btn.closest('.image-row');
+  const urlInput = row.querySelector("input[name*='Images'][name$='.Url']");
+  const url = (urlInput && urlInput.value || '').trim();
+  if (url) removeTokenFromEditorBy('SV-IMAGE', url);
+  row.remove();
+}
+
+// Preview for pasted/typed URL (image)
+(function attachPreviewHandlers(){
+  document.addEventListener('input', function(e){
+    if (e.target && e.target.classList.contains('image-url-input')){
+      const row = e.target.closest('.image-row');
+      const url = e.target.value.trim();
+      const prev = ensureRowPreview(row);
+      if (!url){ prev.style.display='none'; prev.innerHTML=''; return; }
+      prev.innerHTML = `<img src="${url}" alt="preview" style="max-width:100%;max-height:160px;border-radius:8px;">`;
+      prev.style.display = 'block';
+    }
+  });
+})();
+
+// Preview for pasted/typed URL (video)
+(function attachVideoPreviewHandlers(){
+  document.addEventListener('input', function(e){
+    if (e.target && e.target.classList.contains('video-url-input')){
+      const row = e.target.closest('.video-row');
+      const url = e.target.value.trim();
+      const box = ensureVideoPreview(row);
+      if (!url){ box.style.display='none'; box.innerHTML=''; return; }
+
+      // Small, centered preview box that works on desktop and phone
+      const wrapStyle = 'max-width:420px;margin:0 auto;border-radius:8px;overflow:hidden;';
+      let html = '';
+      if (url.includes('youtube.com') || url.includes('youtu.be')) {
+        let youtubeId = '';
+        if (url.includes('youtube.com/watch?v=')) {
+          const m = url.match(/[?&]v=([^&]+)/); if (m) youtubeId = m[1];
+        } else if (url.includes('youtu.be/')) {
+          const m = url.match(/youtu\.be\/([^?]+)/); if (m) youtubeId = m[1];
+        }
+        if (youtubeId) {
+          html = `<div style="${wrapStyle}aspect-ratio:16/9;background:#000;">
+<iframe src="https://www.youtube.com/embed/${youtubeId}" style="width:100%;height:100%;border:0;display:block;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>`;
+        }
+      } else if (url.includes('drive.google.com')) {
+        let fileId = null;
+        const m1 = url.match(/\/file\/d\/([^\/\?]+)/); if (m1) fileId = m1[1];
+        if (!fileId) { const m2 = url.match(/[?&]id=([^&]+)/); if (m2) fileId = m2[1]; }
+        if (fileId) {
+          html = `<div style="${wrapStyle}aspect-ratio:16/9;background:#000;">
+<iframe src="https://drive.google.com/file/d/${fileId}/preview" style="width:100%;height:100%;border:0;display:block;" allow="autoplay"></iframe>
+</div>`;
+        }
+      } else {
+        html = `<div style="${wrapStyle}"><video controls style="width:100%;max-height:240px;border-radius:8px;background:#000;display:block;"><source src="${url}" type="video/mp4">Trình duyệt không hỗ trợ</video></div>`;
+      }
+      if (html) { box.innerHTML = html; box.style.display = 'block'; } else { box.style.display='none'; box.innerHTML=''; }
+    }
+  });
+})();
+
+// Re-enable insert button if user edits the URL/Title after insert
+(function attachChangeHandlers() {
+  document.addEventListener('input', function(e){
+    const row = e.target.closest('.video-row, .image-row');
+    if (!row) return;
+    const btn = row.querySelector('.btn-insert');
+    if (btn && btn.disabled) {
+      btn.disabled = false;
+      btn.classList.remove('btn-success');
+      btn.classList.add('btn-outline-secondary');
+      btn.innerHTML = '<i class="fas fa-level-down-alt"></i>';
+      row.dataset.inserted = '0';
+    }
+  });
+})();
+</script>

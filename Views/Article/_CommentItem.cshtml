@@ -1,0 +1,100 @@
+﻿@model SacViet.Models.Comment
+
+<div class="comment mb-4 p-3 border rounded" data-comment-id="@Model.CommentId">
+    <div class="comment-header d-flex align-items-center mb-2">
+        <div class="comment-avatar me-3">
+            @if (!string.IsNullOrEmpty(Model.User.Avatar))
+            {
+                <img src="@Model.User.Avatar" class="rounded-circle" alt="@Model.User.FullName" style="width: 40px; height: 40px; object-fit: cover;">
+            }
+            else
+            {
+                <div class="avatar-placeholder bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" 
+                     style="width: 40px; height: 40px; font-size: 1.2rem;">
+                    @Model.User.FullName.Substring(0, 1).ToUpper()
+                </div>
+            }
+        </div>
+        <div class="comment-meta">
+            <h6 class="mb-0">@Model.User.FullName</h6>
+            <small class="text-muted">
+                <i class="fas fa-clock me-1"></i>
+                @Model.CreatedAt?.ToString("dd/MM/yyyy HH:mm")
+            </small>
+        </div>
+    </div>
+    <div class="comment-content">
+        <p class="mb-2">@Model.Content</p>
+    </div>
+
+    <!-- Replies -->
+    <div class="replies-container mt-3 ms-5">
+        @if (Model.InverseParentComment.Any())
+        {
+            @foreach (var reply in Model.InverseParentComment.Where(r => r.IsApproved == true).OrderBy(r => r.CreatedAt))
+            {
+                <div class="reply mb-3 p-3 bg-light rounded">
+                    <div class="reply-header d-flex align-items-center mb-2">
+                        <div class="reply-avatar me-2">
+                            @if (!string.IsNullOrEmpty(reply.User.Avatar))
+                            {
+                                <img src="@reply.User.Avatar" class="rounded-circle" alt="@reply.User.FullName" style="width: 30px; height: 30px; object-fit: cover;">
+                            }
+                            else
+                            {
+                                <div class="avatar-placeholder bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                     style="width: 30px; height: 30px; font-size: 0.9rem;">
+                                    @reply.User.FullName.Substring(0, 1).ToUpper()
+                                </div>
+                            }
+                        </div>
+                        <div class="reply-meta">
+                            <h6 class="mb-0 small">@reply.User.FullName</h6>
+                            <small class="text-muted">
+                                @reply.CreatedAt?.ToString("dd/MM/yyyy HH:mm")
+                            </small>
+                        </div>
+                    </div>
+                    <div class="reply-content">
+                        <p class="mb-0 small">@reply.Content</p>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    <!-- Reply Form - Only for Logged-in Users -->
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <div class="reply-form mt-3" style="display: none;" id="replyForm@(Model.CommentId)">
+            <form class="comment-form-ajax reply-form-ajax" data-article-id="@Model.ArticleId" data-parent-id="@Model.CommentId">
+                @Html.AntiForgeryToken()
+                <div class="mb-2">
+                    <textarea name="content" class="form-control form-control-sm comment-textarea" rows="2" placeholder="Trả lời bình luận..." required></textarea>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-sm btn-outline-danger submit-comment-btn">
+                        <i class="fas fa-paper-plane me-1"></i>Gửi
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleReplyForm(@Model.CommentId)">
+                        <i class="fas fa-times me-1"></i>Hủy
+                    </button>
+                </div>
+            </form>
+        </div>
+        <button class="btn btn-sm btn-link text-decoration-none p-0 mt-2" onclick="toggleReplyForm(@Model.CommentId)">
+            <i class="fas fa-reply me-1"></i>Trả lời
+        </button>
+    }
+    else
+    {
+        <div class="mt-2">
+            <small class="text-muted">
+                <i class="fas fa-lock me-1"></i>
+                <a href="@Url.Action("Login", "Account", new { returnUrl = Context.Request.Path })" class="text-decoration-none">
+                    Đăng nhập
+                </a> để trả lời bình luận này
+            </small>
+        </div>
+    }
+</div>

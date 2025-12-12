@@ -1,0 +1,466 @@
+﻿// Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
+// for details on configuring this project to bundle and minify static web assets.
+
+// Write your JavaScript code.
+
+// SacViet - Enhanced User Experience JavaScript
+
+(function () {
+    'use strict';
+
+    // ============================================
+    // Smooth Dropdown Menu Enhancement
+    // ============================================
+    const dropdownMenus = document.querySelectorAll('.category-menu .dropdown');
+    
+    dropdownMenus.forEach(dropdown => {
+        const toggle = dropdown.querySelector('.dropdown-toggle');
+        const menu = dropdown.querySelector('.dropdown-menu');
+        
+        if (toggle && menu) {
+            let timeoutId;
+            
+            // Show dropdown on hover
+            dropdown.addEventListener('mouseenter', function () {
+                clearTimeout(timeoutId);
+                toggle.classList.add('show');
+                menu.classList.add('show');
+                toggle.setAttribute('aria-expanded', 'true');
+                
+                // Add stagger animation to menu items
+                const items = menu.querySelectorAll('.dropdown-item');
+                items.forEach((item, index) => {
+                    item.style.animation = `fadeInUp 0.3s ease-out ${index * 0.05}s both`;
+                });
+            });
+            
+            // Hide dropdown with delay
+            dropdown.addEventListener('mouseleave', function () {
+                timeoutId = setTimeout(() => {
+                    toggle.classList.remove('show');
+                    menu.classList.remove('show');
+                    toggle.setAttribute('aria-expanded', 'false');
+                }, 200);
+            });
+        }
+    });
+
+    // ============================================
+    // Mobile Offcanvas Smooth Collapse
+    // ============================================
+    const offcanvasCollapses = document.querySelectorAll('.offcanvas-body [data-bs-toggle="collapse"]');
+    
+    offcanvasCollapses.forEach(collapseBtn => {
+        collapseBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            const targetCollapse = document.querySelector(targetId);
+            
+            if (targetCollapse) {
+                // Bootstrap handles the collapse, we just add smooth animation
+                targetCollapse.addEventListener('show.bs.collapse', function () {
+                    this.style.maxHeight = this.scrollHeight + 'px';
+                }, { once: true });
+                
+                targetCollapse.addEventListener('shown.bs.collapse', function () {
+                    this.style.maxHeight = 'none';
+                }, { once: true });
+                
+                targetCollapse.addEventListener('hide.bs.collapse', function () {
+                    this.style.maxHeight = this.scrollHeight + 'px';
+                    setTimeout(() => {
+                        this.style.maxHeight = '0';
+                    }, 10);
+                }, { once: true });
+            }
+        });
+    });
+
+    // ============================================
+    // Smooth Scroll to Top Button
+    // ============================================
+    const scrollToTopBtn = document.createElement('button');
+    scrollToTopBtn.innerHTML = '<i class="fas fa-arrow-up"></i>';
+    scrollToTopBtn.className = 'scroll-to-top';
+    scrollToTopBtn.setAttribute('aria-label', 'Scroll to top');
+    document.body.appendChild(scrollToTopBtn);
+
+    window.addEventListener('scroll', function () {
+        if (window.pageYOffset > 300) {
+            scrollToTopBtn.classList.add('show');
+        } else {
+            scrollToTopBtn.classList.remove('show');
+        }
+    });
+
+    scrollToTopBtn.addEventListener('click', function () {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+
+    // ============================================
+    // Add animation classes when elements come into view
+    // ============================================
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver(function (entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('fade-in-up');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    // Observe elements with animation class
+    document.addEventListener('DOMContentLoaded', function () {
+        const animatedElements = document.querySelectorAll('.news-card-home, .timeline-item, .sidebar-news-item, .secondary-card');
+        animatedElements.forEach(el => observer.observe(el));
+    });
+
+    // ============================================
+    // Reading Progress Bar
+    // ============================================
+    if (document.querySelector('.article-content')) {
+        const progressBar = document.createElement('div');
+        progressBar.className = 'reading-progress';
+        document.body.appendChild(progressBar);
+
+        window.addEventListener('scroll', function () {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            progressBar.style.width = scrolled + '%';
+        });
+    }
+
+    // ============================================
+    // Search Input Enhancement
+    // ============================================
+    const searchInputs = document.querySelectorAll('input[type="text"][name="keyword"]');
+    searchInputs.forEach(input => {
+        input.addEventListener('focus', function () {
+            this.parentElement.classList.add('focused');
+        });
+
+        input.addEventListener('blur', function () {
+            if (!this.value) {
+                this.parentElement.classList.remove('focused');
+            }
+        });
+    });
+
+    // ============================================
+    // Copy Link to Clipboard
+    // ============================================
+    const copyLinkButtons = document.querySelectorAll('.btn[href="#"]');
+    copyLinkButtons.forEach(btn => {
+        const icon = btn.querySelector('.fa-link');
+        if (icon) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const url = window.location.href;
+                
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(url).then(() => {
+                        showToast('Đã sao chép liên kết!');
+                    });
+                } else {
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = url;
+                    textArea.style.position = 'fixed';
+                    textArea.style.left = '-999999px';
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    
+                    try {
+                        document.execCommand('copy');
+                        showToast('Đã sao chép liên kết!');
+                    } catch (err) {
+                        console.error('Failed to copy:', err);
+                    }
+                    
+                    document.body.removeChild(textArea);
+                }
+            });
+        }
+    });
+
+    // ============================================
+    // Toast Notification
+    // ============================================
+    function showToast(message, duration = 3000) {
+        const toast = document.createElement('div');
+        toast.className = 'toast-notification';
+        toast.innerHTML = `
+            <i class="fas fa-check-circle me-2"></i>
+            <span>${message}</span>
+        `;
+        document.body.appendChild(toast);
+
+        setTimeout(() => toast.classList.add('show'), 10);
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => document.body.removeChild(toast), 300);
+        }, duration);
+    }
+
+    // ============================================
+    // Enhanced Search Modal
+    // ============================================
+    const searchModal = document.getElementById('searchModal');
+    if (searchModal) {
+        searchModal.addEventListener('shown.bs.modal', function () {
+            const searchInput = this.querySelector('input[name="keyword"]');
+            if (searchInput) {
+                searchInput.focus();
+            }
+        });
+    }
+
+    // ============================================
+    // Dropdown Menu Accessibility
+    // ============================================
+    const dropdownToggles = document.querySelectorAll('[data-bs-toggle="dropdown"]');
+    dropdownToggles.forEach(toggle => {
+        toggle.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                this.click();
+            }
+        });
+    });
+
+    // ============================================
+    // Smooth Category Menu Highlight
+    // ============================================
+    const currentPath = window.location.pathname;
+    const categoryLinks = document.querySelectorAll('.nav-link-cat, .category-menu .dropdown-item');
+    
+    categoryLinks.forEach(link => {
+        if (link.getAttribute('href') === currentPath) {
+            link.classList.add('active');
+            link.style.color = 'var(--primary-red)';
+            
+            // If it's a dropdown item, highlight the parent too
+            const parentDropdown = link.closest('.dropdown');
+            if (parentDropdown) {
+                const parentToggle = parentDropdown.querySelector('.dropdown-toggle');
+                if (parentToggle) {
+                    parentToggle.style.color = 'var(--primary-red)';
+                }
+            }
+        }
+    });
+
+    // ============================================
+    // Lazy Load Images Enhancement
+    // ============================================
+    if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    if (img.dataset.src) {
+                        img.src = img.dataset.src;
+                        img.classList.add('loaded');
+                        observer.unobserve(img);
+                    }
+                }
+            });
+        });
+
+        document.querySelectorAll('img[data-src]').forEach(img => {
+            imageObserver.observe(img);
+        });
+    }
+
+    // ============================================
+    // Timeline Auto-scroll Preview
+    // ============================================
+    const timeline = document.querySelector('.latest-timeline');
+    if (timeline) {
+        let scrollTimeout;
+        
+        timeline.addEventListener('mouseenter', function () {
+            clearTimeout(scrollTimeout);
+            this.style.scrollBehavior = 'smooth';
+        });
+
+        timeline.addEventListener('mouseleave', function () {
+            scrollTimeout = setTimeout(() => {
+                this.scrollTop = 0;
+            }, 2000);
+        });
+    }
+
+    // ============================================
+    // Print Article Button
+    // ============================================
+    if (document.querySelector('.article-detail')) {
+        const printButton = document.createElement('button');
+        printButton.className = 'btn btn-outline-secondary btn-sm ms-2';
+        printButton.innerHTML = '<i class="fas fa-print me-1"></i>In bài viết';
+        printButton.addEventListener('click', () => window.print());
+        
+        const shareButtons = document.querySelector('.share-buttons');
+        if (shareButtons) {
+            shareButtons.appendChild(printButton);
+        }
+    }
+
+    // ============================================
+    // Prevent FOUC (Flash of Unstyled Content)
+    // ============================================
+    document.documentElement.classList.add('js-loaded');
+
+    // ============================================
+    // Mobile Menu Close on Link Click
+    // ============================================
+    const offcanvasLinks = document.querySelectorAll('.offcanvas-body a:not([data-bs-toggle])');
+    const offcanvas = document.querySelector('.offcanvas');
+    
+    if (offcanvas) {
+        const bsOffcanvas = bootstrap.Offcanvas.getInstance(offcanvas) || new bootstrap.Offcanvas(offcanvas);
+        
+        offcanvasLinks.forEach(link => {
+            link.addEventListener('click', function () {
+                setTimeout(() => {
+                    bsOffcanvas.hide();
+                }, 300);
+            });
+        });
+    }
+
+    // ============================================
+    // Badge Hover Effect
+    // ============================================
+    const badges = document.querySelectorAll('.badge');
+    badges.forEach(badge => {
+        badge.addEventListener('mouseenter', function () {
+            this.style.transform = 'scale(1.1)';
+        });
+        
+        badge.addEventListener('mouseleave', function () {
+            this.style.transform = 'scale(1)';
+        });
+    });
+
+    console.log('🎨 SacViet Enhanced UX Loaded Successfully!');
+
+})();
+
+// Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
+// for details on configuring this project to bundle and minify static web assets.
+
+// Write your JavaScript code.
+
+// Category Smooth Scroll on Homepage
+document.addEventListener('DOMContentLoaded', function () {
+    // Check if we're on the homepage
+    const isHomePage = window.location.pathname === '/' || window.location.pathname === '/Home' || window.location.pathname === '/Home/Index';
+    
+    if (isHomePage) {
+        // Add click event listeners to category scroll links
+        const categoryScrollLinks = document.querySelectorAll('.category-scroll-link');
+        
+        categoryScrollLinks.forEach(link => {
+            link.addEventListener('click', function (e) {
+                // Only prevent default if not a dropdown toggle
+                if (!this.classList.contains('dropdown-toggle')) {
+                    e.preventDefault();
+                }
+                
+                const categorySlug = this.getAttribute('data-category-slug');
+                const targetSection = document.getElementById('category-' + categorySlug);
+                
+                if (targetSection) {
+                    e.preventDefault();
+                    
+                    // Calculate offset for sticky navbar
+                    const navbarHeight = document.getElementById('mainNavbar').offsetHeight;
+                    const categoryMenuHeight = document.getElementById('categoryMenu').offsetHeight;
+                    const offset = navbarHeight + categoryMenuHeight + 20; // 20px extra padding
+                    
+                    const targetPosition = targetSection.getBoundingClientRect().top + window.pageYOffset - offset;
+                    
+                    // Smooth scroll to target
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                } else {
+                    // If section doesn't exist, navigate to category page
+                    window.location.href = '/Category/' + categorySlug;
+                }
+            });
+        });
+    } else {
+        // On non-homepage, restore original category link behavior
+        const categoryScrollLinks = document.querySelectorAll('.category-scroll-link');
+        
+        categoryScrollLinks.forEach(link => {
+            link.addEventListener('click', function (e) {
+                if (!this.classList.contains('dropdown-toggle')) {
+                    e.preventDefault();
+                    const categorySlug = this.getAttribute('data-category-slug');
+                    window.location.href = '/Category/' + categorySlug;
+                }
+            });
+        });
+    }
+});
+
+// Scroll to Top Button
+(function () {
+    // Create scroll to top button
+    const scrollBtn = document.createElement('button');
+    scrollBtn.className = 'scroll-to-top';
+    scrollBtn.innerHTML = '<i class="fas fa-arrow-up"></i>';
+    scrollBtn.setAttribute('aria-label', 'Scroll to top');
+    document.body.appendChild(scrollBtn);
+    
+    // Show/hide button on scroll
+    window.addEventListener('scroll', function () {
+        if (window.pageYOffset > 300) {
+            scrollBtn.classList.add('show');
+        } else {
+            scrollBtn.classList.remove('show');
+        }
+    });
+    
+    // Scroll to top on click
+    scrollBtn.addEventListener('click', function () {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+})();
+
+// Reading Progress Bar (for article pages)
+(function () {
+    if (document.querySelector('.article-content')) {
+        const progressBar = document.createElement('div');
+        progressBar.className = 'reading-progress';
+        document.body.prepend(progressBar);
+        
+        window.addEventListener('scroll', function () {
+            const articleContent = document.querySelector('.article-content');
+            if (articleContent) {
+                const contentHeight = articleContent.offsetHeight;
+                const contentTop = articleContent.offsetTop;
+                const scrolled = window.pageYOffset - contentTop;
+                const percentage = Math.min(100, Math.max(0, (scrolled / contentHeight) * 100));
+                progressBar.style.width = percentage + '%';
+            }
+        });
+    }
+})();

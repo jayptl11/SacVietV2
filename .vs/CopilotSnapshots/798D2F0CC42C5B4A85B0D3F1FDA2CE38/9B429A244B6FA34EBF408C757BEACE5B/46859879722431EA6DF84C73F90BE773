@@ -1,0 +1,18 @@
+﻿using SacViet.Models;
+
+namespace SacViet.Repositories
+{
+    public interface IArticleRepository
+    {
+        Task<IEnumerable<Article>> GetFeaturedArticlesAsync(int count = 5);
+        Task<IEnumerable<Article>> GetLatestArticlesAsync(int count = 10);
+        Task<IEnumerable<Article>> GetHotArticlesTodayAsync(int count = 6); // Bài viết hot trong ngày
+        Task<IEnumerable<Article>> GetArticlesByCategoryAsync(int categoryId, int page = 1, int pageSize = 10);
+        Task<IEnumerable<Article>> SearchArticlesAsync(string keyword, int? categoryId = null, int? authorId = null, DateTime? fromDate = null, DateTime? toDate = null, int page = 1, int pageSize = 10);
+        Task<Article?> GetArticleByIdAsync(int id);
+        Task<Article?> GetArticleBySlugAsync(string slug);
+        Task<int> GetTotalArticlesCountAsync();
+        Task<int> GetArticlesCountByCategoryAsync(int categoryId);
+        Task<int> GetSearchResultsCountAsync(string keyword, int? categoryId = null, int? authorId = null, DateTime? fromDate = null, DateTime? toDate = null);
+    }
+}

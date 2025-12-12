@@ -1,0 +1,431 @@
+﻿@model AdminUsersViewModel
+@{
+    ViewData["Title"] = "Quản lý người dùng";
+}
+
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h2 class="text-danger mb-0">
+                <i class="fas fa-users me-2"></i>Quản lý người dùng
+            </h2>
+            <p class="text-muted">Tổng cộng @Model.TotalItems người dùng</p>
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Quay lại Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Vai trò</label>
+                    <select name="role" class="form-select">
+                        <option value="">Tất cả</option>
+                        <option value="User" @(Model.RoleFilter == "User" ? "selected" : "")>Người dùng</option>
+                        <option value="Writer" @(Model.RoleFilter == "Writer" ? "selected" : "")>Tác giả</option>
+                        <option value="Admin" @(Model.RoleFilter == "Admin" ? "selected" : "")>Quản trị viên</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Tìm kiếm</label>
+                    <input type="text" name="search" class="form-control" placeholder="Tìm theo tên hoặc email..." value="@Model.SearchQuery">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-2"></i>Tìm kiếm
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    @if (Model.Items.Any())
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Người dùng</th>
+                                <th>Email</th>
+                                <th>Vai trò</th>
+                                <th>Trạng thái</th>
+                                <th>Ngày đăng ký</th>
+                                <th>Lần cuối online</th>
+                                <th>Số bài viết</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in Model.Items)
+                            {
+                                <tr id="user-@user.UserId" class="@(user.IsBanned ? "table-secondary" : "")">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            @if (!string.IsNullOrEmpty(user.Avatar))
+                                            {
+                                                <img src="@user.Avatar" alt="@user.FullName" 
+                                                     class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;">
+                                            }
+                                            else
+                                            {
+                                                <div class="bg-secondary text-white rounded-circle me-3 d-flex align-items-center justify-content-center" 
+                                                     style="width: 40px; height: 40px;">
+                                                    <i class="fas fa-user"></i>
+                                                </div>
+                                            }
+                                            <div>
+                                                <h6 class="mb-0">@user.FullName</h6>
+                                                @if (user.IsBanned)
+                                                {
+                                                    <small class="text-danger">
+                                                        <i class="fas fa-ban me-1"></i>Đã bị khóa
+                                                    </small>
+                                                }
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="text-nowrap">@user.Email</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-@(user.Role == "Admin" ? "danger" : user.Role == "Writer" ? "warning" : "secondary")">
+                                            @if (user.Role == "Admin")
+                                            {
+                                                <i class="fas fa-crown me-1"></i>@("Admin")
+                                            }
+                                            else if (user.Role == "Writer")
+                                            {
+                                                <i class="fas fa-pen me-1"></i>@("Tác giả")
+                                            }
+                                            else
+                                            {
+                                                <i class="fas fa-user me-1"></i>@("Người dùng")
+                                            }
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if (user.IsBanned)
+                                        {
+                                            <span class="badge bg-danger">
+                                                <i class="fas fa-ban me-1"></i>Bị khóa
+                                            </span>
+                                            @if (!string.IsNullOrEmpty(user.BanReason))
+                                            {
+                                                <br><small class="text-muted">@user.BanReason</small>
+                                            }
+                                        }
+                                        else if (user.IsActive)
+                                        {
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check-circle me-1"></i>Hoạt động
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">
+                                                <i class="fas fa-pause-circle me-1"></i>Tạm dừng
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="text-nowrap">@user.CreatedAt.ToString("dd/MM/yyyy")</div>
+                                    </td>
+                                    <td>
+                                        <div class="text-nowrap">
+                                            @if (user.LastLoginAt.HasValue)
+                                            {
+                                                @user.LastLoginAt?.ToString("dd/MM/yyyy HH:mm")
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Chưa đăng nhập</span>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">
+                                            <i class="fas fa-newspaper me-1"></i>@user.ArticleCount
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
+                                                    data-bs-toggle="dropdown">
+                                                <i class="fas fa-cog"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li class="dropdown-header">Vai trò</li>
+                                                @if (user.Role != "User")
+                                                {
+                                                    <li>
+                                                        <a class="dropdown-item" href="#" 
+                                                           onclick="updateUserRole(@user.UserId, 'User')">
+                                                            <i class="fas fa-user me-2"></i>Đặt làm người dùng
+                                                        </a>
+                                                    </li>
+                                                }
+                                                @if (user.Role != "Writer")
+                                                {
+                                                    <li>
+                                                        <a class="dropdown-item" href="#" 
+                                                           onclick="updateUserRole(@user.UserId, 'Writer')">
+                                                            <i class="fas fa-pen me-2"></i>Đặt làm tác giả
+                                                        </a>
+                                                    </li>
+                                                }
+                                                @if (user.Role != "Admin")
+                                                {
+                                                    <li>
+                                                        <a class="dropdown-item text-warning" href="#" 
+                                                           onclick="updateUserRole(@user.UserId, 'Admin')">
+                                                            <i class="fas fa-crown me-2"></i>Đặt làm Admin
+                                                        </a>
+                                                    </li>
+                                                }
+                                                
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li class="dropdown-header">Trạng thái</li>
+                                                
+                                                @if (user.IsBanned)
+                                                {
+                                                    <li>
+                                                        <a class="dropdown-item text-success" href="#" 
+                                                           onclick="unbanUser(@user.UserId)">
+                                                            <i class="fas fa-unlock me-2"></i>Mở khóa
+                                                        </a>
+                                                    </li>
+                                                }
+                                                else
+                                                {
+                                                    <li>
+                                                        <a class="dropdown-item text-danger" href="#" 
+                                                           onclick="banUser(@user.UserId)">
+                                                            <i class="fas fa-ban me-2"></i>Khóa tài khoản
+                                                        </a>
+                                                    </li>
+                                                }
+                                                
+                                                @if (user.ArticleCount == 0)
+                                                {
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li>
+                                                        <a class="dropdown-item text-danger" href="#" 
+                                                           onclick="deleteUser(@user.UserId)">
+                                                            <i class="fas fa-trash me-2"></i>Xóa tài khoản
+                                                        </a>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        @if (Model.TotalPages > 1)
+        {
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    @if (Model.HasPreviousPage)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("Users", new { role = Model.RoleFilter, search = Model.SearchQuery, page = Model.CurrentPage - 1 })">
+                                Trước
+                            </a>
+                        </li>
+                    }
+
+                    @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+                    {
+                        <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                            <a class="page-link" href="@Url.Action("Users", new { role = Model.RoleFilter, search = Model.SearchQuery, page = i })">
+                                @i
+                            </a>
+                        </li>
+                    }
+
+                    @if (Model.HasNextPage)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("Users", new { role = Model.RoleFilter, search = Model.SearchQuery, page = Model.CurrentPage + 1 })">
+                                Sau
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-users fa-4x text-muted mb-3"></i>
+                <h5 class="text-muted">Không tìm thấy người dùng nào</h5>
+                <p class="text-muted">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Ban Modal -->
+<div class="modal fade" id="banModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Khóa tài khoản</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Lý do khóa tài khoản <span class="text-danger">*</span></label>
+                    <textarea id="banReason" class="form-control" rows="4" 
+                              placeholder="Nhập lý do khóa tài khoản..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger" onclick="confirmBan()">Khóa tài khoản</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentUserId = 0;
+
+        function updateUserRole(userId, role) {
+            const roleNames = {
+                'User': 'Người dùng',
+                'Writer': 'Tác giả', 
+                'Admin': 'Quản trị viên'
+            };
+            
+            if (!confirm(`Bạn có chắc chắn muốn đặt vai trò "${roleNames[role]}" cho người dùng này?`)) return;
+
+            fetch('@Url.Action("UpdateUserRole")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    userId: userId, 
+                    role: role
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra. Vui lòng thử lại.');
+            });
+        }
+
+        function banUser(userId) {
+            currentUserId = userId;
+            document.getElementById('banReason').value = '';
+            new bootstrap.Modal(document.getElementById('banModal')).show();
+        }
+
+        function confirmBan() {
+            const reason = document.getElementById('banReason').value.trim();
+            if (!reason) {
+                alert('Vui lòng nhập lý do khóa tài khoản');
+                return;
+            }
+
+            fetch('@Url.Action("BanUser")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    userId: currentUserId, 
+                    reason: reason
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra. Vui lòng thử lại.');
+            });
+        }
+
+        function unbanUser(userId) {
+            if (!confirm('Bạn có chắc chắn muốn mở khóa tài khoản này?')) return;
+
+            fetch('@Url.Action("UnbanUser")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ userId: userId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert(data.message);
+                }
+            });
+        }
+
+        function deleteUser(userId) {
+            if (!confirm('CẢNH BÁO: Bạn có chắc chắn muốn xóa tài khoản này?\nHành động này không thể hoàn tác!')) return;
+
+            fetch('@Url.Action("DeleteUser")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ userId: userId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert(data.message);
+                }
+            });
+        }
+    </script>
+}
+
+@Html.AntiForgeryToken()

@@ -1,0 +1,558 @@
+﻿@model SacViet.ViewModels.SearchViewModel
+@{
+    ViewData["Title"] = ViewBag.CategoryName ?? "Chuyên mục";
+}
+
+<div class="container mt-4">
+    <!-- Category Hero Section -->
+    <div class="category-hero bg-white rounded shadow-sm mb-4 overflow-hidden">
+        <div class="category-hero-bg position-relative">
+            <div class="hero-overlay"></div>
+            <div class="category-hero-content p-4 p-md-5 position-relative">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <nav aria-label="breadcrumb" class="mb-3">
+                            <ol class="breadcrumb mb-0">
+                                <li class="breadcrumb-item">
+                                    <a href="@Url.Action("Index", "Home")" class="text-white text-decoration-none">
+                                        <i class="fas fa-home me-1"></i>Trang chủ
+                                    </a>
+                                </li>
+                                <li class="breadcrumb-item active text-white" aria-current="page">
+                                    @(ViewBag.CategoryName ?? "Chuyên mục")
+                                </li>
+                            </ol>
+                        </nav>
+                        <h1 class="category-hero-title text-white mb-3">
+                            <i class="fas fa-newspaper me-2"></i>
+                            @(ViewBag.CategoryName ?? "Chuyên mục")
+                        </h1>
+                        <p class="category-hero-subtitle text-white-50 mb-0 lead">
+                            Khám phá <strong class="text-warning">@Model.TotalCount</strong> bài viết chất lượng cao
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-center text-md-end d-none d-md-block">
+                        <div class="category-stats">
+                            <div class="stat-item">
+                                <div class="stat-number text-white display-6 fw-bold">@Model.TotalCount</div>
+                                <div class="stat-label text-white-50 small">Bài viết</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <!-- Filter Bar -->
+            <div class="filter-bar bg-white rounded shadow-sm p-3 mb-4">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <span class="text-muted me-3">
+                                <i class="fas fa-filter me-1"></i>Hiển thị:
+                            </span>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button type="button" class="btn btn-outline-danger active">
+                                    <i class="fas fa-th-large me-1"></i>Lưới
+                                </button>
+                                <button type="button" class="btn btn-outline-danger">
+                                    <i class="fas fa-list me-1"></i>Danh sách
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center justify-content-md-end">
+                            <span class="text-muted me-2">Sắp xếp:</span>
+                            <select class="form-select form-select-sm" style="width: auto;">
+                                <option>Mới nhất</option>
+                                <option>Xem nhiều nhất</option>
+                                <option>Cũ nhất</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Articles Grid -->
+            @if (Model.Articles.Any())
+            {
+                <div class="articles-grid" id="articlesGrid">
+                    <div class="row g-4">
+                        @foreach (var article in Model.Articles)
+                        {
+                            <div class="col-md-6 article-item">
+                                <div class="modern-card h-100 bg-white rounded shadow-sm overflow-hidden border-0">
+                                    <div class="card-image-wrapper position-relative">
+                                        <img src="@(string.IsNullOrEmpty(article.ThumbnailImage) ? "/images/placeholder-article.jpg" : article.ThumbnailImage)" 
+                                             class="card-image w-100" alt="@article.Title">
+                                        <div class="image-overlay"></div>
+                                        <div class="position-absolute top-0 start-0 m-3">
+                                            <span class="badge bg-danger rounded-pill px-3 py-2">
+                                                @article.Category.CategoryName
+                                            </span>
+                                        </div>
+                                        @if (article.ViewCount.HasValue && article.ViewCount > 0)
+                                        {
+                                            <div class="position-absolute bottom-0 end-0 m-3">
+                                                <span class="badge bg-dark bg-opacity-75 rounded-pill">
+                                                    <i class="fas fa-eye me-1"></i>@article.ViewCount
+                                                </span>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="card-content p-4">
+                                        <div class="card-meta mb-2">
+                                            <div class="d-flex align-items-center text-muted small">
+                                                <i class="fas fa-user me-1 text-danger"></i>
+                                                <span class="me-3">@article.Author.FullName</span>
+                                                <i class="fas fa-clock me-1 text-danger"></i>
+                                                <span>@article.PublishedAt?.ToString("dd/MM/yyyy")</span>
+                                            </div>
+                                        </div>
+                                        <h5 class="card-title mb-3">
+                                            <a href="@Url.Action("Details", "Article", new { slug = article.Slug })" 
+                                               class="text-decoration-none text-dark card-title-link">
+                                                @article.Title
+                                            </a>
+                                        </h5>
+                                        <p class="card-summary text-muted mb-3">
+                                            @if (!string.IsNullOrEmpty(article.Summary))
+                                            {
+                                                @(article.Summary.Length > 120 ? article.Summary.Substring(0, 120) + "..." : article.Summary)
+                                            }
+                                        </p>
+                                        <div class="card-actions">
+                                            <a href="@Url.Action("Details", "Article", new { slug = article.Slug })" 
+                                               class="btn btn-outline-danger btn-sm">
+                                                <i class="fas fa-arrow-right me-1"></i>Đọc tiếp
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Enhanced Pagination -->
+                @if (Model.TotalPages > 1)
+                {
+                    <div class="pagination-wrapper mt-5">
+                        <nav aria-label="Category pagination">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-muted small">
+                                    Trang @Model.Page / @Model.TotalPages (Tổng @Model.TotalCount bài viết)
+                                </span>
+                                <div class="pagination-info">
+                                    <span class="text-muted small">
+                                        Hiển thị @((Model.Page - 1) * Model.PageSize + 1) - @(Math.Min(Model.Page * Model.PageSize, Model.TotalCount)) trong @Model.TotalCount
+                                    </span>
+                                </div>
+                            </div>
+                            <ul class="pagination justify-content-center pagination-modern">
+                                @if (Model.Page > 1)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" href="@Url.Action("Index", "Category", new { categorySlug = ViewBag.CategorySlug, page = 1 })">
+                                            <i class="fas fa-angle-double-left"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="@Url.Action("Index", "Category", new { categorySlug = ViewBag.CategorySlug, page = Model.Page - 1 })">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                }
+                                
+                                @for (int i = Math.Max(1, Model.Page - 2); i <= Math.Min(Model.TotalPages, Model.Page + 2); i++)
+                                {
+                                    <li class="page-item @(i == Model.Page ? "active" : "")">
+                                        <a class="page-link" href="@Url.Action("Index", "Category", new { categorySlug = ViewBag.CategorySlug, page = i })">@i</a>
+                                    </li>
+                                }
+                                
+                                @if (Model.Page < Model.TotalPages)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" href="@Url.Action("Index", "Category", new { categorySlug = ViewBag.CategorySlug, page = Model.Page + 1 })">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="@Url.Action("Index", "Category", new { categorySlug = ViewBag.CategorySlug, page = Model.TotalPages })">
+                                            <i class="fas fa-angle-double-right"></i>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </nav>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="empty-state bg-white rounded shadow-sm text-center py-5">
+                    <div class="empty-state-icon mb-4">
+                        <i class="fas fa-newspaper fa-4x text-muted opacity-50"></i>
+                    </div>
+                    <h4 class="text-muted mb-3">Chưa có bài viết nào</h4>
+                    <p class="text-muted mb-4">Chuyên mục này hiện chưa có bài viết nào được đăng tải.</p>
+                    <div class="d-flex gap-2 justify-content-center">
+                        <a href="@Url.Action("Index", "Home")" class="btn btn-danger">
+                            <i class="fas fa-home me-2"></i>Về trang chủ
+                        </a>
+                        <a href="@Url.Action("Search", "Home")" class="btn btn-outline-secondary">
+                            <i class="fas fa-search me-2"></i>Tìm kiếm khác
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Enhanced Sidebar -->
+        <div class="col-lg-4">
+            <!-- Related Categories -->
+            <div class="sidebar-widget mb-4">
+                <div class="widget-header bg-danger text-white p-3 rounded-top d-flex align-items-center">
+                    <i class="fas fa-folder me-2"></i>
+                    <h6 class="mb-0 fw-bold">CHUYÊN MỤC KHÁC</h6>
+                </div>
+                <div class="widget-content bg-white border border-top-0 rounded-bottom">
+                    @foreach (var category in Model.Categories.Take(8))
+                    {
+                        <a href="@Url.Action("Index", "Category", new { categorySlug = category.Slug })" 
+                           class="category-link d-flex justify-content-between align-items-center p-3 border-bottom text-decoration-none @(Model.CategoryId == category.CategoryId ? "active" : "")">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-tag me-2 text-danger"></i>
+                                <span class="category-name">@category.CategoryName</span>
+                            </div>
+                            <i class="fas fa-chevron-right text-muted small"></i>
+                        </a>
+                    }
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="sidebar-widget mb-4">
+                <div class="widget-header bg-info text-white p-3 rounded-top d-flex align-items-center">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    <h6 class="mb-0 fw-bold">THỐNG KÊ</h6>
+                </div>
+                <div class="widget-content bg-white border border-top-0 rounded-bottom p-4">
+                    <div class="stats-grid">
+                        <div class="stat-item text-center mb-3">
+                            <div class="stat-number display-6 fw-bold text-danger">@Model.TotalCount</div>
+                            <div class="stat-label text-muted small">Tổng bài viết</div>
+                        </div>
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="mini-stat">
+                                    <div class="mini-stat-number h5 mb-1 text-success">@Model.TotalPages</div>
+                                    <div class="mini-stat-label small text-muted">Trang</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mini-stat">
+                                    <div class="mini-stat-number h5 mb-1 text-warning">@Model.PageSize</div>
+                                    <div class="mini-stat-label small text-muted">Bài/trang</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Back to Home -->
+            <div class="sidebar-widget">
+                <div class="back-to-home bg-gradient text-white p-4 rounded text-center">
+                    <i class="fas fa-home fa-2x mb-3 opacity-75"></i>
+                    <h6 class="mb-2">Khám phá thêm</h6>
+                    <p class="small mb-3 opacity-75">Quay về trang chủ để xem thêm nhiều chuyên mục khác</p>
+                    <a href="@Url.Action("Index", "Home")" class="btn btn-light btn-sm">
+                        <i class="fas fa-arrow-left me-1"></i>Về trang chủ
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+<style>
+    /* Category Hero Section */
+    .category-hero-bg {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 50%, #bd2130 100%);
+        min-height: 200px;
+    }
+    
+    .hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.1);
+    }
+    
+    .category-hero-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .category-hero-subtitle {
+        font-size: 1.1rem;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+    
+    /* Breadcrumb Custom */
+    .breadcrumb-item + .breadcrumb-item::before {
+        content: "›";
+        color: rgba(255,255,255,0.7);
+        font-weight: bold;
+    }
+    
+    /* Filter Bar */
+    .filter-bar {
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+    
+    .filter-bar:hover {
+        border-color: #dc3545;
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.15);
+    }
+    
+    /* Modern Cards */
+    .modern-card {
+        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        border: 1px solid #f8f9fa !important;
+        overflow: hidden;
+    }
+    
+    .modern-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.07) !important;
+        border-color: #dc3545 !important;
+    }
+    
+    .card-image-wrapper {
+        overflow: hidden;
+        height: 220px;
+        position: relative;
+    }
+    
+    .card-image {
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+    
+    .modern-card:hover .card-image {
+        transform: scale(1.1);
+    }
+    
+    .image-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.1) 70%, rgba(0,0,0,0.3) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .modern-card:hover .image-overlay {
+        opacity: 1;
+    }
+    
+    .card-title-link {
+        font-weight: 600;
+        line-height: 1.4;
+        transition: color 0.3s ease;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .card-title-link:hover {
+        color: #dc3545 !important;
+    }
+    
+    .card-summary {
+        font-size: 0.95rem;
+        line-height: 1.6;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    /* Enhanced Pagination */
+    .pagination-modern .page-link {
+        border-radius: 8px;
+        margin: 0 4px;
+        border: 1px solid #dee2e6;
+        color: #6c757d;
+        font-weight: 500;
+        padding: 0.5rem 0.75rem;
+        transition: all 0.3s ease;
+    }
+    
+    .pagination-modern .page-item.active .page-link {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        border-color: #dc3545;
+        color: white;
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+        transform: translateY(-2px);
+    }
+    
+    .pagination-modern .page-link:hover {
+        color: #dc3545;
+        background-color: #fff;
+        border-color: #dc3545;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(220, 53, 69, 0.2);
+    }
+    
+    /* Sidebar Widgets */
+    .sidebar-widget {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        border: 1px solid #f1f3f4;
+    }
+    
+    .widget-header h6 {
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .category-link {
+        transition: all 0.3s ease;
+        color: #495057 !important;
+    }
+    
+    .category-link:hover {
+        background-color: #f8f9fa !important;
+        color: #dc3545 !important;
+        transform: translateX(5px);
+    }
+    
+    .category-link.active {
+        background-color: #dc3545 !important;
+        color: white !important;
+    }
+    
+    .category-link.active .fas {
+        color: white !important;
+    }
+    
+    /* Stats */
+    .stats-grid {
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-family: 'Arial', sans-serif;
+        font-weight: 800;
+    }
+    
+    /* Back to Home Widget */
+    .back-to-home {
+        background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+    }
+    
+    /* Empty State */
+    .empty-state {
+        border: 2px dashed #e9ecef;
+        min-height: 300px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    
+    /* Responsive */
+    .category-hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .card-image-wrapper {
+        height: 220px;
+    }
+    
+    /* Mobile adjustments via Bootstrap classes already in HTML */
+</style>
+}
+
+@section Scripts {
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // View toggle functionality
+        const gridBtn = document.querySelector('.btn-group .btn:first-child');
+        const listBtn = document.querySelector('.btn-group .btn:last-child');
+        const articlesGrid = document.getElementById('articlesGrid');
+        
+        if (gridBtn && listBtn && articlesGrid) {
+            listBtn.addEventListener('click', function() {
+                gridBtn.classList.remove('active');
+                listBtn.classList.add('active');
+                
+                // Switch to list view
+                articlesGrid.querySelector('.row').classList.remove('g-4');
+                articlesGrid.querySelector('.row').classList.add('g-2');
+                
+                const items = articlesGrid.querySelectorAll('.article-item');
+                items.forEach(item => {
+                    item.className = 'col-12 article-item';
+                    const card = item.querySelector('.modern-card');
+                    card.classList.add('d-md-flex');
+                    
+                    const imageWrapper = card.querySelector('.card-image-wrapper');
+                    imageWrapper.style.width = '200px';
+                    imageWrapper.style.minWidth = '200px';
+                    imageWrapper.style.height = '150px';
+                });
+            });
+            
+            gridBtn.addEventListener('click', function() {
+                listBtn.classList.remove('active');
+                gridBtn.classList.add('active');
+                
+                // Switch back to grid view
+                articlesGrid.querySelector('.row').classList.add('g-4');
+                articlesGrid.querySelector('.row').classList.remove('g-2');
+                
+                const items = articlesGrid.querySelectorAll('.article-item');
+                items.forEach(item => {
+                    item.className = 'col-md-6 article-item';
+                    const card = item.querySelector('.modern-card');
+                    card.classList.remove('d-md-flex');
+                    
+                    const imageWrapper = card.querySelector('.card-image-wrapper');
+                    imageWrapper.style.width = '';
+                    imageWrapper.style.minWidth = '';
+                    imageWrapper.style.height = '220px';
+                });
+            });
+        }
+        
+        // Smooth scroll effect for pagination
+        const paginationLinks = document.querySelectorAll('.pagination .page-link');
+        paginationLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+        });
+    });
+</script>
+}

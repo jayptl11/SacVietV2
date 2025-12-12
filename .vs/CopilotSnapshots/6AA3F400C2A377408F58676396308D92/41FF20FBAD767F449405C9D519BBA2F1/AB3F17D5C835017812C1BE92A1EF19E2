@@ -1,0 +1,722 @@
+﻿@model AdminArticleDetailViewModel
+@{
+    ViewData["Title"] = "Chi tiết bài viết - " + Model.Title;
+}
+
+<div class="article-detail-container">
+    <!-- Header -->
+    <div class="article-header mb-4">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <h1 class="article-title mb-2">@Model.Title</h1>
+                <div class="article-meta d-flex flex-wrap gap-3">
+                    <span class="meta-item">
+                        <i class="fas fa-user"></i>
+                        @Model.AuthorName
+                    </span>
+                    <span class="meta-item">
+                        <i class="fas fa-folder"></i>
+                        @Model.CategoryName
+                    </span>
+                    <span class="meta-item">
+                        <i class="fas fa-calendar"></i>
+                        @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                    </span>
+                    <span class="meta-item">
+                        <i class="fas fa-eye"></i>
+                        @Model.ViewCount.ToString("N0") lượt xem
+                    </span>
+                </div>
+            </div>
+            <div class="article-actions">
+                <a href="@Url.Action("Articles")" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-arrow-left me-1"></i>Quay lại
+                </a>
+                @if (Model.Status == "Published")
+                {
+                    <a href="@Url.Action("Details", "Article", new { slug = Model.Slug })" 
+                       target="_blank" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-external-link-alt me-1"></i>Xem công khai
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Article Status -->
+            <div class="status-card mb-4">
+                <div class="status-header">
+                    <h5>
+                        <i class="fas fa-info-circle me-2"></i>
+                        Trạng thái bài viết
+                    </h5>
+                </div>
+                <div class="status-body">
+                    <div class="current-status">
+                        @switch (Model.Status)
+                        {
+                            case "Draft":
+                                <span class="badge badge-draft">
+                                    <i class="fas fa-edit"></i>Nháp
+                                </span>
+                                break;
+                            case "Pending":
+                                <span class="badge badge-pending">
+                                    <i class="fas fa-clock"></i>Chờ duyệt
+                                </span>
+                                break;
+                            case "Approved":
+                                <span class="badge badge-approved">
+                                    <i class="fas fa-check-double"></i>Đã duyệt
+                                </span>
+                                break;
+                            case "Published":
+                                <span class="badge badge-published">
+                                    <i class="fas fa-check-circle"></i>Đã đăng
+                                </span>
+                                break;
+                            case "Rejected":
+                                <span class="badge badge-rejected">
+                                    <i class="fas fa-times-circle"></i>Từ chối
+                                </span>
+                                break;
+                        }
+                        
+                        @if (Model.PublishedAt.HasValue)
+                        {
+                            <small class="text-muted ms-2">
+                                Đăng lúc: @Model.PublishedAt?.ToString("dd/MM/yyyy HH:mm")
+                            </small>
+                        }
+                        
+                        @if (Model.ScheduledPublishDate.HasValue && Model.Status == "Approved")
+                        {
+                            <div class="scheduled-info mt-2">
+                                <i class="fas fa-clock text-info"></i>
+                                <small class="text-info">
+                                    Hẹn đăng: @Model.ScheduledPublishDate?.ToString("dd/MM/yyyy HH:mm")
+                                </small>
+                            </div>
+                        }
+                    </div>
+
+                    @if (Model.Status == "Pending")
+                    {
+                        <div class="action-buttons mt-3">
+                            <button class="btn btn-success btn-sm me-2" onclick="approveArticle(@Model.ArticleId)">
+                                <i class="fas fa-check me-1"></i>Duyệt bài
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="rejectArticle(@Model.ArticleId)">
+                                <i class="fas fa-times me-1"></i>Từ chối
+                            </button>
+                        </div>
+                    }
+                    @if (Model.Status == "Published")
+                    {
+                        <div class="action-buttons mt-3">
+                            <button class="btn btn-warning btn-sm" onclick="unpublishArticle(@Model.ArticleId)">
+                                <i class="fas fa-eye-slash me-1"></i>Gỡ bài
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Thumbnail -->
+            @if (!string.IsNullOrEmpty(Model.ThumbnailImage))
+            {
+                <div class="thumbnail-section mb-4">
+                    <h5>
+                        <i class="fas fa-image me-2"></i>
+                        Ảnh đại diện
+                    </h5>
+                    <div class="thumbnail-container">
+                        <img src="@Model.ThumbnailImage" alt="@Model.Title" class="img-fluid rounded">
+                    </div>
+                </div>
+            }
+
+            <!-- Summary -->
+            @if (!string.IsNullOrEmpty(Model.Summary))
+            {
+                <div class="summary-section mb-4">
+                    <h5>
+                        <i class="fas fa-align-left me-2"></i>
+                        Tóm tắt
+                    </h5>
+                    <div class="summary-content">
+                        @Model.Summary
+                    </div>
+                </div>
+            }
+
+            <!-- Content -->
+            <div class="content-section">
+                <h5>
+                    <i class="fas fa-file-alt me-2"></i>
+                    Nội dung
+                </h5>
+                <div class="content-body">
+                    @Html.Raw(Model.Content)
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Author Info -->
+            <div class="info-card mb-4">
+                <div class="card-header">
+                    <h6>
+                        <i class="fas fa-user me-2"></i>
+                        Thông tin tác giả
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="author-info">
+                        <div class="d-flex align-items-center mb-3">
+                            @if (!string.IsNullOrEmpty(Model.AuthorAvatar))
+                            {
+                                <img src="@Model.AuthorAvatar" alt="@Model.AuthorName" class="avatar me-3">
+                            }
+                            else
+                            {
+                                <div class="avatar-placeholder me-3">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            }
+                            <div>
+                                <div class="author-name">@Model.AuthorName</div>
+                                <div class="author-email text-muted">@Model.AuthorEmail</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Article Info -->
+            <div class="info-card mb-4">
+                <div class="card-header">
+                    <h6>
+                        <i class="fas fa-info-circle me-2"></i>
+                        Thông tin bài viết
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="info-list">
+                        <div class="info-item">
+                            <span class="label">ID:</span>
+                            <span class="value">#@Model.ArticleId</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Slug:</span>
+                            <span class="value">@Model.Slug</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Danh mục:</span>
+                            <span class="value">@Model.CategoryName</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Tạo lúc:</span>
+                            <span class="value">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                        </div>
+                        @if (Model.UpdatedAt.HasValue)
+                        {
+                            <div class="info-item">
+                                <span class="label">Cập nhật:</span>
+                                <span class="value">@Model.UpdatedAt?.ToString("dd/MM/yyyy HH:mm")</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Approval History -->
+            @if (Model.ApprovalHistory.Any())
+            {
+                <div class="info-card">
+                    <div class="card-header">
+                        <h6>
+                            <i class="fas fa-history me-2"></i>
+                            Lịch sử duyệt
+                        </h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="approval-history">
+                            @foreach (var history in Model.ApprovalHistory)
+                            {
+                                <div class="history-item">
+                                    <div class="history-header">
+                                        <span class="history-status">
+                                            @switch (history.Status)
+                                            {
+                                                case "Pending":
+                                                    <i class="fas fa-clock text-warning"></i>
+                                                    break;
+                                                case "Approved":
+                                                    <i class="fas fa-check text-success"></i>
+                                                    break;
+                                                case "Rejected":
+                                                    <i class="fas fa-times text-danger"></i>
+                                                    break;
+                                            }
+                                            @history.Status
+                                        </span>
+                                        <span class="history-date">
+                                            @history.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                        </span>
+                                    </div>
+                                    <div class="history-admin">
+                                        <i class="fas fa-user-shield me-1"></i>
+                                        @history.AdminName
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(history.Note))
+                                    {
+                                        <div class="history-note">
+                                            "@history.Note"
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Rejection Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-times-circle text-danger me-2"></i>
+                    Từ chối bài viết
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Lý do từ chối <span class="text-danger">*</span></label>
+                    <textarea id="rejectionReason" class="form-control" rows="4" 
+                              placeholder="Nhập lý do từ chối bài viết..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Hủy
+                </button>
+                <button type="button" class="btn btn-danger" onclick="confirmReject()">
+                    <i class="fas fa-check me-1"></i>Từ chối
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .article-detail-container {
+        padding: 1.5rem;
+        background: #f8f9fa;
+        min-height: 100vh;
+    }
+
+    .article-header {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .article-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #2c3e50;
+        line-height: 1.3;
+    }
+
+    .article-meta {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .meta-item i {
+        color: #adb5bd;
+        width: 16px;
+    }
+
+    .status-card,
+    .info-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    .status-header,
+    .card-header {
+        padding: 1rem 1.25rem;
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        margin: 0;
+    }
+
+    .status-header h5,
+    .card-header h6 {
+        margin: 0;
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .status-body,
+    .card-body {
+        padding: 1.25rem;
+    }
+
+    .badge {
+        padding: 0.4rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .badge-draft {
+        background: #6c757d;
+        color: white;
+    }
+
+    .badge-pending {
+        background: #ffc107;
+        color: #000;
+    }
+
+    .badge-approved {
+        background: #0dcaf0;
+        color: #000;
+    }
+
+    .badge-published {
+        background: #198754;
+        color: white;
+    }
+
+    .badge-rejected {
+        background: #dc3545;
+        color: white;
+    }
+
+    .scheduled-info {
+        background: #e7f3ff;
+        padding: 0.5rem 0.75rem;
+        border-radius: 6px;
+        border-left: 3px solid #0dcaf0;
+    }
+
+    .thumbnail-container {
+        max-width: 100%;
+        text-align: center;
+    }
+
+    .thumbnail-container img {
+        max-height: 300px;
+        object-fit: cover;
+    }
+
+    .summary-section,
+    .content-section {
+        background: white;
+        padding: 1.25rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .summary-section h5,
+    .content-section h5 {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 1rem;
+    }
+
+    .summary-content {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        border-left: 3px solid #0d6efd;
+        color: #495057;
+        line-height: 1.6;
+    }
+
+    .content-body {
+        line-height: 1.7;
+        color: #495057;
+    }
+
+    .content-body h1,
+    .content-body h2,
+    .content-body h3,
+    .content-body h4,
+    .content-body h5,
+    .content-body h6 {
+        color: #2c3e50;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .content-body p {
+        margin-bottom: 1rem;
+    }
+
+    .content-body img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        margin: 1rem 0;
+    }
+
+    .author-info {
+        display: flex;
+        align-items: center;
+    }
+
+    .avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .avatar-placeholder {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #adb5bd;
+        font-size: 1.25rem;
+    }
+
+    .author-name {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .author-email {
+        font-size: 0.85rem;
+    }
+
+    .info-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #f8f9fa;
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .info-item .label {
+        font-weight: 600;
+        color: #6c757d;
+        font-size: 0.85rem;
+    }
+
+    .info-item .value {
+        color: #495057;
+        font-size: 0.85rem;
+    }
+
+    .approval-history {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .history-item {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #f8f9fa;
+    }
+
+    .history-item:last-child {
+        border-bottom: none;
+    }
+
+    .history-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .history-status {
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .history-date {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+
+    .history-admin {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+    }
+
+    .history-note {
+        background: #f8f9fa;
+        padding: 0.5rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        color: #495057;
+        font-style: italic;
+    }
+
+    @media (max-width: 768px) {
+        .article-detail-container {
+            padding: 1rem;
+        }
+
+        .article-actions {
+            margin-top: 1rem;
+        }
+
+        .article-meta {
+            flex-direction: column;
+            gap: 0.5rem !important;
+        }
+    }
+</style>
+
+@section Scripts {
+    <script>
+        let currentArticleId = @Model.ArticleId;
+
+        function getAntiForgeryToken() {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]');
+            if (!token) {
+                console.error('Anti-forgery token not found!');
+                return '';
+            }
+            return token.value;
+        }
+
+        function approveArticle(articleId) {
+            if (!confirm('Bạn có chắc chắn muốn duyệt bài viết này?')) return;
+
+            const note = prompt('Ghi chú (không bắt buộc):');
+            
+            const formData = new FormData();
+            formData.append('articleId', articleId);
+            formData.append('note', note || '');
+            formData.append('__RequestVerificationToken', getAntiForgeryToken());
+
+            fetch('@Url.Action("ApproveArticle")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('Lỗi: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra: ' + error.message);
+            });
+        }
+
+        function rejectArticle(articleId) {
+            currentArticleId = articleId;
+            document.getElementById('rejectionReason').value = '';
+            new bootstrap.Modal(document.getElementById('rejectModal')).show();
+        }
+
+        function confirmReject() {
+            const reason = document.getElementById('rejectionReason').value.trim();
+            if (!reason) {
+                alert('Vui lòng nhập lý do từ chối');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('articleId', currentArticleId);
+            formData.append('note', reason);
+            formData.append('__RequestVerificationToken', getAntiForgeryToken());
+
+            fetch('@Url.Action("RejectArticle")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('Lỗi: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra: ' + error.message);
+            });
+        }
+
+        function unpublishArticle(articleId) {
+            if (!confirm('Bạn có chắc chắn muốn gỡ bài viết này?')) return;
+
+            const formData = new FormData();
+            formData.append('articleId', articleId);
+            formData.append('__RequestVerificationToken', getAntiForgeryToken());
+
+            fetch('@Url.Action("UnpublishArticle")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('Lỗi: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra: ' + error.message);
+            });
+        }
+    </script>
+}
+
+@Html.AntiForgeryToken()

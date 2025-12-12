@@ -1,0 +1,1824 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\VisualStudio\\source\\repos\\SacViet\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\wwwroot\\js\\writer-article-form.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:wwwroot\\js\\writer-article-form.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\views\\writer\\_actionbuttons.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:views\\writer\\_actionbuttons.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\viewmodels\\writerviewmodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:viewmodels\\writerviewmodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\validation\\urlorpathattribute.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:validation\\urlorpathattribute.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\controllers\\writercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:controllers\\writercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\dataprotection-keys\\key-9f430399-9ea4-4c47-8403-f15a2e8d2325.xml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:dataprotection-keys\\key-9f430399-9ea4-4c47-8403-f15a2e8d2325.xml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\dataprotectionkeys\\key-8718f31a-22f0-48ca-a63c-6feaba63d904.xml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:dataprotectionkeys\\key-8718f31a-22f0-48ca-a63c-6feaba63d904.xml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\wwwroot\\favicon.ico||{177559E0-D141-11D0-92DF-00A0C9138C45}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:wwwroot\\favicon.ico||{177559E0-D141-11D0-92DF-00A0C9138C45}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\services\\writerservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:services\\writerservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\views\\writer\\edit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:views\\writer\\edit.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\views\\writer\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:views\\writer\\create.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\views\\article\\_articlecontent.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:views\\article\\_articlecontent.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\views\\article\\_articleheader.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:views\\article\\_articleheader.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\views\\article\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:views\\article\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\wwwroot\\css\\writer-article-form.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:wwwroot\\css\\writer-article-form.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\views\\admin\\articledetail.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:views\\admin\\articledetail.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\views\\category\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:views\\category\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\web.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:web.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\views\\article\\_sidebar.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:views\\article\\_sidebar.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\views\\article\\_videoplayer.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:views\\article\\_videoplayer.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\views\\article\\_audioplayer.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:views\\article\\_audioplayer.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\views\\writer\\_contentformfields.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:views\\writer\\_contentformfields.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\migrations\\create_articleinlinemedia.sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:migrations\\create_articleinlinemedia.sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\views\\writer\\_articlesidebar.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:views\\writer\\_articlesidebar.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\models\\article.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:models\\article.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\models\\sacvietcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:models\\sacvietcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\migrations\\addimageurltoarticles.sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:migrations\\addimageurltoarticles.sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\views\\article\\_commentitem.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:views\\article\\_commentitem.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\views\\article\\_commentssection.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:views\\article\\_commentssection.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\wwwroot\\js\\scheduled-publish-default.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:wwwroot\\js\\scheduled-publish-default.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\views\\shared\\error.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:views\\shared\\error.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\views\\shared\\_validationscriptspartial.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:views\\shared\\_validationscriptspartial.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\wwwroot\\js\\site.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:wwwroot\\js\\site.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\wwwroot\\js\\article-details.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}|",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:wwwroot\\js\\article-details.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\viewmodels\\adminviewmodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:viewmodels\\adminviewmodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\viewmodels\\authviewmodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:viewmodels\\authviewmodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\viewmodels\\homepageviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:viewmodels\\homepageviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\viewmodels\\searchviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:viewmodels\\searchviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\views\\article\\_socialshare.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:views\\article\\_socialshare.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\migrations\\addvideourlcolumn.sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:migrations\\addvideourlcolumn.sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\views\\account\\login.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:views\\account\\login.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\controllers\\articlecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:controllers\\articlecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\models\\errorviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:models\\errorviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\wwwroot\\css\\article-details.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:wwwroot\\css\\article-details.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|d:\\visualstudio\\source\\repos\\sacviet\\models\\articleinlinemedia.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D4B12803-F1FC-4D9A-8A6A-12156744028B}|SacViet.csproj|solutionrelative:models\\articleinlinemedia.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 844,
+          "SelectedChildIndex": 239,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{e8b06f52-6d01-11d2-aa7d-00c04f990343}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:132:0:{13b12e3e-c1b4-4539-9371-4fe9a0d523fc}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{13b12e3e-c1b4-4539-9371-4fe9a0d523fc}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:130:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:131:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:2:0:{e8b06f52-6d01-11d2-aa7d-00c04f990343}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{873151d0-cf2e-48cc-b4bf-ad0394f6a3c3}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1377497384:0:{83107a3e-496a-485e-b455-16ddb978e55e}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:15:0:{e8b06f52-6d01-11d2-aa7d-00c04f990343}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:16:0:{e8b06f52-6d01-11d2-aa7d-00c04f990343}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:17:0:{e8b06f52-6d01-11d2-aa7d-00c04f990343}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:14:0:{e8b06f52-6d01-11d2-aa7d-00c04f990343}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:13:0:{e8b06f52-6d01-11d2-aa7d-00c04f990343}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:12:0:{e8b06f52-6d01-11d2-aa7d-00c04f990343}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:11:0:{e8b06f52-6d01-11d2-aa7d-00c04f990343}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:10:0:{e8b06f52-6d01-11d2-aa7d-00c04f990343}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:9:0:{e8b06f52-6d01-11d2-aa7d-00c04f990343}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:8:0:{e8b06f52-6d01-11d2-aa7d-00c04f990343}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:7:0:{e8b06f52-6d01-11d2-aa7d-00c04f990343}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:6:0:{e8b06f52-6d01-11d2-aa7d-00c04f990343}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:5:0:{e8b06f52-6d01-11d2-aa7d-00c04f990343}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:4:0:{e8b06f52-6d01-11d2-aa7d-00c04f990343}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:3:0:{e8b06f52-6d01-11d2-aa7d-00c04f990343}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:129:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{e1b7d1f8-9b3c-49b1-8f4f-bfc63a88835d}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{588470cc-84f8-4a57-9ac4-86bca0625ff4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1928210406:0:{bf84ea66-d821-4dba-b1b1-2777d8574775}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:350743133:0:{bf84ea66-d821-4dba-b1b1-2777d8574775}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:132:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:23:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:29:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:12:0:{2456bd12-ecf7-4988-a4a6-67d49173f565}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:13:0:{2456bd12-ecf7-4988-a4a6-67d49173f565}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{6324226f-61b6-4f28-92ee-18d4b5fe1e48}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:34:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:133:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:134:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:133:0:{13b12e3e-c1b4-4539-9371-4fe9a0d523fc}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:134:0:{13b12e3e-c1b4-4539-9371-4fe9a0d523fc}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{e8b06f53-6d01-11d2-aa7d-00c04f990343}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:134:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:135:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:136:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:137:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:138:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{e506b91c-c606-466a-90a9-123d1d1e12b3}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{fbcae063-e2c0-4ab1-a516-996ea3dafb72}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{f5cd1b51-c771-5648-966f-646d419b1e7c}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:133:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:41:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:30:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:129:0:{13b12e3e-c1b4-4539-9371-4fe9a0d523fc}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:147:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:148:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:143:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:144:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:145:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:146:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:142:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:139:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:140:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:141:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:136:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:138:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:130:0:{13b12e3e-c1b4-4539-9371-4fe9a0d523fc}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:135:0:{13b12e3e-c1b4-4539-9371-4fe9a0d523fc}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:139:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:137:0:{13b12e3e-c1b4-4539-9371-4fe9a0d523fc}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:138:0:{13b12e3e-c1b4-4539-9371-4fe9a0d523fc}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:38:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:69:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:129:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:130:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:131:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:132:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:70:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:71:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:69:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:73:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:72:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:54:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{004be353-6879-467c-9d1e-9ac23cdf6d49}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:93:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:37:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:49:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:68:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:67:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:17:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:33:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:45:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:45:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1196186238:0:{83107a3e-496a-485e-b455-16ddb978e55e}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:18:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:14:0:{2456bd12-ecf7-4988-a4a6-67d49173f565}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:18:0:{2456bd12-ecf7-4988-a4a6-67d49173f565}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:21:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:7:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:7:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:46:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:47:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:63:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:64:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:65:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:32:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:37:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:39:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:40:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:43:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:42:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:41:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:20:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:129:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:132:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{fabf9319-47eb-497e-b8f6-d9f73fba5f55}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{99a11807-c5db-4877-ad35-09b56a044012}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{9a7cebbb-dc5c-4986-bc49-962da46aa506}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:48:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:11:0:{2456bd12-ecf7-4988-a4a6-67d49173f565}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:141:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:143:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:144:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:145:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:146:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:147:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:131:0:{13b12e3e-c1b4-4539-9371-4fe9a0d523fc}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:145:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:146:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:142:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:147:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:146:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:147:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:129:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{605322a2-17ae-43f4-b60f-766556e46c87}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{0174dea2-fdbe-4ef1-8f99-c0beae78880f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:131:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:44:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:63:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:74:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:26:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:25:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:136:0:{13b12e3e-c1b4-4539-9371-4fe9a0d523fc}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:74:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:75:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:76:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:77:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:78:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:44:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{4a9b7e51-aa16-11d0-a8c5-00a0c921a4d2}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{74946827-37a0-11d2-a273-00c04f8ef4ff}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:14:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:27:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:9:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:19:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:29:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:31:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:34:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{26341fe2-71dd-46fd-bb1b-2e51a92a0d64}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{80c411e8-fd5e-4b16-914b-0d9d84172cc1}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:130:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:134:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:134:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:135:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:133:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:129:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:131:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:24:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:3:0:{57d563b6-44a5-47df-85be-f4199ad6b651}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:6:0:{57d563b6-44a5-47df-85be-f4199ad6b651}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{57d563b6-44a5-47df-85be-f4199ad6b651}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:132:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{6bf11835-8a31-496c-b01e-94f731afc7ce}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:2:0:{6bf11835-8a31-496c-b01e-94f731afc7ce}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:48:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:62:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:81:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:11:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:36:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{b1e99781-ab81-11d0-b683-00aa00a3ee26}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:12:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:10:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:14:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{eefa5220-e298-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "UrlOrPathAttribute.cs",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Validation\\UrlOrPathAttribute.cs",
+              "RelativeDocumentMoniker": "Validation\\UrlOrPathAttribute.cs",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Validation\\UrlOrPathAttribute.cs",
+              "RelativeToolTip": "Validation\\UrlOrPathAttribute.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAC0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-05T18:39:00.488Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "WriterController.cs",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Controllers\\WriterController.cs",
+              "RelativeDocumentMoniker": "Controllers\\WriterController.cs",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Controllers\\WriterController.cs",
+              "RelativeToolTip": "Controllers\\WriterController.cs",
+              "ViewState": "AgIAAOQBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-05T17:14:54.278Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "favicon.ico -  [English (United States)] - Icon [16x16, 32 bit, BMP]",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\wwwroot\\favicon.ico",
+              "RelativeDocumentMoniker": "wwwroot\\favicon.ico",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\wwwroot\\favicon.ico -  [English (United States)] - Icon [16x16, 32 bit, BMP]",
+              "RelativeToolTip": "wwwroot\\favicon.ico -  [English (United States)] - Icon [16x16, 32 bit, BMP]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001525|",
+              "WhenOpened": "2025-11-03T17:17:46.779Z",
+              "EditorCaption": " -  [English (United States)] - Icon [16x16, 32 bit, BMP]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "AdminController.cs",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Controllers\\AdminController.cs",
+              "RelativeDocumentMoniker": "Controllers\\AdminController.cs",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Controllers\\AdminController.cs",
+              "RelativeToolTip": "Controllers\\AdminController.cs",
+              "ViewState": "AgIAAKQAAAAAAAAAAAAswAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-03T17:09:07.267Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "key-9f430399-9ea4-4c47-8403-f15a2e8d2325.xml",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\DataProtection-Keys\\key-9f430399-9ea4-4c47-8403-f15a2e8d2325.xml",
+              "RelativeDocumentMoniker": "DataProtection-Keys\\key-9f430399-9ea4-4c47-8403-f15a2e8d2325.xml",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\DataProtection-Keys\\key-9f430399-9ea4-4c47-8403-f15a2e8d2325.xml",
+              "RelativeToolTip": "DataProtection-Keys\\key-9f430399-9ea4-4c47-8403-f15a2e8d2325.xml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003576|",
+              "WhenOpened": "2025-11-03T16:59:10.55Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "key-8718f31a-22f0-48ca-a63c-6feaba63d904.xml",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\DataProtectionKeys\\key-8718f31a-22f0-48ca-a63c-6feaba63d904.xml",
+              "RelativeDocumentMoniker": "DataProtectionKeys\\key-8718f31a-22f0-48ca-a63c-6feaba63d904.xml",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\DataProtectionKeys\\key-8718f31a-22f0-48ca-a63c-6feaba63d904.xml",
+              "RelativeToolTip": "DataProtectionKeys\\key-8718f31a-22f0-48ca-a63c-6feaba63d904.xml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003576|",
+              "WhenOpened": "2025-11-03T16:59:05.128Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "_ActionButtons.cshtml",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Writer\\_ActionButtons.cshtml",
+              "RelativeDocumentMoniker": "Views\\Writer\\_ActionButtons.cshtml",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Writer\\_ActionButtons.cshtml",
+              "RelativeToolTip": "Views\\Writer\\_ActionButtons.cshtml",
+              "ViewState": "AgIAAA0AAAAAAAAAAAAIwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-03T16:58:16.057Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Category\\Index.cshtml",
+              "RelativeDocumentMoniker": "Views\\Category\\Index.cshtml",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Category\\Index.cshtml",
+              "RelativeToolTip": "Views\\Category\\Index.cshtml",
+              "ViewState": "AgIAAIkBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-26T10:42:55.337Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "ArticleDetail.cshtml",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Admin\\ArticleDetail.cshtml",
+              "RelativeDocumentMoniker": "Views\\Admin\\ArticleDetail.cshtml",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Admin\\ArticleDetail.cshtml",
+              "RelativeToolTip": "Views\\Admin\\ArticleDetail.cshtml",
+              "ViewState": "AgIAAM8BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-26T10:26:13.931Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "writer-article-form.css",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\wwwroot\\css\\writer-article-form.css",
+              "RelativeDocumentMoniker": "wwwroot\\css\\writer-article-form.css",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\wwwroot\\css\\writer-article-form.css",
+              "RelativeToolTip": "wwwroot\\css\\writer-article-form.css",
+              "ViewState": "AgIAALYCAAAAAAAAAAAAANwCAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2025-10-26T09:44:38.715Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "Create_ArticleInlineMedia.sql",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Migrations\\Create_ArticleInlineMedia.sql",
+              "RelativeDocumentMoniker": "Migrations\\Create_ArticleInlineMedia.sql",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Migrations\\Create_ArticleInlineMedia.sql",
+              "RelativeToolTip": "Migrations\\Create_ArticleInlineMedia.sql",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
+              "WhenOpened": "2025-10-26T08:01:41.559Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 50,
+              "Title": "ArticleInlineMedia.cs",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Models\\ArticleInlineMedia.cs",
+              "RelativeDocumentMoniker": "Models\\ArticleInlineMedia.cs",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Models\\ArticleInlineMedia.cs",
+              "RelativeToolTip": "Models\\ArticleInlineMedia.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-26T08:00:52.909Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 30,
+              "Title": "AddImageUrlToArticles.sql",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Migrations\\AddImageUrlToArticles.sql",
+              "RelativeDocumentMoniker": "Migrations\\AddImageUrlToArticles.sql",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Migrations\\AddImageUrlToArticles.sql",
+              "RelativeToolTip": "Migrations\\AddImageUrlToArticles.sql",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
+              "WhenOpened": "2025-10-26T06:56:18.221Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 34,
+              "Title": "Error.cshtml",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Shared\\Error.cshtml",
+              "RelativeDocumentMoniker": "Views\\Shared\\Error.cshtml",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Shared\\Error.cshtml",
+              "RelativeToolTip": "Views\\Shared\\Error.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-25T15:05:53.208Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 35,
+              "Title": "_ValidationScriptsPartial.cshtml",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Shared\\_ValidationScriptsPartial.cshtml",
+              "RelativeDocumentMoniker": "Views\\Shared\\_ValidationScriptsPartial.cshtml",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Shared\\_ValidationScriptsPartial.cshtml",
+              "RelativeToolTip": "Views\\Shared\\_ValidationScriptsPartial.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-25T15:05:50.5Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "_Layout.cshtml",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Shared\\_Layout.cshtml",
+              "RelativeDocumentMoniker": "Views\\Shared\\_Layout.cshtml",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Shared\\_Layout.cshtml",
+              "RelativeToolTip": "Views\\Shared\\_Layout.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAxwAMCAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-25T15:05:47.382Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 36,
+              "Title": "site.js",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\wwwroot\\js\\site.js",
+              "RelativeDocumentMoniker": "wwwroot\\js\\site.js",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\wwwroot\\js\\site.js",
+              "RelativeToolTip": "wwwroot\\js\\site.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAnAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2025-10-25T15:03:14.173Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 33,
+              "Title": "scheduled-publish-default.js",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\wwwroot\\js\\scheduled-publish-default.js",
+              "RelativeDocumentMoniker": "wwwroot\\js\\scheduled-publish-default.js",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\wwwroot\\js\\scheduled-publish-default.js",
+              "RelativeToolTip": "wwwroot\\js\\scheduled-publish-default.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAABCAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2025-10-25T15:03:11.539Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 38,
+              "Title": "AdminViewModels.cs",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\ViewModels\\AdminViewModels.cs",
+              "RelativeDocumentMoniker": "ViewModels\\AdminViewModels.cs",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\ViewModels\\AdminViewModels.cs",
+              "RelativeToolTip": "ViewModels\\AdminViewModels.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-25T15:03:00.045Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 39,
+              "Title": "AuthViewModels.cs",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\ViewModels\\AuthViewModels.cs",
+              "RelativeDocumentMoniker": "ViewModels\\AuthViewModels.cs",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\ViewModels\\AuthViewModels.cs",
+              "RelativeToolTip": "ViewModels\\AuthViewModels.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-25T15:02:57.604Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 40,
+              "Title": "HomePageViewModel.cs",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\ViewModels\\HomePageViewModel.cs",
+              "RelativeDocumentMoniker": "ViewModels\\HomePageViewModel.cs",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\ViewModels\\HomePageViewModel.cs",
+              "RelativeToolTip": "ViewModels\\HomePageViewModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-25T15:02:55.427Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 41,
+              "Title": "SearchViewModel.cs",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\ViewModels\\SearchViewModel.cs",
+              "RelativeDocumentMoniker": "ViewModels\\SearchViewModel.cs",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\ViewModels\\SearchViewModel.cs",
+              "RelativeToolTip": "ViewModels\\SearchViewModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAqAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-25T15:02:52.849Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "_ContentFormFields.cshtml",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Writer\\_ContentFormFields.cshtml",
+              "RelativeDocumentMoniker": "Views\\Writer\\_ContentFormFields.cshtml",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Writer\\_ContentFormFields.cshtml",
+              "RelativeToolTip": "Views\\Writer\\_ContentFormFields.cshtml",
+              "ViewState": "AgIAAEIBAAAAAAAAAAAAAFQBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-25T11:02:52.378Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 37,
+              "Title": "article-details.js",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\wwwroot\\js\\article-details.js",
+              "RelativeDocumentMoniker": "wwwroot\\js\\article-details.js",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\wwwroot\\js\\article-details.js",
+              "RelativeToolTip": "wwwroot\\js\\article-details.js",
+              "ViewState": "AgIAALoAAAAAAAAAAAASwDcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2025-10-25T10:50:00.308Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 49,
+              "Title": "article-details.css",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\wwwroot\\css\\article-details.css",
+              "RelativeDocumentMoniker": "wwwroot\\css\\article-details.css",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\wwwroot\\css\\article-details.css",
+              "RelativeToolTip": "wwwroot\\css\\article-details.css",
+              "ViewState": "AgIAABoAAAAAAAAAAIBJwBwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2025-10-25T10:49:25.198Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "_Sidebar.cshtml",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Article\\_Sidebar.cshtml",
+              "RelativeDocumentMoniker": "Views\\Article\\_Sidebar.cshtml",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Article\\_Sidebar.cshtml",
+              "RelativeToolTip": "Views\\Article\\_Sidebar.cshtml",
+              "ViewState": "AgIAADMAAAAAAAAAAAAAABAAAAAeAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-25T10:48:49.86Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 31,
+              "Title": "_CommentItem.cshtml",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Article\\_CommentItem.cshtml",
+              "RelativeDocumentMoniker": "Views\\Article\\_CommentItem.cshtml",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Article\\_CommentItem.cshtml",
+              "RelativeToolTip": "Views\\Article\\_CommentItem.cshtml",
+              "ViewState": "AgIAABsAAAAAAAAAAAAAAFgAAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-25T10:48:37.276Z"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{40ea2e6b-2121-4bb8-a43e-c83c04b51041}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 32,
+              "Title": "_CommentsSection.cshtml",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Article\\_CommentsSection.cshtml",
+              "RelativeDocumentMoniker": "Views\\Article\\_CommentsSection.cshtml",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Article\\_CommentsSection.cshtml",
+              "RelativeToolTip": "Views\\Article\\_CommentsSection.cshtml",
+              "ViewState": "AgIAAEUAAAAAAAAAAAAAABEAAAArAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-25T10:48:17.334Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 42,
+              "Title": "_SocialShare.cshtml",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Article\\_SocialShare.cshtml",
+              "RelativeDocumentMoniker": "Views\\Article\\_SocialShare.cshtml",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Article\\_SocialShare.cshtml",
+              "RelativeToolTip": "Views\\Article\\_SocialShare.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAvAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-25T10:48:01.326Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "_ArticleContent.cshtml",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Article\\_ArticleContent.cshtml",
+              "RelativeDocumentMoniker": "Views\\Article\\_ArticleContent.cshtml",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Article\\_ArticleContent.cshtml",
+              "RelativeToolTip": "Views\\Article\\_ArticleContent.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAADAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-25T10:47:49.393Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "_ArticleHeader.cshtml",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Article\\_ArticleHeader.cshtml",
+              "RelativeDocumentMoniker": "Views\\Article\\_ArticleHeader.cshtml",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Article\\_ArticleHeader.cshtml",
+              "RelativeToolTip": "Views\\Article\\_ArticleHeader.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-25T10:47:40.532Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "_AudioPlayer.cshtml",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Article\\_AudioPlayer.cshtml",
+              "RelativeDocumentMoniker": "Views\\Article\\_AudioPlayer.cshtml",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Article\\_AudioPlayer.cshtml",
+              "RelativeToolTip": "Views\\Article\\_AudioPlayer.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-25T10:47:26.985Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "_VideoPlayer.cshtml",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Article\\_VideoPlayer.cshtml",
+              "RelativeDocumentMoniker": "Views\\Article\\_VideoPlayer.cshtml",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Article\\_VideoPlayer.cshtml",
+              "RelativeToolTip": "Views\\Article\\_VideoPlayer.cshtml",
+              "ViewState": "AgIAAEEAAAAAAAAAAAAAAEQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-25T10:47:16.076Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 43,
+              "Title": "AddVideoUrlColumn.sql",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Migrations\\AddVideoUrlColumn.sql",
+              "RelativeDocumentMoniker": "Migrations\\AddVideoUrlColumn.sql",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Migrations\\AddVideoUrlColumn.sql",
+              "RelativeToolTip": "Migrations\\AddVideoUrlColumn.sql",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
+              "WhenOpened": "2025-10-25T10:03:34.23Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "WriterService.cs",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Services\\WriterService.cs",
+              "RelativeDocumentMoniker": "Services\\WriterService.cs",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Services\\WriterService.cs",
+              "RelativeToolTip": "Services\\WriterService.cs",
+              "ViewState": "AgIAAOMBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-25T09:34:10.934Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "Edit.cshtml",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Writer\\Edit.cshtml",
+              "RelativeDocumentMoniker": "Views\\Writer\\Edit.cshtml",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Writer\\Edit.cshtml",
+              "RelativeToolTip": "Views\\Writer\\Edit.cshtml",
+              "ViewState": "AgIAAJAAAAAAAAAAAAAAAJwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-25T09:31:11.964Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "_ArticleSidebar.cshtml",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Writer\\_ArticleSidebar.cshtml",
+              "RelativeDocumentMoniker": "Views\\Writer\\_ArticleSidebar.cshtml",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Writer\\_ArticleSidebar.cshtml",
+              "RelativeToolTip": "Views\\Writer\\_ArticleSidebar.cshtml",
+              "ViewState": "AgIAACQBAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-25T09:30:33.836Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "WriterViewModels.cs",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\ViewModels\\WriterViewModels.cs",
+              "RelativeDocumentMoniker": "ViewModels\\WriterViewModels.cs",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\ViewModels\\WriterViewModels.cs",
+              "RelativeToolTip": "ViewModels\\WriterViewModels.cs",
+              "ViewState": "AgIAAIEAAAAAAAAAAAAAAIEAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-25T09:29:37.291Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 28,
+              "Title": "Article.cs",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Models\\Article.cs",
+              "RelativeDocumentMoniker": "Models\\Article.cs",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Models\\Article.cs",
+              "RelativeToolTip": "Models\\Article.cs",
+              "ViewState": "AgIAACoAAAAAAAAAAAAmwD0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-25T09:29:23.259Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 44,
+              "Title": "Login.cshtml",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Account\\Login.cshtml",
+              "RelativeDocumentMoniker": "Views\\Account\\Login.cshtml",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Account\\Login.cshtml",
+              "RelativeToolTip": "Views\\Account\\Login.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-25T09:12:02.954Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "web.config",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\web.config",
+              "RelativeDocumentMoniker": "web.config",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\web.config",
+              "RelativeToolTip": "web.config",
+              "ViewState": "AgIAACIAAAAAAAAAAAAAABQAAAATAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000601|",
+              "WhenOpened": "2025-10-25T07:21:14.964Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "Create.cshtml",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Writer\\Create.cshtml",
+              "RelativeDocumentMoniker": "Views\\Writer\\Create.cshtml",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Writer\\Create.cshtml",
+              "RelativeToolTip": "Views\\Writer\\Create.cshtml",
+              "ViewState": "AgIAAG8AAAAAAAAAAAAAAG8AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-25T06:04:19.094Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 45,
+              "Title": "appsettings.Development.json",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\appsettings.Development.json",
+              "RelativeDocumentMoniker": "appsettings.Development.json",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\appsettings.Development.json",
+              "RelativeToolTip": "appsettings.Development.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-10-25T05:56:45.526Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "AccountController.cs",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Controllers\\AccountController.cs",
+              "RelativeDocumentMoniker": "Controllers\\AccountController.cs",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Controllers\\AccountController.cs",
+              "RelativeToolTip": "Controllers\\AccountController.cs",
+              "ViewState": "AgIAAAgBAAAAAAAAAAAkwBUBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-25T00:22:12.215Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 46,
+              "Title": "ArticleController.cs",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Controllers\\ArticleController.cs",
+              "RelativeDocumentMoniker": "Controllers\\ArticleController.cs",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Controllers\\ArticleController.cs",
+              "RelativeToolTip": "Controllers\\ArticleController.cs",
+              "ViewState": "AgIAAF8AAAAAAAAAAAAwwHEAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-25T00:21:31.28Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 48,
+              "Title": "ErrorViewModel.cs",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Models\\ErrorViewModel.cs",
+              "RelativeDocumentMoniker": "Models\\ErrorViewModel.cs",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Models\\ErrorViewModel.cs",
+              "RelativeToolTip": "Models\\ErrorViewModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-24T11:22:22.131Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "Details.cshtml",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Article\\Details.cshtml",
+              "RelativeDocumentMoniker": "Views\\Article\\Details.cshtml",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Views\\Article\\Details.cshtml",
+              "RelativeToolTip": "Views\\Article\\Details.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAJMAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-24T04:22:24.475Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "writer-article-form.js",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\wwwroot\\js\\writer-article-form.js",
+              "RelativeDocumentMoniker": "wwwroot\\js\\writer-article-form.js",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\wwwroot\\js\\writer-article-form.js",
+              "RelativeToolTip": "wwwroot\\js\\writer-article-form.js",
+              "ViewState": "AgIAAAUEAAAAAAAAAAAswCsEAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2025-10-24T04:21:42.077Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 29,
+              "Title": "SacVietContext.cs",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Models\\SacVietContext.cs",
+              "RelativeDocumentMoniker": "Models\\SacVietContext.cs",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Models\\SacVietContext.cs",
+              "RelativeToolTip": "Models\\SacVietContext.cs",
+              "ViewState": "AgIAAJUBAAAAAAAAAAAswDQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-23T20:06:39.415Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\Program.cs",
+              "RelativeToolTip": "Program.cs",
+              "ViewState": "AgIAAL8AAAAAAAAAAAAAAL8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-23T19:42:15.482Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 47,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "D:\\VisualStudio\\source\\repos\\SacViet\\appsettings.json",
+              "RelativeDocumentMoniker": "appsettings.json",
+              "ToolTip": "D:\\VisualStudio\\source\\repos\\SacViet\\appsettings.json",
+              "RelativeToolTip": "appsettings.json",
+              "ViewState": "AgIAABMAAAAAAAAAAAAAABMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-10-23T19:41:17.128Z"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 97,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{5b6781c0-e99d-11d0-9954-00a0c91bc8e5}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:132:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:31:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:32:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:53:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:67:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:68:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:73:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:78:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:81:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 660,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:43:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:22:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:23:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:24:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:35:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{260978c3-582c-487d-ab12-c1fdde07c578}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:36:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:38:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:39:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:40:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:42:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:15:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:133:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:13:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:33:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:27:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:30:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:28:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:12:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:10:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:8:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:9:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:21:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:25:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:26:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:35:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:28:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:22:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:15:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 1304,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{0ad07096-bba9-4900-a651-0598d26f6d24}"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 1304,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:18:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:19:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:20:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 1304,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:17:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:16:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 1304,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:16:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

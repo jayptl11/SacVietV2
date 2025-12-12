@@ -1,0 +1,50 @@
+﻿@model SacViet.Models.ArticleApproval
+@* Partial View: Approval Status Alert *@
+
+<div class="status-alert-card mb-4">
+    @switch (Model.Status)
+    {
+        case "Pending":
+            <div class="status-alert status-pending">
+                <div class="status-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="status-content">
+                    <h6>Đang chờ duyệt</h6>
+                    <p>Bài viết đã được gửi lúc: @Model.SubmittedAt?.ToString("dd/MM/yyyy HH:mm")</p>
+                </div>
+            </div>
+            break;
+        case "Approved":
+            <div class="status-alert status-approved">
+                <div class="status-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="status-content">
+                    <h6>Đã được duyệt</h6>
+                    <p>Người duyệt: <strong>@Model.ReviewedByUser?.FullName</strong> • @Model.ReviewedAt?.ToString("dd/MM/yyyy HH:mm")</p>
+                    @if (!string.IsNullOrEmpty(Model.ReviewNote))
+                    {
+                        <p class="review-note">💬 @Model.ReviewNote</p>
+                    }
+                </div>
+            </div>
+            break;
+        case "Rejected":
+            <div class="status-alert status-rejected">
+                <div class="status-icon">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <div class="status-content">
+                    <h6>Bị từ chối</h6>
+                    <p>Người duyệt: <strong>@Model.ReviewedByUser?.FullName</strong> • @Model.ReviewedAt?.ToString("dd/MM/yyyy HH:mm")</p>
+                    @if (!string.IsNullOrEmpty(Model.ReviewNote))
+                    {
+                        <p class="review-note"><strong>Lý do:</strong> @Model.ReviewNote</p>
+                    }
+                    <p class="mb-0"><small>⚠️ Vui lòng chỉnh sửa theo yêu cầu và gửi lại</small></p>
+                </div>
+            </div>
+            break;
+    }
+</div>

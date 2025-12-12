@@ -1,0 +1,354 @@
+﻿@model SacViet.ViewModels.HomePageViewModel
+@{
+    ViewData["Title"] = "Trang chủ";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <!-- Left Sidebar - Small News (using separate sidebar articles) -->
+        <div class="col-lg-3">
+            <div class="left-sidebar">
+                @if (Model.SidebarArticles.Any())
+                {
+                    @foreach (var article in Model.SidebarArticles.Take(3))
+                    {
+                        <div class="sidebar-news-item mb-4">
+                            <div class="news-image-small mb-2 position-relative overflow-hidden rounded">
+                                <img src="@(string.IsNullOrEmpty(article.ThumbnailImage) ? "/images/placeholder-article.jpg" : article.ThumbnailImage)"
+                                     class="img-fluid w-100" alt="@article.Title" style="height: 150px; object-fit: cover;">
+                                <div class="image-overlay"></div>
+                            </div>
+                            <h6 class="news-title-small mb-2">
+                                <a href="@Url.Action("Details", "Article", new { slug = article.Slug })" class="text-dark text-decoration-none">
+                                    @article.Title
+                                </a>
+                            </h6>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+
+        <!-- Main Center Content - Most Viewed Articles Today -->
+        <div class="col-lg-6">
+            @if (Model.MostViewedTodayArticles.Any())
+            {
+                var mainArticle = Model.MostViewedTodayArticles.First();
+                <div class="main-featured-article mb-4">
+                    <div class="featured-image mb-3 position-relative overflow-hidden rounded">
+                        <img src="@(string.IsNullOrEmpty(mainArticle.ThumbnailImage) ? "/images/placeholder-article.jpg" : mainArticle.ThumbnailImage)"
+                             class="img-fluid w-100" alt="@mainArticle.Title" style="height: 450px; object-fit: cover;">
+                        <div class="featured-overlay"></div>
+                        <div class="position-absolute top-0 start-0 m-3">
+                            <span class="badge bg-danger bg-opacity-90">
+                                <i class="fas fa-fire me-1"></i>Nhiều xem nhất hôm nay
+                            </span>
+                        </div>
+                    </div>
+                    <h2 class="main-title mb-3">
+                        <a href="@Url.Action("Details", "Article", new { slug = mainArticle.Slug })" class="text-dark text-decoration-none">
+                            @mainArticle.Title
+                        </a>
+                    </h2>
+                    <div class="main-meta mb-3">
+                        <small class="text-danger me-3">
+                            <i class="fas fa-clock me-1"></i>@mainArticle.PublishedAt?.ToString("dd/MM/yyyy HH:mm")
+                        </small>
+                        @if (mainArticle.ViewCount.HasValue && mainArticle.ViewCount > 0)
+                        {
+                            <small class="text-warning me-3">
+                                <i class="fas fa-eye me-1"></i>@mainArticle.ViewCount lượt xem
+                            </small>
+                        }
+                        <small class="text-muted">
+                            <i class="fas fa-tag me-1"></i>@mainArticle.Category.CategoryName
+                        </small>
+                    </div>
+                    <p class="main-summary text-muted mb-3">@mainArticle.Summary</p>
+
+                    <!-- Sub bullets - Other most viewed articles today -->
+                    <ul class="sub-headlines list-unstyled">
+                        @foreach (var subArticle in Model.MostViewedTodayArticles.Skip(1).Take(2))
+                        {
+                            <li class="mb-2 d-flex align-items-start">
+                                <i class="fas fa-angle-double-right text-danger me-2 mt-1" style="font-size: 0.8rem;"></i>
+                                <div class="flex-grow-1">
+                                    <a href="@Url.Action("Details", "Article", new { slug = subArticle.Slug })" class="text-dark text-decoration-none">
+                                        @subArticle.Title
+                                    </a>
+                                    @if (subArticle.ViewCount.HasValue && subArticle.ViewCount > 0)
+                                    {
+                                        <small class="text-muted d-block">
+                                            <i class="fas fa-eye me-1"></i>@subArticle.ViewCount lượt xem
+                                        </small>
+                                    }
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                </div>
+
+                <!-- Secondary Articles - More most viewed articles today -->
+                <div class="secondary-articles">
+                    <div class="row g-3">
+                        @foreach (var article in Model.MostViewedTodayArticles.Skip(3).Take(3))
+                        {
+                            <div class="col-md-12 mb-3">
+                                <div class="row g-2 secondary-card p-2 rounded">
+                                    <div class="col-5">
+                                        <div class="position-relative overflow-hidden rounded">
+                                            <img src="@(string.IsNullOrEmpty(article.ThumbnailImage) ? "/images/placeholder-article.jpg" : article.ThumbnailImage)"
+                                                 class="img-fluid w-100" alt="@article.Title" style="height: 120px; object-fit: cover;">
+                                            <div class="secondary-overlay"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-7">
+                                        <h6 class="mb-2">
+                                            <a href="@Url.Action("Details", "Article", new { slug = article.Slug })" class="text-dark text-decoration-none">
+                                                @article.Title
+                                            </a>
+                                        </h6>
+                                        <small class="text-muted d-block mb-1">
+                                            <i class="far fa-calendar-alt me-1"></i>@article.PublishedAt?.ToString("dd/MM/yyyy HH:mm")
+                                        </small>
+                                        @if (article.ViewCount.HasValue && article.ViewCount > 0)
+                                        {
+                                            <small class="text-warning">
+                                                <i class="fas fa-eye me-1"></i>@article.ViewCount lượt xem
+                                            </small>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <!-- Fallback to featured articles if no most viewed today -->
+                @if (Model.FeaturedArticles.Any())
+                {
+                    var mainArticle = Model.FeaturedArticles.First();
+                    <div class="main-featured-article mb-4">
+                        <div class="featured-image mb-3 position-relative overflow-hidden rounded">
+                            <img src="@(string.IsNullOrEmpty(mainArticle.ThumbnailImage) ? "/images/placeholder-article.jpg" : mainArticle.ThumbnailImage)"
+                                 class="img-fluid w-100" alt="@mainArticle.Title" style="height: 450px; object-fit: cover;">
+                            <div class="featured-overlay"></div>
+                        </div>
+                        <h2 class="main-title mb-3">
+                            <a href="@Url.Action("Details", "Article", new { slug = mainArticle.Slug })" class="text-dark text-decoration-none">
+                                @mainArticle.Title
+                            </a>
+                        </h2>
+                        <div class="main-meta mb-3">
+                            <small class="text-danger me-3">
+                                <i class="fas fa-clock me-1"></i>@mainArticle.PublishedAt?.ToString("dd/MM/yyyy HH:mm")
+                            </small>
+                        </div>
+                        <p class="main-summary text-muted mb-3">@mainArticle.Summary</p>
+
+                        <!-- Sub bullets -->
+                        <ul class="sub-headlines list-unstyled">
+                            @foreach (var subArticle in Model.FeaturedArticles.Skip(1).Take(2))
+                            {
+                                <li class="mb-2">
+                                    <i class="fas fa-angle-double-right text-danger me-2" style="font-size: 0.8rem;"></i>
+                                    <a href="@Url.Action("Details", "Article", new { slug = subArticle.Slug })" class="text-dark">
+                                        @subArticle.Title
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+
+                    <!-- Secondary Articles -->
+                    <div class="secondary-articles">
+                        <div class="row g-3">
+                            @foreach (var article in Model.LatestArticles.Skip(3).Take(3))
+                            {
+                                <div class="col-md-12 mb-3">
+                                    <div class="row g-2 secondary-card p-2 rounded">
+                                        <div class="col-5">
+                                            <div class="position-relative overflow-hidden rounded">
+                                                <img src="@(string.IsNullOrEmpty(article.ThumbnailImage) ? "/images/placeholder-article.jpg" : article.ThumbnailImage)"
+                                                     class="img-fluid w-100" alt="@article.Title" style="height: 120px; object-fit: cover;">
+                                                <div class="secondary-overlay"></div>
+                                            </div>
+                                        </div>
+                                        <div class="col-7">
+                                            <h6 class="mb-2">
+                                                <a href="@Url.Action("Details", "Article", new { slug = article.Slug })" class="text-dark text-decoration-none">
+                                                    @article.Title
+                                                </a>
+                                            </h6>
+                                            <small class="text-muted">
+                                                <i class="far fa-calendar-alt me-1"></i>@article.PublishedAt?.ToString("dd/MM/yyyy HH:mm")
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+
+        <!-- Right Sidebar - Latest News với Timeline (using sidebar articles for timeline) -->
+        <div class="col-lg-3">
+            <div class="right-sidebar">
+                <div class="latest-news-box bg-white rounded shadow-sm">
+                    <div class="latest-header bg-danger text-white p-3 rounded-top d-flex align-items-center">
+                        <i class="fas fa-newspaper me-2"></i>
+                        <h5 class="mb-0 fw-bold">TIN MỚI NHẤT</h5>
+                    </div>
+
+                    @if (Model.SidebarArticles.Any())
+                    {
+                        <div class="latest-timeline p-3">
+                            @for (int i = 0; i < Math.Min(10, Model.SidebarArticles.Count()); i++)
+                            {
+                                var article = Model.SidebarArticles.ElementAt(i);
+                                <div class="timeline-item @(i == Model.SidebarArticles.Count() - 1 || i == 9 ? "last-item" : "")">
+                                    <div class="timeline-marker">
+                                        <div class="timeline-dot"></div>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <div class="timeline-time text-danger mb-1">
+                                            <i class="far fa-clock me-1"></i>
+                                            <small class="fw-semibold">@article.PublishedAt?.ToString("HH:mm")</small>
+                                            <small class="text-muted ms-1">@article.PublishedAt?.ToString("dd/MM")</small>
+                                        </div>
+                                        <h6 class="timeline-title mb-2">
+                                            <a href="@Url.Action("Details", "Article", new { slug = article.Slug })"
+                                               class="text-dark text-decoration-none timeline-link">
+                                                @article.Title
+                                            </a>
+                                        </h6>
+                                        @if (!string.IsNullOrEmpty(article.Summary) && article.Summary.Length > 80)
+                                        {
+                                            <p class="timeline-summary text-muted small mb-2">
+                                                @article.Summary.Substring(0, 80)...</p>
+                                        }
+                                        <div class="timeline-meta d-flex align-items-center">
+                                            <span class="badge bg-light text-dark small me-2">
+                                                <i class="fas fa-tag me-1"></i>@article.Category.CategoryName
+                                            </span>
+                                            @if (article.ViewCount.HasValue && article.ViewCount > 0)
+                                            {
+                                                <small class="text-muted">
+                                                    <i class="far fa-eye me-1"></i>@article.ViewCount
+                                                </small>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="latest-footer p-3 border-top">
+                            <a href="@Url.Action("Search", "Home")" class="btn btn-outline-danger btn-sm w-100">
+                                <i class="fas fa-plus me-2"></i>Xem tất cả tin
+                            </a>
+                        </div>
+                    }
+                    else if (Model.LatestArticles.Any())
+                    {
+                        <!-- Fallback to latest articles if no sidebar articles -->
+                        <div class="latest-timeline p-3">
+                            @for (int i = 0; i < Math.Min(10, Model.LatestArticles.Count()); i++)
+                            {
+                                var article = Model.LatestArticles.ElementAt(i);
+                                <div class="timeline-item @(i == Model.LatestArticles.Count() - 1 || i == 9 ? "last-item" : "")">
+                                    <div class="timeline-marker">
+                                        <div class="timeline-dot"></div>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <div class="timeline-time text-danger mb-1">
+                                            <i class="far fa-clock me-1"></i>
+                                            <small class="fw-semibold">@article.PublishedAt?.ToString("HH:mm")</small>
+                                            <small class="text-muted ms-1">@article.PublishedAt?.ToString("dd/MM")</small>
+                                        </div>
+                                        <h6 class="timeline-title mb-2">
+                                            <a href="@Url.Action("Details", "Article", new { slug = article.Slug })"
+                                               class="text-dark text-decoration-none timeline-link">
+                                                @article.Title
+                                            </a>
+                                        </h6>
+                                        @if (!string.IsNullOrEmpty(article.Summary) && article.Summary.Length > 80)
+                                        {
+                                            <p class="timeline-summary text-muted small mb-2">
+                                                @article.Summary.Substring(0, 80)...</p>
+                                        }
+                                        <div class="timeline-meta d-flex align-items-center">
+                                            <span class="badge bg-light text-dark small me-2">
+                                                <i class="fas fa-tag me-1"></i>@article.Category.CategoryName
+                                            </span>
+                                            @if (article.ViewCount.HasValue && article.ViewCount > 0)
+                                            {
+                                                <small class="text-muted">
+                                                    <i class="far fa-eye me-1"></i>@article.ViewCount
+                                                </small>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="latest-footer p-3 border-top">
+                            <a href="@Url.Action("Search", "Home")" class="btn btn-outline-danger btn-sm w-100">
+                                <i class="fas fa-plus me-2"></i>Xem tất cả tin
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hi?n th? bài vi?t theo th? t? danh m?c c? ??nh v?i thi?t k? ?a d?ng -->
+@{
+    if (Model.ArticlesByCategory.Any())
+    {
+        // ??nh ngh?a th? t? hi?n th? danh m?c c? ??nh v?i icon t??ng ?ng
+        var categoryOrder = new List<(string slug, string icon)>
+        {
+            ("trong-nuoc", "fas fa-home"),           // Nh?p v?n hóa: Trong n??c
+            ("the-gioi", "fas fa-globe-asia"),       // Nh?p v?n hóa: Th? gi?i
+            ("du-lich", "fas fa-plane"),             // Du l?ch
+            ("con-nguoi", "fas fa-users"),           // Con ng??i
+            ("am-thuc", "fas fa-utensils"),          // ?m th?c
+            ("trang-phuc-va-kien-truc", "fas fa-building"), // Trang ph?c & Ki?n trúc
+            ("thanh-sac", "fas fa-palette"),         // Thanh - S?c
+            ("podcast", "fas fa-podcast"),           // Multimedia: Podcast
+            ("video", "fas fa-video"),               // Multimedia: Video
+            ("infographic", "fas fa-chart-bar"),     // Multimedia: Infographic
+            ("longform", "fas fa-scroll"),           // Multimedia: Longform
+            ("emagazine", "fas fa-book-open")        // Multimedia: eMagazine
+        };
+
+        // L?y danh m?c có bài vi?t theo th? t? ?ã ??nh
+        var orderedCategories = new List<(SacViet.Models.Category category, string icon)>();
+        
+        foreach (var (slug, icon) in categoryOrder)
+        {
+            var category = Model.AllCategories.FirstOrDefault(c => c.Slug == slug && 
+                Model.ArticlesByCategory.ContainsKey(c.CategoryId) && 
+                Model.ArticlesByCategory[c.CategoryId].Any());
+            
+            if (category != null)
+            {
+                orderedCategories.Add((category, icon));
+            }
+        }
+
+        // Thi?t k? ?a d?ng cho t?ng danh m?c
+        var layoutIndex = 0;
+        foreach (var (category, categoryIcon) in orderedCategories)
+        {
+            var articles = Model.ArticlesByCategory[category.CategoryId];
+            var currentLayout = layoutIndex % 4; // 4 ki?u layout khác nhau
+           

@@ -1,0 +1,56 @@
+﻿@model SacViet.Models.Article
+
+<div class="article-header mb-4">
+    <div class="category-badge bg-danger text-white px-3 py-1 d-inline-block mb-3">
+        @Model.Category.CategoryName
+    </div>
+    <h1 class="article-title fw-bold mb-3">@Model.Title</h1>
+    
+    @* Audio Player (if exists) - giữ lại vì podcast cần ở đầu *@
+    @await Html.PartialAsync("_AudioPlayer", Model)
+    
+    @if (!string.IsNullOrEmpty(Model.Summary))
+    {
+        <p class="article-summary lead text-muted mb-4">@Model.Summary</p>
+    }
+    
+    <div class="article-meta d-flex align-items-center mb-4 pb-3 border-bottom">
+        <div class="author-info me-4">
+            <small class="text-muted">
+                <i class="fas fa-user me-1"></i>
+                <strong>@Model.Author.FullName</strong>
+            </small>
+        </div>
+        <div class="publish-date me-4">
+            <small class="text-muted">
+                <i class="fas fa-clock me-1"></i>
+                @Model.PublishedAt?.ToString("dd/MM/yyyy HH:mm")
+            </small>
+        </div>
+        @if (Model.ViewCount.HasValue && Model.ViewCount > 0)
+        {
+            <div class="view-count me-4">
+                <small class="text-muted">
+                    <i class="fas fa-eye me-1"></i>
+                    @Model.ViewCount lượt xem
+                </small>
+            </div>
+        }
+        <div class="comment-count">
+            <small class="text-muted">
+                <i class="fas fa-comments me-1"></i>
+                <span id="commentCountDisplay">@ViewBag.CommentCount</span> bình luận
+            </small>
+        </div>
+    </div>
+
+    <!-- Text Size Adjustment Actions Only -->
+    <div class="article-actions d-flex align-items-center mb-4 no-print">
+        <button class="btn btn-outline-secondary btn-sm me-2" onclick="changeTextSize('increase')">
+            <i class="fas fa-plus me-1"></i>A+
+        </button>
+        <button class="btn btn-outline-secondary btn-sm" onclick="changeTextSize('decrease')">
+            <i class="fas fa-minus me-1"></i>A-
+        </button>
+    </div>
+</div>

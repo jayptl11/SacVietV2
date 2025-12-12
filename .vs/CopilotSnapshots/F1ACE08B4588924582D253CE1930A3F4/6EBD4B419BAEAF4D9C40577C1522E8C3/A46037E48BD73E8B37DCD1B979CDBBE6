@@ -1,0 +1,80 @@
+﻿@model SacViet.Models.Article
+
+@* Video Player for Multimedia Video category - responsive and full view *@
+@if (!string.IsNullOrEmpty(Model.VideoUrl))
+{
+    var videoFileId = "";
+    var videoMatch = System.Text.RegularExpressions.Regex.Match(Model.VideoUrl, @"[?&]id=([^&]+)");
+    if (videoMatch.Success)
+    {
+        videoFileId = videoMatch.Groups[1].Value;
+    }
+    else
+    {
+        var videoMatch2 = System.Text.RegularExpressions.Regex.Match(Model.VideoUrl, @"/file/d/([^/\?]+)");
+        if (videoMatch2.Success)
+        {
+            videoFileId = videoMatch2.Groups[1].Value;
+        }
+    }
+    
+    <div class="mb-4">
+        @* Video frame *@
+        @if (!string.IsNullOrEmpty(videoFileId))
+        {
+            <!-- Google Drive Embed Video -->
+            <div class="ratio ratio-16x9 rounded-3 shadow-sm overflow-hidden">
+                <iframe 
+                    src="https://drive.google.com/file/d/@videoFileId/preview"
+                    class="w-100 h-100 multimedia-video-player"
+                    allow="autoplay"
+                    loading="lazy"
+                    style="border:0;">
+                </iframe>
+            </div>
+        }
+        else if (Model.VideoUrl.Contains("youtube.com") || Model.VideoUrl.Contains("youtu.be"))
+        {
+            var youtubeId = "";
+            if (Model.VideoUrl.Contains("youtube.com/watch?v="))
+            {
+                var match3 = System.Text.RegularExpressions.Regex.Match(Model.VideoUrl, @"[?&]v=([^&]+)");
+                if (match3.Success) youtubeId = match3.Groups[1].Value;
+            }
+            else if (Model.VideoUrl.Contains("youtu.be/"))
+            {
+                var match3 = System.Text.RegularExpressions.Regex.Match(Model.VideoUrl, @"youtu\.be/([^?]+)");
+                if (match3.Success) youtubeId = match3.Groups[1].Value;
+            }
+            
+            if (!string.IsNullOrEmpty(youtubeId))
+            {
+                <!-- YouTube Embed -->
+                <div class="ratio ratio-16x9 rounded-3 shadow-sm overflow-hidden">
+                    <iframe 
+                        src="https://www.youtube.com/embed/@youtubeId"
+                        class="w-100 h-100 multimedia-video-player"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen
+                        loading="lazy"
+                        style="border:0;">
+                    </iframe>
+                </div>
+            }
+        }
+        else
+        {
+            <!-- Generic Video Player -->
+            <video controls playsinline class="w-100 multimedia-video-player rounded-3 shadow-sm" style="max-height: 90vh; background: #000;">
+                <source src="@Model.VideoUrl" type="video/mp4">
+                Trình duyệt không hỗ trợ video này.
+            </video>
+        }
+
+        @* Small caption under the video *@
+        @if (!string.IsNullOrWhiteSpace(Model.VideoTitle))
+        {
+            <div class="video-caption mt-2 text-muted small text-center">@Model.VideoTitle</div>
+        }
+    </div>
+}

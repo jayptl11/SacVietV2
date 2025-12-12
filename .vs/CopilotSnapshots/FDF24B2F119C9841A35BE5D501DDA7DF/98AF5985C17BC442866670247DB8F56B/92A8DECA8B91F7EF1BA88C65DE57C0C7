@@ -1,0 +1,747 @@
+﻿@model SacViet.ViewModels.WriterStatsViewModel
+@{
+    ViewData["Title"] = "Writer Dashboard";
+}
+
+<div class="writer-dashboard-container">
+    <!-- Welcome Header -->
+    <div class="welcome-header mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="page-title">
+                    <i class="fas fa-pen-fancy text-primary me-2"></i>
+                    Chào mừng, @User.Identity?.Name!
+                </h2>
+                <p class="page-subtitle">
+                    <i class="far fa-calendar-alt me-2"></i>
+                    @DateTime.Now.ToString("dddd, dd/MM/yyyy")
+                </p>
+            </div>
+            <div class="text-end">
+                <small class="text-muted d-block">Không gian sáng tạo của bạn</small>
+                <strong class="text-primary">Writer Dashboard</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards Row 1 -->
+    <div class="row g-3 mb-4">
+        <!-- Total Articles -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card stat-card-primary">
+                <div class="stat-icon">
+                    <i class="fas fa-newspaper"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-label">Tổng bài viết</div>
+                    <div class="stat-value">@Model.TotalArticles</div>
+                </div>
+                <div class="stat-footer">
+                    <a href="@Url.Action("MyArticles", "Writer")" class="stat-link">
+                        Xem tất cả <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Draft Articles -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card stat-card-secondary">
+                <div class="stat-icon">
+                    <i class="fas fa-edit"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-label">Bài nháp</div>
+                    <div class="stat-value">@Model.DraftArticles</div>
+                </div>
+                <div class="stat-footer">
+                    <a href="@Url.Action("MyArticles", "Writer", new { status = "Draft" })" class="stat-link">
+                        Tiếp tục viết <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Articles -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card stat-card-warning">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-label">Chờ duyệt</div>
+                    <div class="stat-value">@Model.PendingArticles</div>
+                </div>
+                <div class="stat-footer">
+                    <a href="@Url.Action("MyArticles", "Writer", new { status = "Pending" })" class="stat-link">
+                        Xem chi tiết <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Published Articles -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card stat-card-success">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-label">Đã đăng</div>
+                    <div class="stat-value">@Model.PublishedArticles</div>
+                </div>
+                <div class="stat-footer">
+                    <a href="@Url.Action("MyArticles", "Writer", new { status = "Published" })" class="stat-link">
+                        Xem bài đăng <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards Row 2 -->
+    <div class="row g-3 mb-4">
+        <!-- Total Views -->
+        <div class="col-lg-4 col-md-6">
+            <div class="stat-card-mini stat-card-info">
+                <div class="stat-mini-icon">
+                    <i class="fas fa-eye"></i>
+                </div>
+                <div class="stat-mini-content">
+                    <div class="stat-mini-value">@Model.TotalViews.ToString("N0")</div>
+                    <div class="stat-mini-label">Lượt xem</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Approved Articles -->
+        <div class="col-lg-4 col-md-6">
+            <div class="stat-card-mini stat-card-approved">
+                <div class="stat-mini-icon">
+                    <i class="fas fa-thumbs-up"></i>
+                </div>
+                <div class="stat-mini-content">
+                    <div class="stat-mini-value">@Model.ApprovedArticles</div>
+                    <div class="stat-mini-label">Đã duyệt</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rejected Articles -->
+        <div class="col-lg-4 col-md-12">
+            <div class="stat-card-mini stat-card-danger">
+                <div class="stat-mini-icon">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <div class="stat-mini-content">
+                    <div class="stat-mini-value">@Model.RejectedArticles</div>
+                    <div class="stat-mini-label">Bị từ chối</div>
+                </div>
+                @if (Model.RejectedArticles > 0)
+                {
+                    <a href="@Url.Action("ApprovalHistory", "Writer")" class="stat-mini-link">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="quick-actions-card">
+                <div class="quick-actions-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bolt text-warning me-2"></i>
+                        Thao tác nhanh
+                    </h5>
+                </div>
+                <div class="quick-actions-body">
+                    <div class="row g-3">
+                        <div class="col-lg-3 col-md-6">
+                            <a href="@Url.Action("Create", "Writer")" class="action-button action-primary">
+                                <div class="action-icon">
+                                    <i class="fas fa-plus-circle"></i>
+                                </div>
+                                <div class="action-content">
+                                    <strong>Tạo bài mới</strong>
+                                    <small>Viết bài viết mới</small>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <a href="@Url.Action("MyArticles", "Writer", new { status = "Draft" })" class="action-button action-secondary">
+                                <div class="action-icon">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                                <div class="action-content">
+                                    <strong>Bài nháp</strong>
+                                    <small>@Model.DraftArticles bài</small>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <a href="@Url.Action("MyArticles", "Writer", new { status = "Pending" })" class="action-button action-warning">
+                                <div class="action-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="action-content">
+                                    <strong>Chờ duyệt</strong>
+                                    <small>@Model.PendingArticles bài</small>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <a href="@Url.Action("ApprovalHistory", "Writer")" class="action-button action-info">
+                                <div class="action-icon">
+                                    <i class="fas fa-history"></i>
+                                </div>
+                                <div class="action-content">
+                                    <strong>Lịch sử duyệt</strong>
+                                    <small>Xem chi tiết</small>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Section -->
+    <div class="row g-3">
+        <div class="col-lg-8">
+            <div class="progress-card">
+                <div class="progress-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line text-success me-2"></i>
+                        Thống kê hoạt động
+                    </h5>
+                </div>
+                <div class="progress-body">
+                    <div class="progress-item">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="progress-label">
+                                <i class="fas fa-check-circle text-success me-2"></i>Đã đăng
+                            </span>
+                            <span class="progress-value">@Model.PublishedArticles / @Model.TotalArticles</span>
+                        </div>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 style="width: @(Model.TotalArticles > 0 ? (Model.PublishedArticles * 100.0 / Model.TotalArticles).ToString("0.0") : "0")%">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="progress-item">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="progress-label">
+                                <i class="fas fa-clock text-warning me-2"></i>Chờ duyệt
+                            </span>
+                            <span class="progress-value">@Model.PendingArticles / @Model.TotalArticles</span>
+                        </div>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar bg-warning" role="progressbar" 
+                                 style="width: @(Model.TotalArticles > 0 ? (Model.PendingArticles * 100.0 / Model.TotalArticles).ToString("0.0") : "0")%">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="progress-item">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="progress-label">
+                                <i class="fas fa-edit text-secondary me-2"></i>Bài nháp
+                            </span>
+                            <span class="progress-value">@Model.DraftArticles / @Model.TotalArticles</span>
+                        </div>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar bg-secondary" role="progressbar" 
+                                 style="width: @(Model.TotalArticles > 0 ? (Model.DraftArticles * 100.0 / Model.TotalArticles).ToString("0.0") : "0")%">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="tips-card">
+                <div class="tips-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-lightbulb text-warning me-2"></i>
+                        Gợi ý hữu ích
+                    </h5>
+                </div>
+                <div class="tips-body">
+                    <div class="tip-item">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <div>
+                            <strong>Viết tiêu đề hấp dẫn</strong>
+                            <small>Tiêu đề ngắn gọn, súc tích</small>
+                        </div>
+                    </div>
+                    <div class="tip-item">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <div>
+                            <strong>Thêm hình ảnh</strong>
+                            <small>Ảnh đẹp thu hút người đọc</small>
+                        </div>
+                    </div>
+                    <div class="tip-item">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <div>
+                            <strong>Chọn danh mục đúng</strong>
+                            <small>Giúp bài viết dễ tìm hơn</small>
+                        </div>
+                    </div>
+                    <div class="tip-item">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <div>
+                            <strong>Kiểm tra lỗi chính tả</strong>
+                            <small>Bài viết chuyên nghiệp</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .writer-dashboard-container {
+        padding: 1.5rem;
+        background: #f8f9fa;
+        min-height: 100vh;
+    }
+
+    /* Welcome Header */
+    .welcome-header {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .page-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-subtitle {
+        color: #6c757d;
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    /* Stat Cards */
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.25rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+        height: 100%;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+
+    .stat-card-primary { border-left-color: #0d6efd; }
+    .stat-card-secondary { border-left-color: #6c757d; }
+    .stat-card-warning { border-left-color: #ffc107; }
+    .stat-card-success { border-left-color: #198754; }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .stat-card-primary .stat-icon {
+        background: rgba(13, 110, 253, 0.1);
+        color: #0d6efd;
+    }
+
+    .stat-card-secondary .stat-icon {
+        background: rgba(108, 117, 125, 0.1);
+        color: #6c757d;
+    }
+
+    .stat-card-warning .stat-icon {
+        background: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+    }
+
+    .stat-card-success .stat-icon {
+        background: rgba(25, 135, 84, 0.1);
+        color: #198754;
+    }
+
+    .stat-label {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-bottom: 0.25rem;
+        font-weight: 500;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2c3e50;
+        line-height: 1;
+        margin-bottom: 0.75rem;
+    }
+
+    .stat-footer {
+        padding-top: 0.75rem;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .stat-link {
+        font-size: 0.875rem;
+        color: #6c757d;
+        text-decoration: none;
+        transition: color 0.3s;
+    }
+
+    .stat-link:hover {
+        color: #0d6efd;
+    }
+
+    /* Mini Stat Cards */
+    .stat-card-mini {
+        background: white;
+        border-radius: 12px;
+        padding: 1.25rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card-mini:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+
+    .stat-card-mini::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+    }
+
+    .stat-card-info::before { background: #0dcaf0; }
+    .stat-card-approved::before { background: #198754; }
+    .stat-card-danger::before { background: #dc3545; }
+
+    .stat-mini-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        flex-shrink: 0;
+    }
+
+    .stat-card-info .stat-mini-icon {
+        background: rgba(13, 202, 240, 0.1);
+        color: #0dcaf0;
+    }
+
+    .stat-card-approved .stat-mini-icon {
+        background: rgba(25, 135, 84, 0.1);
+        color: #198754;
+    }
+
+    .stat-card-danger .stat-mini-icon {
+        background: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+    }
+
+    .stat-mini-content {
+        flex: 1;
+    }
+
+    .stat-mini-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #2c3e50;
+        line-height: 1;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-mini-label {
+        font-size: 0.875rem;
+        color: #6c757d;
+        font-weight: 500;
+    }
+
+    .stat-mini-link {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+        text-decoration: none;
+        transition: all 0.3s;
+        flex-shrink: 0;
+    }
+
+    .stat-mini-link:hover {
+        background: #0d6efd;
+        color: white;
+    }
+
+    /* Quick Actions */
+    .quick-actions-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    .quick-actions-header {
+        padding: 1.25rem;
+        border-bottom: 1px solid #e9ecef;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    }
+
+    .quick-actions-header h5 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .quick-actions-body {
+        padding: 1.25rem;
+    }
+
+    .action-button {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.25rem;
+        border-radius: 12px;
+        text-decoration: none;
+        transition: all 0.3s;
+        border: 2px solid transparent;
+        height: 100%;
+    }
+
+    .action-primary {
+        background: #e7f1ff;
+        border-color: #0d6efd;
+        color: #084298;
+    }
+
+    .action-primary:hover {
+        background: #0d6efd;
+        color: white;
+    }
+
+    .action-secondary {
+        background: #f8f9fa;
+        border-color: #6c757d;
+        color: #495057;
+    }
+
+    .action-secondary:hover {
+        background: #6c757d;
+        color: white;
+    }
+
+    .action-warning {
+        background: #fff9e6;
+        border-color: #ffc107;
+        color: #997404;
+    }
+
+    .action-warning:hover {
+        background: #ffc107;
+        color: #000;
+    }
+
+    .action-info {
+        background: #e7f6fd;
+        border-color: #0dcaf0;
+        color: #055160;
+    }
+
+    .action-info:hover {
+        background: #0dcaf0;
+        color: #000;
+    }
+
+    .action-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+        background: rgba(255, 255, 255, 0.5);
+    }
+
+    .action-content strong {
+        display: block;
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .action-content small {
+        display: block;
+        font-size: 0.85rem;
+        opacity: 0.8;
+    }
+
+    /* Progress Card */
+    .progress-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    .progress-header {
+        padding: 1.25rem;
+        border-bottom: 1px solid #e9ecef;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    }
+
+    .progress-header h5 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .progress-body {
+        padding: 1.5rem;
+    }
+
+    .progress-item {
+        margin-bottom: 1.5rem;
+    }
+
+    .progress-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .progress-label {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .progress-value {
+        font-size: 0.875rem;
+        color: #6c757d;
+        font-weight: 600;
+    }
+
+    /* Tips Card */
+    .tips-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        overflow: hidden;
+        height: 100%;
+    }
+
+    .tips-header {
+        padding: 1.25rem;
+        border-bottom: 1px solid #e9ecef;
+        background: linear-gradient(135deg, #fff9e6 0%, #ffffff 100%);
+    }
+
+    .tips-header h5 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .tips-body {
+        padding: 1.25rem;
+    }
+
+    .tip-item {
+        display: flex;
+        align-items: start;
+        gap: 0.875rem;
+        padding: 0.875rem;
+        margin-bottom: 0.75rem;
+        border-radius: 8px;
+        background: #f8f9fa;
+        transition: all 0.3s;
+    }
+
+    .tip-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .tip-item:hover {
+        background: #e7f1ff;
+        transform: translateX(4px);
+    }
+
+    .tip-item i {
+        font-size: 1.25rem;
+        flex-shrink: 0;
+        margin-top: 0.15rem;
+    }
+
+    .tip-item strong {
+        display: block;
+        font-size: 0.9rem;
+        color: #2c3e50;
+        margin-bottom: 0.25rem;
+    }
+
+    .tip-item small {
+        display: block;
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .writer-dashboard-container {
+            padding: 1rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+        }
+
+        .stat-mini-value {
+            font-size: 1.5rem;
+        }
+    }
+</style>

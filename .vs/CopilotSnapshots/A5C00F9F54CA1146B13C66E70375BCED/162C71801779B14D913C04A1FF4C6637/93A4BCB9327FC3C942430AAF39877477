@@ -1,0 +1,129 @@
+﻿HƯỚNG DẪN THÊM VIDEO VÀO VIEWS/ARTICLE/DETAILS.CSHTML
+======================================================
+
+Mở file Views/Article/Details.cshtml và thêm đoạn code sau TRƯỚC phần:
+@* NEW: Podcast Audio Player *@
+
+---
+
+@* NEW: Video Player for Multimedia *@
+@if (!string.IsNullOrEmpty(Model.VideoUrl))
+{
+    @{
+        var videoFileId = "";
+        var videoMatch = System.Text.RegularExpressions.Regex.Match(Model.VideoUrl, @"[?&]id=([^&]+)");
+        if (videoMatch.Success)
+        {
+            videoFileId = videoMatch.Groups[1].Value;
+        }
+        else
+        {
+            var videoMatch2 = System.Text.RegularExpressions.Regex.Match(Model.VideoUrl, @"/file/d/([^/\?]+)");
+            if (videoMatch2.Success)
+            {
+                videoFileId = videoMatch2.Groups[1].Value;
+            }
+        }
+    }
+    
+    <div class="multimedia-video-container mb-4 p-3 bg-light rounded border">
+        <div class="d-flex align-items-center mb-3">
+            <i class="fas fa-video text-danger me-2" style="font-size: 1.5rem;"></i>
+            <div>
+                <h5 class="mb-0 text-danger">Video Multimedia</h5>
+                <small class="text-muted">Xem video bên dưới</small>
+            </div>
+        </div>
+        
+        @if (!string.IsNullOrEmpty(videoFileId))
+        {
+            <!-- Google Drive Embed Video -->
+            <div class="video-player-wrapper" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px;">
+                <iframe 
+                    src="https://drive.google.com/file/d/@videoFileId/preview" 
+                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
+                    allow="autoplay"
+                    class="multimedia-video-player">
+                </iframe>
+            </div>
+            <small class="text-muted d-block mt-2 text-center" style="font-size: 0.75rem;">
+                <i class="fab fa-google-drive me-1"></i>Powered by Google Drive
+            </small>
+        }
+        else if (Model.VideoUrl.Contains("youtube.com") || Model.VideoUrl.Contains("youtu.be"))
+        {
+            @{
+                // Extract YouTube video ID
+                var youtubeId = "";
+                if (Model.VideoUrl.Contains("youtube.com/watch?v="))
+                {
+                    var match3 = System.Text.RegularExpressions.Regex.Match(Model.VideoUrl, @"[?&]v=([^&]+)");
+                    if (match3.Success) youtubeId = match3.Groups[1].Value;
+                }
+                else if (Model.VideoUrl.Contains("youtu.be/"))
+                {
+                    var match3 = System.Text.RegularExpressions.Regex.Match(Model.VideoUrl, @"youtu\.be/([^?]+)");
+                    if (match3.Success) youtubeId = match3.Groups[1].Value;
+                }
+            }
+            
+            @if (!string.IsNullOrEmpty(youtubeId))
+            {
+                <!-- YouTube Embed -->
+                <div class="video-player-wrapper" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px;">
+                    <iframe 
+                        src="https://www.youtube.com/embed/@youtubeId" 
+                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen
+                        class="multimedia-video-player">
+                    </iframe>
+                </div>
+                <small class="text-muted d-block mt-2 text-center" style="font-size: 0.75rem;">
+                    <i class="fab fa-youtube me-1"></i>Powered by YouTube
+                </small>
+            }
+        }
+        else
+        {
+            <!-- Generic Video Player -->
+            <div class="video-player-wrapper" style="border-radius: 12px; overflow: hidden;">
+                <video controls class="w-100 multimedia-video-player" style="max-height: 500px; background: #000;">
+                    <source src="@Model.VideoUrl" type="video/mp4">
+                    Trình duyệt không hỗ trợ video này.
+                </video>
+            </div>
+        }
+    </div>
+}
+
+---
+
+VỊ TRÍ CHÈN:
+Tìm dòng:
+    <h1 class="article-title fw-bold mb-3">@Model.Title</h1>
+    
+Sau đó tìm dòng:
+    @* NEW: Podcast Audio Player *@
+    
+Chèn đoạn code trên TRƯỚC dòng @* NEW: Podcast Audio Player *@
+
+---
+
+CÁCH HOẠT ĐỘNG:
+1. Khi người viết chọn chuyên mục "Multimedia Video" (slug: multimedia-video)
+2. Sẽ hiển thị card Video URL trong sidebar
+3. Có thể paste link Google Drive hoặc YouTube
+4. Xem trước video ngay trong form create/edit
+5. Khi publish, video sẽ hiển thị ở đầu bài viết trong Details.cshtml
+
+Đã hoàn thành:
+✅ Thêm cột VideoUrl vào database (Migration đã chạy)
+✅ Thêm VideoUrl vào models và ViewModels
+✅ Cập nhật WriterService để lưu/load VideoUrl
+✅ Thêm Video Card vào sidebar (_ArticleSidebar.cshtml)
+✅ Thêm JavaScript xử lý video (writer-article-form.js)
+✅ Cập nhật Create.cshtml và Edit.cshtml
+
+Còn lại:
+⚠️ BẠN CẦN: Thêm đoạn code trên vào Views/Article/Details.cshtml

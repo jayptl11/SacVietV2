@@ -1,0 +1,119 @@
+﻿@model SacViet.ViewModels.ArticleEditViewModel
+@using Microsoft.AspNetCore.Mvc.ModelBinding
+@using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata
+@{
+    ViewData["Title"] = "Chỉnh sửa bài viết";
+    var categories = ViewBag.Categories as IEnumerable<SacViet.Models.Category>;
+    var approval = ViewBag.ApprovalStatus as SacViet.Models.ArticleApproval;
+    var canEdit = Model.Status == "Draft" || Model.Status == "Rejected";
+}
+
+@* Link CSS - Base styles first, then Edit-specific *@
+<link rel="stylesheet" href="~/css/writer-article-form.css" />
+<link rel="stylesheet" href="~/css/writer-article-edit.css" />
+
+<div class="edit-article-container">
+    <!-- Page Header -->
+    @{
+        var headerData = new ViewDataDictionary(ViewData);
+        headerData["canEdit"] = canEdit;
+    }
+    @await Html.PartialAsync("_EditPageHeader", Model, headerData)
+
+    <!-- Status Alert -->
+    @if (approval != null)
+    {
+        @await Html.PartialAsync("_ApprovalStatusAlert", approval)
+    }
+
+    <form asp-action="Edit" asp-route-id="@Model.ArticleId" method="post" enctype="multipart/form-data">
+        <input type="hidden" asp-for="ArticleId" />
+        <input type="hidden" asp-for="Slug" />
+        <input type="hidden" asp-for="CreatedAt" />
+        
+        <div class="row g-4">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <!-- Content Form Fields -->
+                @{
+                    var contentData = new ViewDataDictionary(ViewData);
+                    contentData["CanEdit"] = canEdit;
+                    contentData["IsEditMode"] = true;
+                }
+                @await Html.PartialAsync("_ContentFormFields", Model, contentData)
+
+                <!-- Article Info Card -->
+                @await Html.PartialAsync("_ArticleInfoCard", Model)
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Status Card -->
+                @await Html.PartialAsync("_StatusCard", Model)
+
+                <!-- Actions Card (chỉ hiện khi có thể edit) -->
+                @if (canEdit)
+                {
+                    var actionData = new ViewDataDictionary(ViewData);
+                    actionData["isEditMode"] = true;
+                    @await Html.PartialAsync("_ActionButtons", Model, actionData)
+                }
+
+                <!-- Sidebar (Category, Thumbnail, Schedule, Tags) -->
+                @{
+                    var sidebarData = new ViewDataDictionary(new EmptyModelMetadataProvider(), new ModelStateDictionary());
+                    sidebarData["Categories"] = categories;
+                    sidebarData["ThumbnailImage"] = Model.ThumbnailImage;
+                    sidebarData["ScheduledPublishDate"] = Model.ScheduledPublishDate;
+                    sidebarData["Tags"] = Model.Tags;
+                    sidebarData["CanEdit"] = canEdit;
+                }
+                @await Html.PartialAsync("_ArticleSidebar", Model, sidebarData)
+
+                <!-- Approval History Link -->
+                @if (approval != null)
+                {
+                    <div class="mt-4">
+                        <a href="@Url.Action("ApprovalHistory", new { articleId = Model.ArticleId })" 
+                           class="btn btn-outline-info w-100">
+                            <i class="fas fa-history me-2"></i>Xem lịch sử duyệt
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+
+        @Html.AntiForgeryToken()
+    </form>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.ckeditor.com/4.20.1/standard/ckeditor.js"></script>
+    <script src="~/js/writer-article-form.js"></script>
+    <script>
+        var canEdit = @(canEdit ? "true" : "false");
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Init CKEditor
+            initCKEditor('@Url.Action("UploadImage", "Writer")');
+            
+            // Set readonly if cannot edit
+            if (!canEdit) {
+                CKEDITOR.instances.editor.setReadOnly(true);
+            }
+            
+            // Update CKEditor before submit
+            updateCKEditorBeforeSubmit();
+            
+            // Load existing tags
+            @if (Model.Tags != null && Model.Tags.Any())
+            {
+                <text>
+                tags = @Html.Raw(Json.Serialize(Model.Tags));
+                renderTags();
+                </text>
+            }
+        });
+    </script>
+}

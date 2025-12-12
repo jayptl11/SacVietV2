@@ -1,0 +1,28 @@
+﻿@model SacViet.ViewModels.ArticleEditViewModel
+@* Partial View: Article Info Card *@
+
+<div class="info-card">
+    <div class="info-grid">
+        <div class="info-item">
+            <i class="fas fa-calendar-plus"></i>
+            <div>
+                <small>Tạo lúc</small>
+                <strong>@Model.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</strong>
+            </div>
+        </div>
+        <div class="info-item">
+            <i class="fas fa-calendar-check"></i>
+            <div>
+                <small>Cập nhật</small>
+                <strong>@(Model.UpdatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa có")</strong>
+            </div>
+        </div>
+        <div class="info-item">
+            <i class="fas fa-link"></i>
+            <div>
+                <small>Slug</small>
+                <strong>@Model.Slug</strong>
+            </div>
+        </div>
+    </div>
+</div>

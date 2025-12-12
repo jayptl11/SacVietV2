@@ -1,0 +1,470 @@
+﻿@model AdminArticlesViewModel
+@{
+    ViewData["Title"] = "Quản lý bài viết";
+}
+
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h2 class="text-danger mb-0">
+                <i class="fas fa-newspaper me-2"></i>Quản lý bài viết
+            </h2>
+            <p class="text-muted">Tổng cộng @Model.TotalItems bài viết</p>
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Quay lại Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Trạng thái</label>
+                    <select name="status" class="form-select">
+                        <option value="">Tất cả</option>
+                        @if (Model.StatusFilter == "Draft") {
+                            <option value="Draft" selected>Nháp</option>
+                        } else {
+                            <option value="Draft">Nháp</option>
+                        }
+                        @if (Model.StatusFilter == "Pending") {
+                            <option value="Pending" selected>Chờ duyệt</option>
+                        } else {
+                            <option value="Pending">Chờ duyệt</option>
+                        }
+                        @if (Model.StatusFilter == "Published") {
+                            <option value="Published" selected>Đã đăng</option>
+                        } else {
+                            <option value="Published">Đã đăng</option>
+                        }
+                        @if (Model.StatusFilter == "Rejected") {
+                            <option value="Rejected" selected>Bị từ chối</option>
+                        } else {
+                            <option value="Rejected">Bị từ chối</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Tìm kiếm</label>
+                    <input type="text" name="search" class="form-control" placeholder="Tìm theo tiêu đề hoặc tác giả..." value="@Model.SearchQuery">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-2"></i>Tìm kiếm
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Articles Table -->
+    @if (Model.Items.Any())
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Bài viết</th>
+                                <th>Tác giả</th>
+                                <th>Danh mục</th>
+                                <th>Trạng thái</th>
+                                <th>Ngày tạo</th>
+                                <th>Lượt xem</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var article in Model.Items)
+                            {
+                                <tr id="article-@article.ArticleId">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            @if (!string.IsNullOrEmpty(article.ThumbnailImage))
+                                            {
+                                                <img src="@article.ThumbnailImage" alt="@article.Title" 
+                                                     class="rounded me-3" style="width: 60px; height: 40px; object-fit: cover;">
+                                            }
+                                            else
+                                            {
+                                                <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" 
+                                                     style="width: 60px; height: 40px;">
+                                                    <i class="fas fa-image text-muted"></i>
+                                                </div>
+                                            }
+                                            <div>
+                                                <h6 class="mb-1">@article.Title</h6>
+                                                @if (article.IsFeatured)
+                                                {
+                                                    <span class="badge bg-warning text-dark">
+                                                        <i class="fas fa-star me-1"></i>Nổi bật
+                                                    </span>
+                                                }
+                                                @if (!string.IsNullOrEmpty(article.RejectionReason))
+                                                {
+                                                    <small class="text-danger d-block">
+                                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                                        @article.RejectionReason
+                                                    </small>
+                                                }
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="text-nowrap">@article.AuthorName</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">@article.CategoryName</span>
+                                    </td>
+                                    <td>
+                                        @switch (article.Status)
+                                        {
+                                            case "Draft":
+                                                <span class="badge bg-secondary">
+                                                    <i class="fas fa-file-alt me-1"></i>Nháp
+                                                </span>
+                                                break;
+                                            case "Pending":
+                                                <span class="badge bg-warning">
+                                                    <i class="fas fa-clock me-1"></i>Chờ duyệt
+                                                </span>
+                                                break;
+                                            case "Published":
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check-circle me-1"></i>Đã đăng
+                                                </span>
+                                                break;
+                                            case "Rejected":
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-times-circle me-1"></i>Từ chối
+                                                </span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="text-nowrap">
+                                            @article.CreatedAt.ToString("dd/MM/yyyy")
+                                            @if (article.PublishedAt.HasValue)
+                                            {
+                                                <br><small class="text-muted">Đăng: @article.PublishedAt?.ToString("dd/MM/yyyy")</small>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">
+                                            <i class="fas fa-eye me-1"></i>@article.ViewCount.ToString("N0")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" 
+                                                    data-bs-toggle="dropdown">
+                                                <i class="fas fa-cog"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                @if (article.Status == "Pending")
+                                                {
+                                                    <li>
+                                                        <a class="dropdown-item text-success" href="#" 
+                                                           onclick="approveArticle(@article.ArticleId)">
+                                                            <i class="fas fa-check me-2"></i>Duyệt bài
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item text-danger" href="#" 
+                                                           onclick="rejectArticle(@article.ArticleId)">
+                                                            <i class="fas fa-times me-2"></i>Từ chối
+                                                        </a>
+                                                    </li>
+                                                }
+                                                @if (article.Status == "Published")
+                                                {
+                                                    <li>
+                                                        <a class="dropdown-item" href="@Url.Action("Details", "Article", new { slug = article.Slug })" target="_blank">
+                                                            <i class="fas fa-eye me-2"></i>Xem bài viết
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item text-warning" href="#" 
+                                                           onclick="unpublishArticle(@article.ArticleId)">
+                                                            <i class="fas fa-eye-slash me-2"></i>Gỡ bài
+                                                        </a>
+                                                    </li>
+                                                }
+                                                @if (article.Status == "Draft")
+                                                {
+                                                    <li>
+                                                        <a class="dropdown-item text-success" href="#" 
+                                                           onclick="publishArticle(@article.ArticleId)">
+                                                            <i class="fas fa-globe me-2"></i>Đăng bài
+                                                        </a>
+                                                    </li>
+                                                }
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li>
+                                                    <a class="dropdown-item" href="#" 
+                                                       onclick="toggleFeatured(@article.ArticleId)">
+                                                        <i class="fas fa-star me-2"></i>
+                                                        @(article.IsFeatured ? "Bỏ nổi bật" : "Đặt nổi bật")
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item text-danger" href="#" 
+                                                       onclick="deleteArticle(@article.ArticleId)">
+                                                        <i class="fas fa-trash me-2"></i>Xóa bài
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        @if (Model.TotalPages > 1)
+        {
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    @if (Model.HasPreviousPage)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("Articles", new { status = Model.StatusFilter, search = Model.SearchQuery, page = Model.CurrentPage - 1 })">
+                                Trước
+                            </a>
+                        </li>
+                    }
+
+                    @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+                    {
+                        <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                            <a class="page-link" href="@Url.Action("Articles", new { status = Model.StatusFilter, search = Model.SearchQuery, page = i })">
+                                @i
+                            </a>
+                        </li>
+                    }
+
+                    @if (Model.HasNextPage)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("Articles", new { status = Model.StatusFilter, search = Model.SearchQuery, page = Model.CurrentPage + 1 })">
+                                Sau
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-newspaper fa-4x text-muted mb-3"></i>
+                <h5 class="text-muted">Không tìm thấy bài viết nào</h5>
+                <p class="text-muted">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Rejection Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Từ chối bài viết</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Lý do từ chối <span class="text-danger">*</span></label>
+                    <textarea id="rejectionReason" class="form-control" rows="4" 
+                              placeholder="Nhập lý do từ chối bài viết..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger" onclick="confirmReject()">Từ chối</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentArticleId = 0;
+
+        // Get anti-forgery token
+        function getAntiForgeryToken() {
+            return document.querySelector('input[name="__RequestVerificationToken"]').value;
+        }
+
+        function approveArticle(articleId) {
+            if (!confirm('Bạn có chắc chắn muốn duyệt bài viết này?')) return;
+
+            const note = prompt('Ghi chú (không bắt buộc):');
+            
+            const formData = new FormData();
+            formData.append('articleId', articleId);
+            formData.append('note', note || '');
+            formData.append('__RequestVerificationToken', getAntiForgeryToken());
+
+            fetch('@Url.Action("ApproveArticle")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('Lỗi: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra. Vui lòng thử lại.');
+            });
+        }
+
+        function rejectArticle(articleId) {
+            currentArticleId = articleId;
+            document.getElementById('rejectionReason').value = '';
+            new bootstrap.Modal(document.getElementById('rejectModal')).show();
+        }
+
+        function confirmReject() {
+            const reason = document.getElementById('rejectionReason').value.trim();
+            if (!reason) {
+                alert('Vui lòng nhập lý do từ chối');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('articleId', currentArticleId);
+            formData.append('note', reason);
+            formData.append('__RequestVerificationToken', getAntiForgeryToken());
+
+            fetch('@Url.Action("RejectArticle")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('Lỗi: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra. Vui lòng thử lại.');
+            });
+        }
+
+        function publishArticle(articleId) {
+            if (!confirm('Bạn có chắc chắn muốn đăng bài viết này?')) return;
+
+            const formData = new FormData();
+            formData.append('articleId', articleId);
+            formData.append('__RequestVerificationToken', getAntiForgeryToken());
+
+            fetch('@Url.Action("PublishArticle")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('Lỗi: ' + data.message);
+                }
+            });
+        }
+
+        function unpublishArticle(articleId) {
+            if (!confirm('Bạn có chắc chắn muốn gỡ bài viết này?')) return;
+
+            const formData = new FormData();
+            formData.append('articleId', articleId);
+            formData.append('__RequestVerificationToken', getAntiForgeryToken());
+
+            fetch('@Url.Action("UnpublishArticle")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('Lỗi: ' + data.message);
+                }
+            });
+        }
+
+        function toggleFeatured(articleId) {
+            const formData = new FormData();
+            formData.append('articleId', articleId);
+            formData.append('__RequestVerificationToken', getAntiForgeryToken());
+
+            fetch('@Url.Action("ToggleFeaturedArticle")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('Lỗi: ' + data.message);
+                }
+            });
+        }
+
+        function deleteArticle(articleId) {
+            if (!confirm('CẢNH BÁO: Bạn có chắc chắn muốn xóa bài viết này?\nHành động này không thể hoàn tác!')) return;
+
+            const formData = new FormData();
+            formData.append('articleId', articleId);
+            formData.append('__RequestVerificationToken', getAntiForgeryToken());
+
+            fetch('@Url.Action("DeleteArticle")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('Lỗi: ' + data.message);
+                }
+            });
+        }
+    </script>
+}
+
+@Html.AntiForgeryToken()

@@ -1,0 +1,339 @@
+﻿@model AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="text-danger mb-0">
+                <i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard
+            </h1>
+            <p class="text-muted">Tổng quan hệ thống quản lý nội dung</p>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="fas fa-newspaper fa-lg"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="small text-muted">Tổng bài viết</div>
+                            <div class="h4 mb-0">@Model.TotalArticles.ToString("N0")</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="fas fa-clock fa-lg"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="small text-muted">Chờ duyệt</div>
+                            <div class="h4 mb-0">@Model.PendingArticles.ToString("N0")</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="fas fa-users fa-lg"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="small text-muted">Tổng người dùng</div>
+                            <div class="h4 mb-0">@Model.TotalUsers.ToString("N0")</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="fas fa-eye fa-lg"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="small text-muted">Tổng lượt xem</div>
+                            <div class="h4 mb-0">@Model.TotalViews.ToString("N0")</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bolt me-2"></i>Thao tác nhanh
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <a href="@Url.Action("Articles", "Admin", new { status = "Pending" })" class="btn btn-outline-warning w-100">
+                                <i class="fas fa-clock me-2"></i>Duyệt bài viết
+                                @if (Model.PendingArticles > 0)
+                                {
+                                    <span class="badge bg-warning text-dark ms-2">@Model.PendingArticles</span>
+                                }
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="@Url.Action("Articles", "Admin")" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-newspaper me-2"></i>Quản lý bài viết
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="@Url.Action("Users", "Admin")" class="btn btn-outline-success w-100">
+                                <i class="fas fa-users me-2"></i>Quản lý người dùng
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="@Url.Action("Settings", "Admin")" class="btn btn-outline-secondary w-100">
+                                <i class="fas fa-cog me-2"></i>Cài đặt hệ thống
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Recent Articles -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clock me-2"></i>Bài viết mới nhất
+                    </h5>
+                    <a href="@Url.Action("Articles", "Admin")" class="btn btn-sm btn-outline-primary">
+                        Xem tất cả
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.RecentArticles.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var article in Model.RecentArticles)
+                            {
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1">@article.Title</h6>
+                                            <p class="mb-1 text-muted small">
+                                                <i class="fas fa-user me-1"></i>@article.AuthorName
+                                                <span class="ms-2">
+                                                    <i class="fas fa-calendar me-1"></i>@article.CreatedAt.ToString("dd/MM/yyyy")
+                                                </span>
+                                            </p>
+                                        </div>
+                                        <div class="flex-shrink-0 ms-3">
+                                            @switch (article.Status)
+                                            {
+                                                case "Draft":
+                                                    <span class="badge bg-secondary">Nháp</span>
+                                                    break;
+                                                case "Pending":
+                                                    <span class="badge bg-warning">Chờ duyệt</span>
+                                                    break;
+                                                case "Published":
+                                                    <span class="badge bg-success">Đã đăng</span>
+                                                    break;
+                                                case "Rejected":
+                                                    <span class="badge bg-danger">Từ chối</span>
+                                                    break;
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4 text-muted">
+                            <i class="fas fa-inbox fa-3x mb-3"></i>
+                            <p>Chưa có bài viết nào</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Articles -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-fire me-2"></i>Bài viết hot nhất
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.TopArticles.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var article in Model.TopArticles)
+                            {
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1">@article.Title</h6>
+                                            <p class="mb-1 text-muted small">
+                                                <i class="fas fa-user me-1"></i>@article.AuthorName
+                                            </p>
+                                        </div>
+                                        <div class="flex-shrink-0 ms-3">
+                                            <span class="badge bg-primary">
+                                                <i class="fas fa-eye me-1"></i>@article.ViewCount.ToString("N0")
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4 text-muted">
+                            <i class="fas fa-chart-line fa-3x mb-3"></i>
+                            <p>Chưa có dữ liệu</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Users -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-plus me-2"></i>Người dùng mới
+                    </h5>
+                    <a href="@Url.Action("Users", "Admin")" class="btn btn-sm btn-outline-primary">
+                        Xem tất cả
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.RecentUsers.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var user in Model.RecentUsers)
+                            {
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1">@user.FullName</h6>
+                                            <p class="mb-1 text-muted small">
+                                                <i class="fas fa-envelope me-1"></i>@user.Email
+                                                <span class="ms-2">
+                                                    <i class="fas fa-calendar me-1"></i>@user.CreatedAt.ToString("dd/MM/yyyy")
+                                                </span>
+                                            </p>
+                                        </div>
+                                        <div class="flex-shrink-0 ms-3">
+                                            <span class="badge bg-@(user.Role == "Admin" ? "danger" : user.Role == "Writer" ? "warning" : "secondary")">
+                                                @user.Role
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4 text-muted">
+                            <i class="fas fa-users fa-3x mb-3"></i>
+                            <p>Chưa có người dùng mới</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Stats Chart -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Thống kê theo tháng
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="monthlyChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Monthly Stats Chart
+        const ctx = document.getElementById('monthlyChart').getContext('2d');
+        const monthlyData = @Html.Raw(Json.Serialize(Model.MonthlyStats));
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: monthlyData.map(d => d.month),
+                datasets: [{
+                    label: 'Bài viết',
+                    data: monthlyData.map(d => d.articles),
+                    borderColor: '#dc3545',
+                    backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                    tension: 0.4
+                }, {
+                    label: 'Người dùng',
+                    data: monthlyData.map(d => d.users),
+                    borderColor: '#198754',
+                    backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+}

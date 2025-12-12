@@ -1,0 +1,40 @@
+﻿@{
+    var articleUrl = ViewBag.ArticleUrl as string ?? "";
+    var encodedUrl = Uri.EscapeDataString(articleUrl);
+    var encodedTitle = Uri.EscapeDataString(Model.Title);
+}
+
+<!-- Enhanced Social Share -->
+<div class="social-share mt-4 pt-3 border-top no-print">
+    <h6 class="mb-3">
+        <i class="fas fa-share-alt me-2"></i>Chia sẻ bài viết:
+    </h6>
+    <div class="share-buttons d-flex flex-wrap align-items-center">
+        <a href="https://www.facebook.com/sharer/sharer.php?u=@encodedUrl" 
+           target="_blank" 
+           class="btn btn-outline-primary btn-sm share-btn"
+           onclick="shareWindow(this.href); return false;">
+            <i class="fab fa-facebook-f"></i>Facebook
+        </a>
+        <a href="https://twitter.com/intent/tweet?url=@encodedUrl&text=@encodedTitle" 
+           target="_blank" 
+           class="btn btn-outline-info btn-sm share-btn"
+           onclick="shareWindow(this.href); return false;">
+            <i class="fab fa-twitter"></i>Twitter
+        </a>
+        <a href="https://api.whatsapp.com/send?text=@encodedTitle @encodedUrl" 
+           target="_blank" 
+           class="btn btn-outline-success btn-sm share-btn">
+            <i class="fab fa-whatsapp"></i>WhatsApp
+        </a>
+        <a href="https://www.linkedin.com/sharing/share-offsite/?url=@encodedUrl" 
+           target="_blank" 
+           class="btn btn-outline-primary btn-sm share-btn"
+           onclick="shareWindow(this.href); return false;">
+            <i class="fab fa-linkedin-in"></i>LinkedIn
+        </a>
+        <button class="btn btn-outline-secondary btn-sm share-btn" onclick="copyToClipboard('@articleUrl')">
+            <i class="fas fa-link"></i>Sao chép liên kết
+        </button>
+    </div>
+</div>

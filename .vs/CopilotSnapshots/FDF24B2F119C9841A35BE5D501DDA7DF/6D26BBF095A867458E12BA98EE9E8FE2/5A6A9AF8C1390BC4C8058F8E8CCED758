@@ -1,0 +1,161 @@
+﻿@model SacViet.ViewModels.WriterStatsViewModel
+@{
+    ViewData["Title"] = "Writer Dashboard";
+}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="text-danger">
+                <i class="fas fa-tachometer-alt me-2"></i>Writer Dashboard
+            </h2>
+            <p class="text-muted">Chào mừng bạn đến với bảng điều khiển tác giả</p>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-newspaper fa-3x text-primary"></i>
+                    </div>
+                    <h3 class="mb-0">@Model.TotalArticles</h3>
+                    <p class="text-muted mb-0">Tổng bài viết</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-file-alt fa-3x text-secondary"></i>
+                    </div>
+                    <h3 class="mb-0">@Model.DraftArticles</h3>
+                    <p class="text-muted mb-0">Bài nháp</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-clock fa-3x text-warning"></i>
+                    </div>
+                    <h3 class="mb-0">@Model.PendingArticles</h3>
+                    <p class="text-muted mb-0">Chờ duyệt</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-check-circle fa-3x text-success"></i>
+                    </div>
+                    <h3 class="mb-0">@Model.PublishedArticles</h3>
+                    <p class="text-muted mb-0">Đã đăng</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-eye fa-3x text-info"></i>
+                    </div>
+                    <h3 class="mb-0">@Model.TotalViews.ToString("N0")</h3>
+                    <p class="text-muted mb-0">Tổng lượt xem</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-thumbs-up fa-3x text-success"></i>
+                    </div>
+                    <h3 class="mb-0">@Model.ApprovedArticles</h3>
+                    <p class="text-muted mb-0">Đã duyệt</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-times-circle fa-3x text-danger"></i>
+                    </div>
+                    <h3 class="mb-0">@Model.RejectedArticles</h3>
+                    <p class="text-muted mb-0">Bị từ chối</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bolt me-2"></i>Thao tác nhanh
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <a href="@Url.Action("Create", "Writer")" class="btn btn-primary w-100 py-3">
+                                <i class="fas fa-plus-circle me-2"></i>Tạo bài viết mới
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="@Url.Action("MyArticles", "Writer", new { status = "Draft" })" class="btn btn-outline-secondary w-100 py-3">
+                                <i class="fas fa-file-alt me-2"></i>Xem bài nháp
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="@Url.Action("MyArticles", "Writer", new { status = "Pending" })" class="btn btn-outline-warning w-100 py-3">
+                                <i class="fas fa-clock me-2"></i>Bài chờ duyệt
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="@Url.Action("MyArticles", "Writer", new { status = "Published" })" class="btn btn-outline-success w-100 py-3">
+                                <i class="fas fa-check-circle me-2"></i>Bài đã đăng
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+
+    .btn {
+        transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+</style>

@@ -1,0 +1,288 @@
+/* Reusable Components */
+
+/* Buttons */
+.btn {
+    transition: all 0.3s ease;
+    font-family: var(--font-summary);
+}
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+.btn-danger {
+    background-color: var(--primary-red) !important;
+    border-color: var(--primary-red) !important;
+    font-weight: 500;
+}
+
+    .btn-danger:hover {
+        background-color: var(--dark-red) !important;
+        border-color: var(--dark-red) !important;
+    }
+
+.btn-outline-danger {
+    color: var(--primary-red) !important;
+    border-color: var(--primary-red) !important;
+    font-weight: 500;
+}
+
+    .btn-outline-danger:hover {
+        background-color: var(--primary-red) !important;
+        border-color: var(--primary-red) !important;
+        color: white !important;
+    }
+
+/* Badges */
+.badge {
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+    transition: all 0.3s ease;
+    font-family: var(--font-summary);
+    color: white;
+}
+
+    .badge:hover {
+        transform: scale(1.05);
+    }
+
+    .badge.bg-danger {
+        background-color: var(--primary-red) !important;
+    }
+
+/* Category Badge */
+.category-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-radius: 4px;
+    font-family: var(--font-summary);
+}
+
+/* Bootstrap Overrides */
+.bg-danger {
+    background-color: var(--primary-red) !important;
+}
+
+.text-danger {
+    color: var(--primary-red) !important;
+}
+
+/* Form Controls */
+.form-control:focus {
+    border-color: var(--primary-red);
+    box-shadow: 0 0 0 0.2rem rgba(152, 7, 0, 0.25);
+}
+
+.form-select:focus {
+    border-color: var(--primary-red);
+    box-shadow: 0 0 0 0.2rem rgba(152, 7, 0, 0.25);
+}
+
+/* Pagination */
+.pagination .page-link {
+    color: var(--primary-red);
+    border-color: var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--primary-red);
+    border-color: var(--primary-red);
+}
+
+.pagination .page-link:hover {
+    color: white;
+    background-color: var(--primary-red);
+    border-color: var(--primary-red);
+    transform: translateY(-2px);
+}
+
+/* Search Modal - Compact Design at Top Right */
+.modal-dialog-end {
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    margin: 0;
+    max-width: 400px;
+    width: 100%;
+    animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+#searchModal .modal-content {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+#searchModal .modal-header {
+    padding: 1rem 1.25rem;
+}
+
+#searchModal .modal-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+#searchModal .modal-body {
+    padding: 1.5rem;
+}
+
+#searchModal .form-control {
+    border-radius: 8px 0 0 8px;
+    border-right: none;
+    padding: 0.6rem 1rem;
+}
+
+#searchModal .input-group .btn {
+    border-radius: 0 8px 8px 0;
+    padding: 0.6rem 1.25rem;
+}
+
+#searchModal .btn-sm {
+    font-size: 0.85rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+#searchModal .btn-outline-secondary {
+    border-color: #dee2e6;
+    color: #6c757d;
+}
+
+#searchModal .btn-outline-secondary:hover {
+    background-color: var(--primary-red);
+    border-color: var(--primary-red);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Mobile adjustments for search modal */
+@media (max-width: 768px) {
+    .modal-dialog-end {
+        position: fixed;
+        top: 0;
+        right: 0;
+        left: 0;
+        bottom: 0;
+        max-width: 100%;
+        margin: 0;
+        height: 100vh;
+    }
+
+    #searchModal .modal-content {
+        height: 100%;
+        border-radius: 0;
+    }
+}
+
+/* Toast Notification */
+.toast-notification {
+    position: fixed;
+    bottom: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    color: var(--text-dark);
+    padding: 1rem 1.5rem;
+    border-radius: 50px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    transition: bottom 0.3s ease;
+    border: 2px solid var(--primary-red);
+    font-family: var(--font-summary);
+}
+
+    .toast-notification.show {
+        bottom: 30px;
+    }
+
+    .toast-notification i {
+        color: var(--primary-red);
+        font-size: 1.2rem;
+    }
+
+/* Scroll to Top Button */
+.scroll-to-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-red), var(--dark-red));
+    color: white;
+    border: none;
+    box-shadow: 0 4px 20px rgba(152, 7, 0, 0.4);
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+    .scroll-to-top.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .scroll-to-top:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(152, 7, 0, 0.6);
+    }
+
+/* Reading Progress Bar */
+.reading-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-red), var(--dark-red));
+    z-index: 9999;
+    transition: width 0.1s ease;
+}
+
+/* Social Links */
+.social-links a {
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+    .social-links a:hover {
+        color: var(--primary-red) !important;
+        transform: translateY(-3px);
+    }
+
+/* Footer */
+footer {
+    font-size: 0.9rem;
+    font-family: var(--font-summary);
+}
+
+    footer h5, footer h6 {
+        color: var(--primary-red) !important;
+        font-family: var(--font-title);
+    }
+
+    footer a {
+        transition: color 0.3s ease;
+    }
+
+        footer a:hover {
+            color: var(--primary-red) !important;
+        }

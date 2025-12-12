@@ -1,0 +1,229 @@
+﻿@* Partial View: Article Content Form Fields *@
+@using SacViet.ViewModels
+
+@* Accept both Create and Edit ViewModels *@
+@model object
+
+@{
+    var createVm = Model as ArticleCreateViewModel;
+    var editVm = Model as ArticleEditViewModel;
+    var videos = (IList<MediaLinkViewModel>)(editVm?.Videos ?? createVm?.Videos ?? new List<MediaLinkViewModel>());
+    var images = (IList<MediaLinkViewModel>)(editVm?.Images ?? createVm?.Images ?? new List<MediaLinkViewModel>());
+}
+
+<div class="content-card mb-4">
+    <div class="content-card-header">
+        <h5 class="mb-0">
+            <i class="fas fa-file-alt text-primary me-2"></i>
+            Nội dung bài viết
+        </h5>
+    </div>
+    <div class="content-card-body">
+        <!-- Title -->
+        <div class="form-group-modern mb-4">
+            <label class="form-label-modern">
+                <i class="fas fa-heading me-2"></i>Tiêu đề <span class="text-danger">*</span>
+            </label>
+            <input name="Title" 
+                   value="@(Model is ArticleEditViewModel edit ? edit.Title : (Model as ArticleCreateViewModel)?.Title)" 
+                   class="form-control-modern"
+                   placeholder="Nhập tiêu đề hấp dẫn cho bài viết..."
+                   required
+                   maxlength="500" />
+            <span class="validation-message"></span>
+            <small class="form-hint">Tiêu đề nên ngắn gọn, súc tích và thu hút</small>
+        </div>
+
+        <!-- Summary -->
+        <div class="form-group-modern mb-4">
+            <label class="form-label-modern">
+                <i class="fas fa-align-left me-2"></i>Tóm tắt
+            </label>
+            <textarea name="Summary" 
+                      class="form-control-modern" 
+                      rows="3"
+                      placeholder="Viết tóm tắt ngắn gọn về nội dung bài viết..."
+                      maxlength="1000">@(Model is ArticleEditViewModel editSum ? editSum.Summary : (Model as ArticleCreateViewModel)?.Summary)</textarea>
+            <span class="validation-message"></span>
+            <small class="form-hint">Tóm tắt giúp người đọc nắm nhanh nội dung</small>
+        </div>
+
+        <!-- Content -->
+        <div class="form-group-modern">
+            <label class="form-label-modern">
+                <i class="fas fa-paragraph me-2"></i>Nội dung <span class="text-danger">*</span>
+            </label>
+            <textarea name="Content" 
+                      id="editor" 
+                      class="form-control-modern" 
+                      rows="10"
+                      required>@(Model is ArticleEditViewModel editContent ? editContent.Content : (Model as ArticleCreateViewModel)?.Content)</textarea>
+            <span class="validation-message"></span>
+        </div>
+
+        <!-- Multi Video Links -->
+        <div class="form-group-modern mt-4">
+            <label class="form-label-modern">
+                <i class="fas fa-video me-2"></i>Video (nhiều link, có thể nhập tiêu đề)
+            </label>
+            <div id="video-links">
+                @if (videos.Count == 0) { videos.Add(new MediaLinkViewModel()); }
+                @for (int i = 0; i < videos.Count; i++)
+                {
+                    <div class="row g-2 align-items-center mb-2 video-row">
+                        <div class="col-6">
+                            <input name="Videos[@i].Url" value="@videos[i]?.Url" class="form-control" placeholder="Video URL" />
+                        </div>
+                        <div class="col-4">
+                            <input name="Videos[@i].Title" value="@videos[i]?.Title" class="form-control" placeholder="Tiêu đề (tuỳ chọn)" />
+                        </div>
+                        <div class="col-2 text-end d-flex gap-2 justify-content-end">
+                            <button type="button" class="btn btn-outline-secondary btn-insert" title="Chèn vào nội dung" onclick="insertVideoRowToken(this)"><i class="fas fa-level-down-alt"></i></button>
+                            <button type="button" class="btn btn-outline-danger" title="Xoá" onclick="deleteVideoRow(this)"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                }
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="addVideoRow()"><i class="fas fa-plus"></i> Thêm link video</button>
+            <small class="form-hint d-block mt-1">Nhấn biểu tượng mũi tên để chèn token ngay tại vị trí con trỏ trong nội dung</small>
+        </div>
+
+        <!-- Multi Image Links -->
+        <div class="form-group-modern mt-4">
+            <label class="form-label-modern">
+                <i class="fas fa-image me-2"></i>Ảnh (nhiều link, có thể nhập tiêu đề)
+            </label>
+            <div id="image-links">
+                @if (images.Count == 0) { images.Add(new MediaLinkViewModel()); }
+                @for (int i = 0; i < images.Count; i++)
+                {
+                    <div class="row g-2 align-items-center mb-2 image-row">
+                        <div class="col-6">
+                            <input name="Images[@i].Url" value="@images[i]?.Url" class="form-control" placeholder="Image URL" />
+                        </div>
+                        <div class="col-4">
+                            <input name="Images[@i].Title" value="@images[i]?.Title" class="form-control" placeholder="Tiêu đề (tuỳ chọn)" />
+                        </div>
+                        <div class="col-2 text-end d-flex gap-2 justify-content-end">
+                            <button type="button" class="btn btn-outline-secondary btn-insert" title="Chèn vào nội dung" onclick="insertImageRowToken(this)"><i class="fas fa-level-down-alt"></i></button>
+                            <button type="button" class="btn btn-outline-danger" title="Xoá" onclick="deleteImageRow(this)"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                }
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="addImageRow()"><i class="fas fa-plus"></i> Thêm link ảnh</button>
+        </div>
+    </div>
+</div>
+
+<script>
+function addVideoRow() {
+  const container = document.getElementById('video-links');
+  const index = container.querySelectorAll('.video-row').length;
+  const row = document.createElement('div');
+  row.className = 'row g-2 align-items-center mb-2 video-row';
+  row.innerHTML = `
+    <div class="col-6"><input name="Videos[${index}].Url" class="form-control" placeholder="Video URL" /></div>
+    <div class="col-4"><input name="Videos[${index}].Title" class="form-control" placeholder="Tiêu đề (tuỳ chọn)" /></div>
+    <div class="col-2 text-end d-flex gap-2 justify-content-end">
+        <button type=\"button\" class=\"btn btn-outline-secondary btn-insert\" title=\"Chèn vào nội dung\" onclick=\"insertVideoRowToken(this)\"><i class=\"fas fa-level-down-alt\"></i></button>
+        <button type=\"button\" class=\"btn btn-outline-danger\" title=\"Xoá\" onclick=\"deleteVideoRow(this)\"><i class=\"fas fa-trash\"></i></button>
+    </div>`;
+  container.appendChild(row);
+}
+function addImageRow() {
+  const container = document.getElementById('image-links');
+  const index = container.querySelectorAll('.image-row').length;
+  const row = document.createElement('div');
+  row.className = 'row g-2 align-items-center mb-2 image-row';
+  row.innerHTML = `
+    <div class="col-6"><input name="Images[${index}].Url" class="form-control" placeholder="Image URL" /></div>
+    <div class="col-4"><input name="Images[${index}].Title" class="form-control" placeholder="Tiêu đề (tuỳ chọn)" /></div>
+    <div class="col-2 text-end d-flex gap-2 justify-content-end">
+        <button type=\"button\" class=\"btn btn-outline-secondary btn-insert\" title=\"Chèn vào nội dung\" onclick=\"insertImageRowToken(this)\"><i class=\"fas fa-level-down-alt\"></i></button>
+        <button type=\"button\" class=\"btn btn-outline-danger\" title=\"Xoá\" onclick=\"deleteImageRow(this)\"><i class=\"fas fa-trash\"></i></button>
+    </div>`;
+  container.appendChild(row);
+}
+
+function markRowInserted(row) {
+  const btn = row.querySelector('.btn-insert');
+  if (btn) {
+    btn.disabled = true;
+    btn.classList.remove('btn-outline-secondary');
+    btn.classList.add('btn-success');
+    btn.innerHTML = '<i class="fas fa-check"></i> Đã chèn';
+  }
+  row.dataset.inserted = '1';
+}
+
+function removeTokenFromEditorBy(type, url) {
+  const ed = (window.CKEDITOR && CKEDITOR.instances && CKEDITOR.instances.editor) ? CKEDITOR.instances.editor : null;
+  const ta = document.getElementById('editor');
+  let html = ed ? ed.getData() : (ta ? ta.value : '');
+  if (!html) return;
+  const esc = url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const tokenInner = `\\[${type}\\b[^\\]]*url=(?:\"|&quot;)${esc}(?:\"|&quot;)[^\\]]*\\]`;
+  const wrapper = new RegExp(`(?:<p[^>]*>\\s*)?${tokenInner}(?:\\s*</p>)?`, 'gi');
+  html = html.replace(wrapper, '');
+  // clean empty paragraphs
+  html = html.replace(/<p>\s*<\/p>/gi, '');
+  if (ed) ed.setData(html); else if (ta) ta.value = html;
+}
+
+function insertVideoRowToken(btn) {
+  const row = btn.closest('.video-row');
+  const url = (row.querySelector("input[name$='].Url']")?.value || '').trim() || (row.querySelector("input[name*='Videos'][name$='.Url']")?.value || '').trim();
+  const title = (row.querySelector("input[name$='].Title']")?.value || '').trim() || (row.querySelector("input[name*='Videos'][name$='.Title']")?.value || '').trim();
+  if (!url) { alert('Vui lòng nhập Video URL'); return; }
+  if (btn.disabled) return; // already inserted
+  const token = title ? `[SV-VIDEO url="${url}" title="${title.replace(/"/g,'\\"')}"]` : `[SV-VIDEO url="${url}"]`;
+  if (window.insertTokenToEditor && window.insertTokenToEditor(token)) {
+    markRowInserted(row);
+  }
+}
+
+function insertImageRowToken(btn) {
+  const row = btn.closest('.image-row');
+  const url = (row.querySelector("input[name$='].Url']")?.value || '').trim() || (row.querySelector("input[name*='Images'][name$='.Url']")?.value || '').trim();
+  const title = (row.querySelector("input[name$='].Title']")?.value || '').trim() || (row.querySelector("input[name*='Images'][name$='.Title']")?.value || '').trim();
+  if (!url) { alert('Vui lòng nhập Image URL'); return; }
+  if (btn.disabled) return; // already inserted
+  const token = title ? `[SV-IMAGE url="${url}" title="${title.replace(/"/g,'\\"')}"]` : `[SV-IMAGE url="${url}"]`;
+  if (window.insertTokenToEditor && window.insertTokenToEditor(token)) {
+    markRowInserted(row);
+  }
+}
+
+function deleteVideoRow(btn) {
+  const row = btn.closest('.video-row');
+  const urlInput = row.querySelector("input[name*='Videos'][name$='.Url']");
+  const url = (urlInput && urlInput.value || '').trim();
+  if (url) removeTokenFromEditorBy('SV-VIDEO', url);
+  row.remove();
+}
+
+function deleteImageRow(btn) {
+  const row = btn.closest('.image-row');
+  const urlInput = row.querySelector("input[name*='Images'][name$='.Url']");
+  const url = (urlInput && urlInput.value || '').trim();
+  if (url) removeTokenFromEditorBy('SV-IMAGE', url);
+  row.remove();
+}
+
+// Re-enable insert button if user edits the URL/Title after insert
+(function attachChangeHandlers() {
+  document.addEventListener('input', function(e){
+    const row = e.target.closest('.video-row, .image-row');
+    if (!row) return;
+    const btn = row.querySelector('.btn-insert');
+    if (btn && btn.disabled) {
+      btn.disabled = false;
+      btn.classList.remove('btn-success');
+      btn.classList.add('btn-outline-secondary');
+      btn.innerHTML = '<i class="fas fa-level-down-alt"></i>';
+      row.dataset.inserted = '0';
+    }
+  });
+})();
+</script>

@@ -1,0 +1,106 @@
+/* Responsive Design and Media Queries */
+
+/* Mobile Responsive */
+@media (max-width: 767px) {
+    body {
+        padding-top: 0;
+    }
+
+    .container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .logo-large {
+        font-size: 2.5rem;
+    }
+
+    .category-menu {
+        display: none !important;
+    }
+
+    .latest-timeline {
+        max-height: 500px;
+    }
+
+    .scroll-to-top {
+        width: 40px;
+        height: 40px;
+        bottom: 20px;
+        right: 20px;
+    }
+
+    .article-title {
+        font-size: 1.5rem;
+    }
+
+    .article-content {
+        font-size: 1rem;
+    }
+}
+
+/* Tablet and Desktop Media Queries */
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+
+    .logo-large {
+        font-size: 4rem;
+    }
+
+    .logo-text-compact {
+        font-size: 1.5rem;
+    }
+
+    .section-heading {
+        font-size: 1.3rem;
+    }
+
+    .main-featured-article .main-title {
+        font-size: 2rem;
+    }
+
+    .main-featured-article .main-summary {
+        font-size: 1.1rem;
+    }
+
+    .news-card-title {
+        font-size: 1.2rem;
+    }
+
+    .news-card-summary {
+        font-size: 0.9rem;
+    }
+
+    .article-content {
+        font-size: 1.15rem;
+    }
+
+    .article-title {
+        font-size: 2.5rem;
+    }
+
+    .article-summary {
+        font-size: 1.3rem;
+    }
+}
+
+/* Large Desktop */
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1140px;
+    }
+}
+
+/* Extra Large Desktop */
+@media (min-width: 1400px) {
+    .container {
+        max-width: 1320px;
+    }
+}

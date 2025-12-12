@@ -1,0 +1,138 @@
+﻿@model SacViet.Models.Article
+@{
+    ViewData["Title"] = Model.Title;
+    var currentUserName = User.Identity?.Name ?? "";
+    var currentUserAvatar = User.FindFirst("Avatar")?.Value ?? "";
+}
+
+@* Link external CSS *@
+<link rel="stylesheet" href="~/css/podcast-audio-player.css" />
+<link rel="stylesheet" href="~/css/article-details.css" />
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Article Header -->
+            <article class="article-detail">
+                @await Html.PartialAsync("_ArticleHeader", Model)
+
+                <!-- Article Content -->
+                @await Html.PartialAsync("_ArticleContent", Model)
+
+                <!-- Social Share -->
+                @await Html.PartialAsync("_SocialShare", Model)
+
+                <!-- Comments Section -->
+                @await Html.PartialAsync("_CommentsSection", Model)
+            </article>
+        </div>
+
+        <!-- Sidebar -->
+        @await Html.PartialAsync("_Sidebar")
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/article-details.js"></script>
+    <script>
+        // Global variables for current user
+        const currentUserName = '@currentUserName';
+        const currentUserAvatar = '@currentUserAvatar';
+
+        // AJAX Comment Submission
+        document.addEventListener('DOMContentLoaded', function() {
+            // Use event delegation for dynamically added forms
+            document.addEventListener('submit', function(e) {
+                if (e.target.classList.contains('comment-form-ajax')) {
+                    e.preventDefault();
+                    
+                    const form = e.target;
+                    const submitBtn = form.querySelector('.submit-comment-btn');
+                    const textarea = form.querySelector('.comment-textarea');
+                    const content = textarea.value.trim();
+                    const articleId = form.getAttribute('data-article-id');
+                    const parentId = form.getAttribute('data-parent-id');
+                    const token = form.querySelector('input[name="__RequestVerificationToken"]').value;
+                    
+                    if (!content) {
+                        showNotification('Vui lòng nhập nội dung bình luận!', 'warning');
+                        return;
+                    }
+                    
+                    // Disable button and show loading
+                    submitBtn.disabled = true;
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Đang gửi...';
+                    
+                    // Show notification
+                    showNotification('Đang gửi bình luận, vui lòng chờ...', 'info');
+                    
+                    // Send AJAX request
+                    fetch('@Url.Action("AddComment", "Article")', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: new URLSearchParams({
+                            articleId: articleId,
+                            content: content,
+                            parentCommentId: parentId || '',
+                            __RequestVerificationToken: token
+                        })
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            // Clear textarea
+                            textarea.value = '';
+                            
+                            // Add comment to DOM
+                            addCommentToDOM(data.comment);
+                            
+                            // Update comment count
+                            updateCommentCount();
+                            
+                            // If it's a reply form, hide it
+                            if (parentId) {
+                                form.closest('.reply-form').style.display = 'none';
+                            }
+                            
+                            // Show success message
+                            showNotification('Bình luận đã được gửi thành công!', 'success');
+                        } else {
+                            showNotification(data.message || 'Có lỗi xảy ra. Vui lòng thử lại.', 'danger');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showNotification('Có lỗi xảy ra khi gửi bình luận. Vui lòng thử lại.', 'danger');
+                    })
+                    .finally(() => {
+                        // Re-enable button
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalText;
+                    });
+                }
+            });
+            
+            // Also handle Enter key in textarea (Shift+Enter for new line, Enter to submit)
+            document.addEventListener('keydown', function(e) {
+                if (e.target.classList.contains('comment-textarea')) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        const form = e.target.closest('.comment-form-ajax');
+                        if (form) {
+                            form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+}

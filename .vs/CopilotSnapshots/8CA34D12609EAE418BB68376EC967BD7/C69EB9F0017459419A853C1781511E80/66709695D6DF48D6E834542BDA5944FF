@@ -1,0 +1,51 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using SacViet.Services;
+using SacViet.ViewModels;
+
+namespace SacViet.Controllers
+{
+    public class CategoryController : Controller
+    {
+        private readonly INewsService _newsService;
+        private readonly ILogger<CategoryController> _logger;
+
+        public CategoryController(INewsService newsService, ILogger<CategoryController> logger)
+        {
+            _newsService = newsService;
+            _logger = logger;
+        }
+
+        [Route("category/{categorySlug}")]
+        public async Task<IActionResult> Index(string categorySlug, int page = 1)
+        {
+            try
+            {
+                // For now, we'll use categoryId directly. In production, you'd resolve slug to ID
+                if (!int.TryParse(categorySlug, out int categoryId))
+                {
+                    return NotFound();
+                }
+
+                var (articles, totalCount) = await _newsService.GetArticlesByCategoryAsync(categoryId, page, 12);
+                var categories = await _newsService.GetNavigationCategoriesAsync();
+
+                var viewModel = new SearchViewModel
+                {
+                    CategoryId = categoryId,
+                    Page = page,
+                    PageSize = 12,
+                    TotalCount = totalCount,
+                    Articles = articles,
+                    Categories = categories
+                };
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading category page for {CategorySlug}", categorySlug);
+                return NotFound();
+            }
+        }
+    }
+}

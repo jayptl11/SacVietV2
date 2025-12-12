@@ -1,0 +1,425 @@
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+
+namespace SacViet.Models;
+
+public partial class SacVietContext : DbContext
+{
+    public SacVietContext()
+    {
+    }
+
+    public SacVietContext(DbContextOptions<SacVietContext> options)
+        : base(options)
+    {
+    }
+
+    public virtual DbSet<Article> Articles { get; set; }
+
+    public virtual DbSet<ArticleApproval> ArticleApprovals { get; set; }
+
+    public virtual DbSet<ArticleMedium> ArticleMedia { get; set; }
+
+    public virtual DbSet<ArticleRevision> ArticleRevisions { get; set; }
+
+    public virtual DbSet<ArticleInlineMedia> ArticleInlineMedia { get; set; } // NEW
+
+    public virtual DbSet<Category> Categories { get; set; }
+
+    public virtual DbSet<Comment> Comments { get; set; }
+
+    public virtual DbSet<Medium> Media { get; set; }
+
+    public virtual DbSet<Otp> Otps { get; set; }
+
+    public virtual DbSet<Role> Roles { get; set; }
+
+    public virtual DbSet<SavedArticle> SavedArticles { get; set; }
+
+    public virtual DbSet<Tag> Tags { get; set; }
+
+    public virtual DbSet<User> Users { get; set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) { }
+    //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+    //        => optionsBuilder.UseSqlServer("Data Source=localhost;Initial Catalog=SacViet;User ID=sa;Password=123456;TrustServerCertificate=True;");
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Article>(entity =>
+        {
+            entity.HasKey(e => e.ArticleId).HasName("PK__Articles__9C6270C8B6DA63E2");
+
+            entity.HasIndex(e => e.AuthorId, "IX_Articles_AuthorID");
+
+            entity.HasIndex(e => e.CategoryId, "IX_Articles_CategoryID");
+
+            entity.HasIndex(e => e.PublishedAt, "IX_Articles_PublishedAt").IsDescending();
+
+            entity.HasIndex(e => e.Slug, "IX_Articles_Slug");
+
+            entity.HasIndex(e => e.Status, "IX_Articles_Status");
+
+            entity.HasIndex(e => e.Slug, "UQ__Articles__BC7B5FB63380EC19").IsUnique();
+
+            entity.Property(e => e.ArticleId).HasColumnName("ArticleID");
+            entity.Property(e => e.AuthorId).HasColumnName("AuthorID");
+            entity.Property(e => e.CategoryId).HasColumnName("CategoryID");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.PublishedAt).HasColumnType("datetime");
+            entity.Property(e => e.Slug).HasMaxLength(500);
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .HasDefaultValue("DRAFT");
+            entity.Property(e => e.Summary).HasMaxLength(1000);
+            entity.Property(e => e.ThumbnailImage).HasMaxLength(500);
+            entity.Property(e => e.ImageUrl).HasMaxLength(500); // NEW: map ImageUrl
+            entity.Property(e => e.Title).HasMaxLength(500);
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.ViewCount).HasDefaultValue(0);
+
+            entity.HasOne(d => d.Author).WithMany(p => p.Articles)
+                .HasForeignKey(d => d.AuthorId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Articles__Author__59FA5E80");
+
+            entity.HasOne(d => d.Category).WithMany(p => p.Articles)
+                .HasForeignKey(d => d.CategoryId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Articles__Catego__59063A47");
+
+            entity.HasMany(d => d.Tags).WithMany(p => p.Articles)
+                .UsingEntity<Dictionary<string, object>>(
+                    "ArticleTag",
+                    r => r.HasOne<Tag>().WithMany()
+                        .HasForeignKey("TagId")
+                        .HasConstraintName("FK__ArticleTa__TagID__70DDC3D8"),
+                    l => l.HasOne<Article>().WithMany()
+                        .HasForeignKey("ArticleId")
+                        .HasConstraintName("FK__ArticleTa__Artic__6FE99F9F"),
+                    j =>
+                    {
+                        j.HasKey("ArticleId", "TagId").HasName("PK__ArticleT__4A35BF6C181DB007");
+                        j.ToTable("ArticleTags");
+                        j.IndexerProperty<int>("ArticleId").HasColumnName("ArticleID");
+                        j.IndexerProperty<int>("TagId").HasColumnName("TagID");
+                    });
+        });
+
+        modelBuilder.Entity<ArticleApproval>(entity =>
+        {
+            entity.HasKey(e => e.ApprovalId).HasName("PK__ArticleA__328477D4E09C466F");
+
+            entity.HasIndex(e => e.ArticleId, "IX_ArticleApprovals_ArticleID");
+
+            entity.HasIndex(e => e.ReviewedByUserId, "IX_ArticleApprovals_ReviewedBy");
+
+            entity.HasIndex(e => e.Status, "IX_ArticleApprovals_Status");
+
+            entity.HasIndex(e => e.SubmittedAt, "IX_ArticleApprovals_SubmittedAt").IsDescending();
+
+            entity.Property(e => e.ApprovalId).HasColumnName("ApprovalID");
+            entity.Property(e => e.ArticleId).HasColumnName("ArticleID");
+            entity.Property(e => e.ReviewNote).HasMaxLength(1000);
+            entity.Property(e => e.ReviewedAt).HasColumnType("datetime");
+            entity.Property(e => e.ReviewedByUserId).HasColumnName("ReviewedByUserID");
+            entity.Property(e => e.Status).HasMaxLength(20);
+            entity.Property(e => e.SubmittedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.SubmittedByUserId).HasColumnName("SubmittedByUserID");
+
+            entity.HasOne(d => d.Article).WithMany(p => p.ArticleApprovals)
+                .HasForeignKey(d => d.ArticleId)
+                .HasConstraintName("FK__ArticleAp__Artic__5EBF139D");
+
+            entity.HasOne(d => d.ReviewedByUser).WithMany(p => p.ArticleApprovalReviewedByUsers)
+                .HasForeignKey(d => d.ReviewedByUserId)
+                .HasConstraintName("FK__ArticleAp__Revie__60A75C0F");
+
+            entity.HasOne(d => d.SubmittedByUser).WithMany(p => p.ArticleApprovalSubmittedByUsers)
+                .HasForeignKey(d => d.SubmittedByUserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__ArticleAp__Submi__5FB337D6");
+        });
+
+        modelBuilder.Entity<ArticleMedium>(entity =>
+        {
+            entity.HasKey(e => e.ArticleMediaId).HasName("PK__ArticleM__D397F9703DF6A470");
+
+            entity.Property(e => e.ArticleMediaId).HasColumnName("ArticleMediaID");
+            entity.Property(e => e.AltText).HasMaxLength(255);
+            entity.Property(e => e.ArticleId).HasColumnName("ArticleID");
+            entity.Property(e => e.Caption).HasMaxLength(500);
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.DisplayOrder).HasDefaultValue(0);
+            entity.Property(e => e.MediaId).HasColumnName("MediaID");
+            entity.Property(e => e.MediaType).HasMaxLength(20);
+
+            entity.HasOne(d => d.Article).WithMany(p => p.ArticleMedia)
+                .HasForeignKey(d => d.ArticleId)
+                .HasConstraintName("FK__ArticleMe__Artic__6C190EBB");
+
+            entity.HasOne(d => d.Media).WithMany(p => p.ArticleMedia)
+                .HasForeignKey(d => d.MediaId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__ArticleMe__Media__6D0D32F4");
+        });
+
+        modelBuilder.Entity<ArticleRevision>(entity =>
+        {
+            entity.HasKey(e => e.RevisionId).HasName("PK__ArticleR__B4B1E3F100059CC7");
+
+            entity.Property(e => e.RevisionId).HasColumnName("RevisionID");
+            entity.Property(e => e.ArticleId).HasColumnName("ArticleID");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.EditedByUserId).HasColumnName("EditedByUserID");
+            entity.Property(e => e.Title).HasMaxLength(500);
+
+            entity.HasOne(d => d.Article).WithMany(p => p.ArticleRevisions)
+                .HasForeignKey(d => d.ArticleId)
+                .HasConstraintName("FK__ArticleRe__Artic__02084FDA");
+
+            entity.HasOne(d => d.EditedByUser).WithMany(p => p.ArticleRevisions)
+                .HasForeignKey(d => d.EditedByUserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__ArticleRe__Edite__02FC7413");
+        });
+
+        modelBuilder.Entity<Category>(entity =>
+        {
+            entity.HasKey(e => e.CategoryId).HasName("PK__Categori__19093A2BF2DB60A4");
+
+            entity.HasIndex(e => e.Slug, "UQ__Categori__BC7B5FB6D4CB6FD1").IsUnique();
+
+            entity.Property(e => e.CategoryId).HasColumnName("CategoryID");
+            entity.Property(e => e.CategoryName).HasMaxLength(255);
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.DisplayOrder).HasDefaultValue(0);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.ParentCategoryId).HasColumnName("ParentCategoryID");
+            entity.Property(e => e.Slug).HasMaxLength(255);
+
+            entity.HasOne(d => d.ParentCategory).WithMany(p => p.InverseParentCategory)
+                .HasForeignKey(d => d.ParentCategoryId)
+                .HasConstraintName("FK__Categorie__Paren__4CA06362");
+        });
+
+        modelBuilder.Entity<Comment>(entity =>
+        {
+            entity.HasKey(e => e.CommentId).HasName("PK__Comments__C3B4DFAADE4551DD");
+
+            entity.HasIndex(e => e.ArticleId, "IX_Comments_ArticleID");
+
+            entity.Property(e => e.CommentId).HasColumnName("CommentID");
+            entity.Property(e => e.ArticleId).HasColumnName("ArticleID");
+            entity.Property(e => e.Content).HasMaxLength(1000);
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.IsApproved).HasDefaultValue(false);
+            entity.Property(e => e.ParentCommentId).HasColumnName("ParentCommentID");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.UserId).HasColumnName("UserID");
+
+            entity.HasOne(d => d.Article).WithMany(p => p.Comments)
+                .HasForeignKey(d => d.ArticleId)
+                .HasConstraintName("FK__Comments__Articl__7C4F7684");
+
+            entity.HasOne(d => d.ParentComment).WithMany(p => p.InverseParentComment)
+                .HasForeignKey(d => d.ParentCommentId)
+                .HasConstraintName("FK__Comments__Parent__7E37BEF6");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Comments)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Comments__UserID__7D439ABD");
+        });
+
+        modelBuilder.Entity<Medium>(entity =>
+        {
+            entity.HasKey(e => e.MediaId).HasName("PK__Media__B2C2B5AF1C9DB33D");
+
+            entity.Property(e => e.MediaId).HasColumnName("MediaID");
+            entity.Property(e => e.FileName).HasMaxLength(255);
+            entity.Property(e => e.FileType).HasMaxLength(50);
+            entity.Property(e => e.FileUrl).HasMaxLength(500);
+            entity.Property(e => e.IsPublic).HasDefaultValue(true);
+            entity.Property(e => e.MimeType).HasMaxLength(100);
+            entity.Property(e => e.OriginalFileName).HasMaxLength(255);
+            entity.Property(e => e.StoragePath).HasMaxLength(500);
+            entity.Property(e => e.ThumbnailUrl).HasMaxLength(500);
+            entity.Property(e => e.UploadedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.UploadedByUserId).HasColumnName("UploadedByUserID");
+            entity.Property(e => e.UsageCount).HasDefaultValue(0);
+
+            entity.HasOne(d => d.UploadedByUser).WithMany(p => p.Media)
+                .HasForeignKey(d => d.UploadedByUserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Media__UploadedB__6754599E");
+        });
+
+        modelBuilder.Entity<Otp>(entity =>
+        {
+            entity.HasKey(e => e.Otpid).HasName("PK__OTP__5C2EC562D663BAA7");
+
+            entity.ToTable("OTP");
+
+            entity.HasIndex(e => new { e.UserId, e.ExpiresAt }, "IX_OTP_UserID_ExpiresAt");
+
+            entity.Property(e => e.Otpid).HasColumnName("OTPID");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.ExpiresAt).HasColumnType("datetime");
+            entity.Property(e => e.IsUsed).HasDefaultValue(false);
+            entity.Property(e => e.Otpcode)
+                .HasMaxLength(6)
+                .HasColumnName("OTPCode");
+            entity.Property(e => e.Purpose).HasMaxLength(50);
+            entity.Property(e => e.UserId).HasColumnName("UserID");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Otps)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__OTP__UserID__45F365D3");
+        });
+
+        modelBuilder.Entity<Role>(entity =>
+        {
+            entity.HasKey(e => e.RoleId).HasName("PK__Roles__8AFACE3ACF12B551");
+
+            entity.HasIndex(e => e.RoleName, "UQ__Roles__8A2B6160AA111C4C").IsUnique();
+
+            entity.Property(e => e.RoleId).HasColumnName("RoleID");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Description).HasMaxLength(255);
+            entity.Property(e => e.RoleName).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<SavedArticle>(entity =>
+        {
+            entity.HasKey(e => e.SaveId).HasName("PK__SavedArt__1450D38615164245");
+
+            entity.HasIndex(e => e.UserId, "IX_SavedArticles_UserID");
+
+            entity.HasIndex(e => new { e.UserId, e.ArticleId }, "UQ__SavedArt__8E4EEBA1050D8D38").IsUnique();
+
+            entity.Property(e => e.SaveId).HasColumnName("SaveID");
+            entity.Property(e => e.ArticleId).HasColumnName("ArticleID");
+            entity.Property(e => e.SavedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.UserId).HasColumnName("UserID");
+
+            entity.HasOne(d => d.Article).WithMany(p => p.SavedArticles)
+                .HasForeignKey(d => d.ArticleId)
+                .HasConstraintName("FK__SavedArti__Artic__76969D2E");
+
+            entity.HasOne(d => d.User).WithMany(p => p.SavedArticles)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK__SavedArti__UserI__75A278F5");
+        });
+
+        modelBuilder.Entity<Tag>(entity =>
+        {
+            entity.HasKey(e => e.TagId).HasName("PK__Tags__657CFA4CBBAA6BFE");
+
+            entity.HasIndex(e => e.Slug, "UQ__Tags__BC7B5FB62895EC7A").IsUnique();
+
+            entity.HasIndex(e => e.TagName, "UQ__Tags__BDE0FD1DA0F2342E").IsUnique();
+
+            entity.Property(e => e.TagId).HasColumnName("TagID");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Slug).HasMaxLength(100);
+            entity.Property(e => e.TagName).HasMaxLength(100);
+        });
+
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.HasKey(e => e.UserId).HasName("PK__Users__1788CCAC90CBAA31");
+
+            entity.HasIndex(e => e.Email, "IX_Users_Email");
+
+            entity.HasIndex(e => e.GoogleId, "IX_Users_GoogleID");
+
+            entity.HasIndex(e => e.RoleId, "IX_Users_RoleID");
+
+            // Replace unique index on GoogleID (which blocked multiple NULLs) with a filtered unique index
+            entity.HasIndex(e => e.GoogleId, "UQ_Users_GoogleID_NotNull")
+                  .IsUnique()
+                  .HasFilter("([GoogleID] IS NOT NULL)");
+
+            entity.HasIndex(e => e.Email, "UQ__Users__A9D10534E42BCE1C").IsUnique();
+
+            entity.Property(e => e.UserId).HasColumnName("UserID");
+            entity.Property(e => e.Avatar).HasMaxLength(500);
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Email).HasMaxLength(255);
+            entity.Property(e => e.FullName).HasMaxLength(255);
+            entity.Property(e => e.GoogleId)
+                .HasMaxLength(255)
+                .HasColumnName("GoogleID");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.IsEmailVerified).HasDefaultValue(false);
+            entity.Property(e => e.LastLogin).HasColumnType("datetime");
+            entity.Property(e => e.PasswordHash).HasMaxLength(255);
+            entity.Property(e => e.RoleId).HasColumnName("RoleID");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+
+            entity.HasOne(d => d.Role).WithMany(p => p.Users)
+                .HasForeignKey(d => d.RoleId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Users__RoleID__412EB0B6");
+        });
+
+        modelBuilder.Entity<ArticleInlineMedia>(entity =>
+        {
+            entity.HasKey(e => e.InlineMediaId);
+            entity.ToTable("ArticleInlineMedia");
+
+            entity.Property(e => e.InlineMediaId).HasColumnName("InlineMediaID");
+            entity.Property(e => e.ArticleId).HasColumnName("ArticleID");
+            entity.Property(e => e.MediaType).HasMaxLength(20);
+            entity.Property(e => e.Url).HasMaxLength(1000);
+            entity.Property(e => e.Title).HasMaxLength(500);
+            entity.Property(e => e.DisplayOrder).HasDefaultValue(0);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())").HasColumnType("datetime");
+
+            entity.HasIndex(e => new { e.ArticleId, e.DisplayOrder }, "IX_ArticleInlineMedia_Article_DisplayOrder");
+
+            entity.HasOne(d => d.Article)
+                  .WithMany(p => p.InlineMedia)
+                  .HasForeignKey(d => d.ArticleId)
+                  .HasConstraintName("FK_ArticleInlineMedia_Articles");
+        });
+
+        OnModelCreatingPartial(modelBuilder);
+    }
+
+    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+}

@@ -1,0 +1,17 @@
+/* CSS Custom Properties and Variables */
+:root {
+    --primary-red: #980700;
+    --dark-red: #7a0600;
+    --light-red: #ffd6d3;
+    --text-dark: #212529;
+    --text-muted: #6c757d;
+    --border-color: #dee2e6;
+    --timeline-color: #e0e0e0;
+    --text-white: white;
+    
+    /* Typography */
+    --font-title: 'Playfair Display', serif;
+    --font-summary: 'Alata', sans-serif;
+    --font-content: Arial, sans-serif;
+    --font-ui: Arial, sans-serif;
+}

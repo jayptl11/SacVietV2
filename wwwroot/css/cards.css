@@ -1,0 +1,181 @@
+/* News Cards and Article Cards */
+
+/* News Cards */
+.news-card-home {
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+    .news-card-home:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.15) !important;
+        border-color: var(--light-red);
+    }
+
+.news-card-title {
+    font-size: 1.1rem;
+    line-height: 1.4;
+    font-weight: 700;
+}
+
+@media (min-width: 768px) {
+    .news-card-title {
+        font-size: 1.2rem;
+    }
+}
+
+.news-card-title a {
+    transition: color 0.2s ease;
+    color: var(--text-dark);
+}
+
+    .news-card-title a:hover {
+        color: var(--primary-red) !important;
+    }
+
+.news-card-summary {
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+@media (min-width: 768px) {
+    .news-card-summary {
+        font-size: 0.9rem;
+    }
+}
+
+/* Enhanced Layout Styles for Diverse Category Displays */
+
+/* Layout 2: Featured + Grid Enhancements */
+.col-md-6 .news-card-home .news-image-home {
+    position: relative;
+    overflow: hidden;
+}
+
+    .col-md-6 .news-card-home .news-image-home::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, rgba(152, 7, 0, 0.1) 0%, transparent 50%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 1;
+    }
+
+.col-md-6 .news-card-home:hover .news-image-home::before {
+    opacity: 1;
+}
+
+/* Layout 3: Horizontal Card Enhancements */
+.secondary-card.row.g-0 {
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent;
+}
+
+    .secondary-card.row.g-0:hover {
+        border-left-color: var(--primary-red);
+        transform: translateX(5px);
+    }
+
+/* Layout 4: Mixed Grid Enhancements */
+.col-md-8 .news-card-home {
+    position: relative;
+}
+
+    .col-md-8 .news-card-home::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 5px;
+        height: 100%;
+        background: linear-gradient(to bottom, var(--primary-red), var(--dark-red));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .col-md-8 .news-card-home:hover::before {
+        opacity: 1;
+    }
+
+/* Small article cards in sidebar layouts */
+.col-md-4 .secondary-card {
+    transition: all 0.3s ease;
+    border-radius: 8px !important;
+}
+
+    .col-md-4 .secondary-card:hover {
+        background: linear-gradient(135deg, #fff 0%, #fffafa 100%) !important;
+        transform: scale(1.02);
+    }
+
+/* Badge enhancements for different layouts */
+.badge.fs-6 {
+    font-size: 0.9rem !important;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* Enhanced hover effects for article titles in different layouts */
+h4.news-card-title a:hover,
+h5.news-card-title a:hover,
+h6.news-card-title a:hover {
+    text-shadow: 0 1px 3px rgba(152, 7, 0, 0.2);
+}
+
+/* Layout-specific responsive adjustments */
+@media (max-width: 768px) {
+    .col-md-6 .news-card-home .news-image-home {
+        height: 250px !important;
+    }
+    
+    .col-md-8 .news-card-home .news-image-home {
+        height: 200px !important;
+    }
+    
+    .secondary-card.row.g-0 .col-md-4 img {
+        height: 150px !important;
+    }
+    
+    .col-md-4 .secondary-card .row.g-2 img {
+        height: 80px !important;
+    }
+}
+
+/* Enhanced spacing for diverse layouts */
+.category-section-header {
+    position: relative;
+    padding-bottom: 15px;
+}
+
+    .category-section-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary-red), var(--dark-red));
+        border-radius: 2px;
+    }
+
+/* Loading animation for category sections */
+@keyframes categoryFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.container[id^="category-"] {
+    animation: categoryFadeIn 0.6s ease-out;
+}

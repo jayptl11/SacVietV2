@@ -1,0 +1,90 @@
+﻿using SacViet.Models;
+using SacViet.Repositories;
+
+namespace SacViet.Services
+{
+    public class NewsService : INewsService
+    {
+        private readonly IArticleRepository _articleRepository;
+        private readonly ICategoryRepository _categoryRepository;
+
+        public NewsService(IArticleRepository articleRepository, ICategoryRepository categoryRepository)
+        {
+            _articleRepository = articleRepository;
+            _categoryRepository = categoryRepository;
+        }
+
+        public async Task<IEnumerable<Article>> GetFeaturedArticlesAsync()
+        {
+            return await _articleRepository.GetFeaturedArticlesAsync(5);
+        }
+
+        public async Task<IEnumerable<Article>> GetLatestArticlesAsync()
+        {
+            return await _articleRepository.GetLatestArticlesAsync(12);
+        }
+
+        public async Task<IEnumerable<Category>> GetNavigationCategoriesAsync()
+        {
+            return await _categoryRepository.GetMainCategoriesAsync();
+        }
+
+        public async Task<IEnumerable<Category>> GetAllCategoriesAsync()
+        {
+            return await _categoryRepository.GetAllCategoriesAsync();
+        }
+
+        public async Task<Article?> GetArticleDetailsAsync(string slug)
+        {
+            var article = await _articleRepository.GetArticleBySlugAsync(slug);
+            
+            // Increment view count (you might want to implement this logic with proper tracking)
+            if (article != null)
+            {
+                // This is a simplified version - in production you'd want to track unique views
+                // article.ViewCount = (article.ViewCount ?? 0) + 1;
+                // await _context.SaveChangesAsync();
+            }
+            
+            return article;
+        }
+
+        public async Task<IEnumerable<Article>> GetRelatedArticlesAsync(int articleId, int categoryId)
+        {
+            var articles = await _articleRepository.GetArticlesByCategoryAsync(categoryId, 1, 6);
+            return articles.Where(a => a.ArticleId != articleId).Take(4);
+        }
+
+        public async Task<(IEnumerable<Article> Articles, int TotalCount)> SearchArticlesAsync(string keyword, int? categoryId = null, int? authorId = null, DateTime? fromDate = null, DateTime? toDate = null, int page = 1, int pageSize = 10)
+        {
+            var articles = await _articleRepository.SearchArticlesAsync(keyword, categoryId, authorId, fromDate, toDate, page, pageSize);
+            var totalCount = await _articleRepository.GetSearchResultsCountAsync(keyword, categoryId, authorId, fromDate, toDate);
+            
+            return (articles, totalCount);
+        }
+
+        public async Task<(IEnumerable<Article> Articles, int TotalCount)> GetArticlesByCategoryAsync(int categoryId, int page = 1, int pageSize = 10)
+        {
+            var articles = await _articleRepository.GetArticlesByCategoryAsync(categoryId, page, pageSize);
+            var totalCount = await _articleRepository.GetArticlesCountByCategoryAsync(categoryId);
+            
+            return (articles, totalCount);
+        }
+
+        public async Task<Dictionary<int, IEnumerable<Article>>> GetArticlesByCategoriesForHomeAsync(IEnumerable<int> categoryIds, int articlesPerCategory = 6)
+        {
+            var result = new Dictionary<int, IEnumerable<Article>>();
+            
+            foreach (var categoryId in categoryIds)
+            {
+                var articles = await _articleRepository.GetArticlesByCategoryAsync(categoryId, 1, articlesPerCategory);
+                if (articles.Any())
+                {
+                    result[categoryId] = articles;
+                }
+            }
+            
+            return result;
+        }
+    }
+}

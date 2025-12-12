@@ -1,0 +1,223 @@
+/* Writer Article Edit Page Specific Styles */
+/* Extends writer-article-form.css */
+
+.edit-article-container {
+    padding: 1.5rem;
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+/* Status Alert */
+.status-alert-card {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.status-alert {
+    display: flex;
+    align-items: start;
+    gap: 1.25rem;
+    padding: 1.5rem;
+}
+
+.status-alert.status-pending {
+    background: linear-gradient(135deg, #fff9e6 0%, #ffffff 100%);
+    border-left: 4px solid #ffc107;
+}
+
+.status-alert.status-approved {
+    background: linear-gradient(135deg, #e7f7ef 0%, #ffffff 100%);
+    border-left: 4px solid #198754;
+}
+
+.status-alert.status-rejected {
+    background: linear-gradient(135deg, #ffe6e6 0%, #ffffff 100%);
+    border-left: 4px solid #dc3545;
+}
+
+.status-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.status-pending .status-icon {
+    background: #ffc107;
+    color: white;
+}
+
+.status-approved .status-icon {
+    background: #198754;
+    color: white;
+}
+
+.status-rejected .status-icon {
+    background: #dc3545;
+    color: white;
+}
+
+.status-content h6 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.status-content p {
+    font-size: 0.95rem;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+.status-content p:last-child {
+    margin-bottom: 0;
+}
+
+.review-note {
+    padding: 0.75rem;
+    background: white;
+    border-radius: 8px;
+    font-size: 0.9rem !important;
+    margin-top: 0.75rem !important;
+}
+
+/* Info Card */
+.info-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.25rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.info-item {
+    display: flex;
+    align-items: start;
+    gap: 0.75rem;
+}
+
+.info-item i {
+    font-size: 1.25rem;
+    color: #0d6efd;
+    margin-top: 0.25rem;
+}
+
+.info-item small {
+    display: block;
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+}
+
+.info-item strong {
+    display: block;
+    font-size: 0.9rem;
+    color: #2c3e50;
+}
+
+/* Status Card */
+.status-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+.status-card-header {
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+    background: #f8f9fa;
+}
+
+.status-card-header h6 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.status-card-body {
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.status-badge-large {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.status-badge-large i {
+    font-size: 1.5rem;
+}
+
+.status-draft {
+    background: #e9ecef;
+    color: #6c757d;
+}
+
+.status-pending {
+    background: #fff3cd;
+    color: #997404;
+}
+
+.status-published {
+    background: #d1e7dd;
+    color: #0f5132;
+}
+
+.status-rejected {
+    background: #f8d7da;
+    color: #842029;
+}
+
+.btn-view-article {
+    display: block;
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: #e7f1ff;
+    border: 2px solid #0d6efd;
+    color: #0d6efd;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.btn-view-article:hover {
+    background: #0d6efd;
+    color: white;
+}
+
+/* Read-only forms */
+.form-control-modern:read-only,
+.form-select-modern:disabled {
+    background: #f8f9fa;
+    cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .edit-article-container {
+        padding: 1rem;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}

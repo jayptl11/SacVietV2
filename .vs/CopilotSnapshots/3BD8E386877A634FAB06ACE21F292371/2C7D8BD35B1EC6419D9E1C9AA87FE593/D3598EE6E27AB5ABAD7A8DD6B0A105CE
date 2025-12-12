@@ -1,0 +1,33 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using SacViet.Services;
+
+namespace SacViet.Controllers
+{
+    public class ArticleController : Controller
+    {
+        private readonly INewsService _newsService;
+
+        public ArticleController(INewsService newsService)
+        {
+            _newsService = newsService;
+        }
+
+        [Route("bai-viet/{slug}")]
+        public async Task<IActionResult> Details(string slug)
+        {
+            var article = await _newsService.GetArticleDetailsAsync(slug);
+            
+            if (article == null)
+            {
+                return NotFound();
+            }
+
+            // Get related articles
+            var relatedArticles = await _newsService.GetRelatedArticlesAsync(article.ArticleId, article.CategoryId);
+            
+            ViewBag.RelatedArticles = relatedArticles;
+            
+            return View(article);
+        }
+    }
+}

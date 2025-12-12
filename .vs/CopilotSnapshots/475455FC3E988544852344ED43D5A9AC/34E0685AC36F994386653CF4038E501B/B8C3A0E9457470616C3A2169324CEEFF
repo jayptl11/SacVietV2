@@ -1,0 +1,183 @@
+﻿# 🔧 Hướng dẫn khắc phục lỗi "Không thấy bài viết của danh mục con"
+
+## 🎯 Nguyên nhân
+
+Trang chủ đã được code đúng để hiển thị bài viết theo từng danh mục (bao gồm cả danh mục con như Trong nước, Thế giới, Podcast, Video, etc.), nhưng **không có dữ liệu bài viết** được gán vào các danh mục con này trong database.
+
+## ✅ Giải pháp
+
+### Bước 1: Kiểm tra dữ liệu hiện tại
+
+Chạy query này để kiểm tra số lượng bài viết theo từng danh mục:
+
+```sql
+SELECT 
+    c.CategoryId,
+    c.CategoryName,
+    c.Slug,
+    c.ParentCategoryId,
+    COUNT(a.ArticleId) AS ArticleCount
+FROM Categories c
+LEFT JOIN Articles a ON c.CategoryId = a.CategoryId 
+    AND a.Status = 'Published' 
+    AND a.PublishedAt <= GETDATE()
+GROUP BY c.CategoryId, c.CategoryName, c.Slug, c.ParentCategoryId
+ORDER BY c.DisplayOrder;
+```
+
+### Bước 2: Thêm dữ liệu mẫu
+
+Chạy file SQL script đã tạo để thêm bài viết mẫu:
+
+```sql
+-- File: SQL_Scripts/Insert_Sample_Articles_For_Subcategories.sql
+```
+
+Script này sẽ thêm:
+- ✅ **6 bài viết** cho danh mục "Trong nước" (CategoryID = 2)
+- ✅ **6 bài viết** cho danh mục "Thế giới" (CategoryID = 3)
+- ✅ **3 bài viết** cho danh mục "Podcast" (CategoryID = 10)
+- ✅ **3 bài viết** cho danh mục "Video" (CategoryID = 11)
+- ✅ **2 bài viết** cho danh mục "Infographic" (CategoryID = 12)
+- ✅ **2 bài viết** cho danh mục "Longform" (CategoryID = 13)
+- ✅ **2 bài viết** cho danh mục "eMagazine" (CategoryID = 14)
+
+### Bước 3: Chạy ứng dụng và kiểm tra
+
+1. Build và chạy ứng dụng:
+   ```bash
+   dotnet run
+   ```
+
+2. Mở browser và truy cập: `https://localhost:5001` (hoặc port tương ứng)
+
+3. Scroll xuống để xem các section theo danh mục
+
+4. Kiểm tra HTML source để xem debug info (nếu cần):
+   - Nhấn `Ctrl + U` hoặc `F12` → View Source
+   - Tìm comment: `<!-- Total categories with articles: -->`
+
+## 📊 Cấu trúc dữ liệu
+
+### Danh mục chính và con:
+
+```
+1. Nhịp văn hóa (ID: 1)
+   ├─ 2. Trong nước (ParentID: 1) ✅ 6 bài viết
+   └─ 3. Thế giới (ParentID: 1) ✅ 6 bài viết
+
+4. Du lịch (ID: 4) ⚠️ Cần thêm bài viết
+
+5. Con người (ID: 5) ⚠️ Cần thêm bài viết
+
+6. Ẩm thực (ID: 6) ⚠️ Cần thêm bài viết
+
+7. Trang phục và Kiến trúc (ID: 7) ⚠️ Cần thêm bài viết
+
+8. Thanh - Sắc (ID: 8) ⚠️ Cần thêm bài viết
+
+9. Multimedia (ID: 9)
+   ├─ 10. Podcast (ParentID: 9) ✅ 3 bài viết
+   ├─ 11. Video (ParentID: 9) ✅ 3 bài viết
+   ├─ 12. Infographic (ParentID: 9) ✅ 2 bài viết
+   ├─ 13. Longform (ParentID: 9) ✅ 2 bài viết
+   └─ 14. eMagazine (ParentID: 9) ✅ 2 bài viết
+```
+
+## 🔍 Cách hoạt động của tính năng
+
+### 1. HomeController lấy dữ liệu:
+```csharp
+// Lấy TẤT CẢ các danh mục (bao gồm cả danh mục con)
+var navigationCategories = await _newsService.GetNavigationCategoriesAsync();
+
+// Lấy bài viết cho TẤT CẢ các danh mục
+var allCategoryIds = navigationCategories.Select(c => c.CategoryId).ToList();
+var articlesByCategory = await _newsService.GetArticlesByCategoriesForHomeAsync(allCategoryIds, 6);
+```
+
+### 2. View hiển thị theo DisplayOrder:
+```razor
+@foreach (var category in Model.NavigationCategories
+    .Where(c => Model.ArticlesByCategory.ContainsKey(c.CategoryId))
+    .OrderBy(c => c.DisplayOrder))
+{
+    // Hiển thị section với ID = category-{slug}
+    <div id="category-@category.Slug">
+        // 6 bài viết
+    </div>
+}
+```
+
+### 3. Menu có anchor links:
+- Click "Nhịp văn hóa" → "Trong nước" → Scroll xuống `#category-trong-nuoc`
+- Click "Multimedia" → "Video" → Scroll xuống `#category-video`
+
+## 🎨 Tính năng đã implement
+
+✅ Hiển thị tất cả danh mục có bài viết (kể cả danh mục con)
+✅ Breadcrumb cho danh mục con (Nhịp văn hóa / Trong nước)
+✅ Smooth scroll với offset cho navbar
+✅ Highlight effect khi scroll đến section
+✅ Responsive design
+✅ Sắp xếp theo DisplayOrder
+✅ Debug mode với alert nếu không có bài viết
+
+## 🐛 Troubleshooting
+
+### Vấn đề: Vẫn không thấy section sau khi chạy SQL script
+
+**Giải pháp:**
+1. Kiểm tra Status của bài viết phải là `'Published'`
+2. Kiểm tra PublishedAt phải `<= GETDATE()`
+3. Kiểm tra CategoryId có khớp với database không
+4. Clear cache browser (Ctrl + Shift + R)
+5. Restart ứng dụng
+
+### Vấn đề: Section hiển thị nhưng không có ảnh
+
+**Giải pháp:**
+1. Tạo thư mục: `wwwroot/images/articles/`
+2. Thêm ảnh placeholder hoặc ảnh thật
+3. Hoặc sửa đường dẫn trong database về `/images/placeholder-article.jpg`
+
+## 📝 Thêm bài viết mới vào danh mục con
+
+```sql
+INSERT INTO Articles (Title, Slug, Summary, Content, ThumbnailImage, 
+                      CategoryId, AuthorId, Status, PublishedAt, 
+                      ViewCount, CreatedAt, UpdatedAt)
+VALUES 
+(N'Tiêu đề bài viết', 'tieu-de-bai-viet', 
+ N'Tóm tắt ngắn', 
+ N'<p>Nội dung chi tiết...</p>', 
+ '/images/articles/thumbnail.jpg', 
+ 2,  -- CategoryId (2 = Trong nước, 3 = Thế giới, 10 = Podcast, etc.)
+ 1,  -- AuthorId
+ 'Published', 
+ GETDATE(), 
+ 0, 
+ GETDATE(), 
+ GETDATE());
+```
+
+## 🎯 Kết quả mong đợi
+
+Sau khi chạy SQL script, trang chủ sẽ hiển thị:
+
+1. **Section "Trong nước"** với 6 bài viết
+2. **Section "Thế giới"** với 6 bài viết
+3. **Section "Podcast"** với 3 bài viết
+4. **Section "Video"** với 3 bài viết
+5. **Section "Infographic"** với 2 bài viết
+6. **Section "Longform"** với 2 bài viết
+7. **Section "eMagazine"** với 2 bài viết
+
+Mỗi section có:
+- Tiêu đề với breadcrumb (nếu là danh mục con)
+- 6 card bài viết (hoặc ít hơn nếu không đủ)
+- Nút "Xem thêm" link đến trang category
+
+---
+
+💡 **Lưu ý:** Nếu muốn thêm bài viết cho các danh mục chính khác (Du lịch, Con người, Ẩm thực, etc.), hãy tạo SQL script tương tự với CategoryID tương ứng.

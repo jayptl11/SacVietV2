@@ -1,0 +1,124 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using SacViet.Services;
+using System.Security.Claims;
+
+namespace SacViet.Controllers
+{
+    public class ArticleController : Controller
+    {
+        private readonly INewsService _newsService;
+        private readonly ILogger<ArticleController> _logger;
+
+        public ArticleController(INewsService newsService, ILogger<ArticleController> logger)
+        {
+            _newsService = newsService;
+            _logger = logger;
+        }
+
+        [Route("bai-viet/{slug}")]
+        public async Task<IActionResult> Details(string slug)
+        {
+            try
+            {
+                var article = await _newsService.GetArticleDetailsAsync(slug);
+                
+                if (article == null)
+                {
+                    return NotFound();
+                }
+
+                // Increment view count with basic duplicate prevention
+                // Check if this article was already viewed in this session recently (last 30 minutes)
+                var sessionKey = $"article_viewed_{article.ArticleId}";
+                var lastViewed = HttpContext.Session.GetString(sessionKey);
+                
+                bool shouldIncrementView = true;
+                if (!string.IsNullOrEmpty(lastViewed))
+                {
+                    if (DateTime.TryParse(lastViewed, out DateTime lastViewTime))
+                    {
+                        // Only increment if more than 30 minutes have passed
+                        shouldIncrementView = DateTime.Now.Subtract(lastViewTime).TotalMinutes > 30;
+                    }
+                }
+
+                if (shouldIncrementView)
+                {
+                    await _newsService.IncrementArticleViewCountAsync(article.ArticleId);
+                    // Record this view in session
+                    HttpContext.Session.SetString(sessionKey, DateTime.Now.ToString());
+                }
+
+                // Get related articles
+                var relatedArticles = await _newsService.GetRelatedArticlesAsync(article.ArticleId, article.CategoryId);
+                
+                // Get comments for the article
+                var comments = await _newsService.GetArticleCommentsAsync(article.ArticleId);
+                var commentCount = await _newsService.GetCommentCountAsync(article.ArticleId);
+                
+                ViewBag.RelatedArticles = relatedArticles;
+                ViewBag.Comments = comments;
+                ViewBag.CommentCount = commentCount;
+                
+                // Article URL for social sharing
+                ViewBag.ArticleUrl = $"{Request.Scheme}://{Request.Host}{Url.Action("Details", "Article", new { slug = article.Slug })}";
+                ViewBag.ArticleTitle = article.Title;
+                ViewBag.ArticleSummary = article.Summary ?? "";
+                
+                return View(article);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading article details for slug: {Slug}", slug);
+                return View("Error");
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddComment(int articleId, string content, int? parentCommentId = null)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(content))
+                {
+                    return Json(new { success = false, message = "Nội dung bình luận không được để trống." });
+                }
+
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                {
+                    return Json(new { success = false, message = "Bạn cần đăng nhập để bình luận." });
+                }
+
+                var comment = await _newsService.AddCommentAsync(articleId, userId, content, parentCommentId);
+                
+                if (comment != null)
+                {
+                    // Return the comment data as JSON for AJAX handling
+                    return Json(new
+                    {
+                        success = true,
+                        comment = new
+                        {
+                            commentId = comment.CommentId,
+                            content = comment.Content,
+                            createdAt = comment.CreatedAt?.ToString("dd/MM/yyyy HH:mm"),
+                            userName = comment.User.FullName,
+                            userAvatar = comment.User.Avatar,
+                            parentCommentId = comment.ParentCommentId
+                        }
+                    });
+                }
+                
+                return Json(new { success = false, message = "Không thể thêm bình luận." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding comment for article {ArticleId} by user {UserId}", articleId, User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                return Json(new { success = false, message = "Có lỗi xảy ra khi thêm bình luận. Vui lòng thử lại sau." });
+            }
+        }
+    }
+}}

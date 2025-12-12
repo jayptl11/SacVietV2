@@ -1,0 +1,195 @@
+﻿# Tóm tắt thay đổi: Trang chủ - Bài viết xem nhiều nhất trong ngày
+
+## Mô tả thay đổi
+
+Đã cập nhật logic trang chủ để hiển thị các bài viết xem nhiều nhất trong ngày (most viewed today) ở phần **Main Center Content** và đảm bảo các bài viết ở **Left Sidebar** không trùng lặp với các bài viết đã hiển thị ở Main Center.
+
+**CẬP NHẬT MỚI**: Logic tự động lùi lại các ngày trước nếu không tìm thấy bài viết trong ngày hôm nay.
+
+## Các thay đổi chi tiết
+
+### 1. Repository Layer (`Repositories/ArticleRepository.cs`)
+
+**Thêm method mới:**
+
+- `GetMostViewedTodayAsync(int count)`: Lấy các bài viết có lượt xem cao nhất với logic thông minh
+  - **Ưu tiên 1**: Tìm bài viết published trong ngày hôm nay (00:00 - 23:59)
+  - **Ưu tiên 2**: Nếu không có, tự động lùi lại từng ngày (tối đa 7 ngày)
+  - **Fallback**: Nếu vẫn không có, lấy bài viết xem nhiều nhất tổng thể
+  - Sắp xếp theo ViewCount giảm dần, sau đó PublishedAt giảm dần
+  
+- `GetSidebarArticlesAsync(int count, IEnumerable<int> excludeArticleIds)`: Lấy bài viết cho sidebar với khả năng loại trừ các bài viết đã hiển thị
+  - Nhận danh sách các ArticleId cần loại trừ
+  - Lọc các bài viết published
+  - Sắp xếp theo PublishedAt giảm dần
+
+### 2. Service Layer (`Services/NewsService.cs`)
+
+**Thêm method mới:**
+
+- `GetMostViewedTodayAsync(int count)`: Wrapper cho repository method
+- `GetSidebarArticlesAsync(int count, IEnumerable<int> excludeArticleIds)`: Wrapper cho repository method
+
+### 3. Controller (`Controllers/HomeController.cs`)
+
+**Cập nhật logic trong `Index()` action:**
+
+```csharp
+// Lấy các bài viết xem nhiều nhất trong ngày cho Main Center
+var mostViewedToday = await _newsService.GetMostViewedTodayAsync(3);
+var mostViewedTodayIds = mostViewedToday.Select(a => a.ArticleId).ToList();
+
+// Lấy bài viết cho Left Sidebar, loại trừ các bài đã hiển thị ở Main Center
+var sidebarArticles = await _newsService.GetSidebarArticlesAsync(10, mostViewedTodayIds);
+```
+
+### 4. ViewModel (`ViewModels/HomePageViewModel.cs`)
+
+**Đã có sẵn các properties:**
+
+- `MostViewedTodayArticles`: Danh sách bài viết xem nhiều nhất trong ngày
+- `SidebarArticles`: Danh sách bài viết cho left sidebar (không trùng với main center)
+
+### 5. View (`Views/Home/Index.cshtml`)
+
+**Cập nhật hiển thị:**
+
+- **Left Sidebar**: Sử dụng `Model.SidebarArticles` thay vì `Model.LatestArticles`
+- **Main Center Content**: 
+  - Sử dụng `Model.MostViewedTodayArticles` 
+  - **Badge động**: Hiển thị text dựa trên ngày publish:
+    - "Xem nhiều nhất hôm nay" - nếu bài viết published hôm nay
+    - "Xem nhiều nhất hôm qua" - nếu bài viết published hôm qua
+    - "Xem nhiều nhất X ngày trước" - nếu bài viết published trước đó
+  - Hiển thị số lượt xem trong meta info
+  - Fallback về `Model.FeaturedArticles` nếu không có bài viết
+- **Secondary Articles**: Sử dụng `Model.SidebarArticles.Skip(3).Take(3)`
+
+## Logic hoạt động - CẬP NHẬT
+
+### Thuật toán tìm bài viết xem nhiều nhất:
+
+```
+1. Tìm bài viết trong ngày hôm nay (Day 0)
+   ├─ Nếu tìm thấy → Trả về ngay
+   └─ Nếu không → Tiếp tục
+   
+2. Lùi lại 1 ngày (Day -1)
+   ├─ Nếu tìm thấy → Trả về ngay
+   └─ Nếu không → Tiếp tục
+   
+3. Lùi lại 2 ngày (Day -2)
+   ├─ Nếu tìm thấy → Trả về ngay
+   └─ Nếu không → Tiếp tục
+   
+... (lặp lại cho đến Day -7)
+
+8. Nếu vẫn không tìm thấy sau 7 ngày
+   └─ Trả về bài viết xem nhiều nhất tổng thể (all time)
+```
+
+### Hiển thị:
+
+1. **Main Center**: Hiển thị top 3 bài viết có lượt xem cao nhất (với logic trên)
+2. **Badge**: Tự động cập nhật text dựa trên số ngày đã qua
+3. **Left Sidebar**: Hiển thị 3 bài viết mới nhất, KHÔNG bao gồm các bài đã hiển thị ở Main Center
+4. **Secondary Articles** (dưới Main Center): Hiển thị 3 bài viết tiếp theo từ Sidebar
+5. **Right Sidebar**: Vẫn hiển thị tin mới nhất như cũ
+
+## Lợi ích
+
+✅ Không có bài viết trùng lặp giữa Main Center và Left Sidebar
+✅ **Luôn có nội dung hiển thị** - tự động fallback về các ngày trước
+✅ **Badge thông minh** - hiển thị chính xác thời gian của bài viết
+✅ Nội dung dynamic dựa trên lượt xem thực tế
+✅ Tối ưu performance - dừng ngay khi tìm thấy kết quả
+✅ Linh hoạt - có thể điều chỉnh số ngày lùi lại (hiện tại: 7 ngày)
+
+## Testing
+
+Để test chức năng này:
+
+### Test Case 1: Có bài viết hôm nay
+```
+- Database có bài viết:
+  * Status = "Published"
+  * PublishedAt = hôm nay
+  * ViewCount > 0
+  
+- Kết quả mong đợi:
+  * Main Center hiển thị bài viết hôm nay
+  * Badge: "Xem nhiều nhất hôm nay"
+```
+
+### Test Case 2: Không có bài viết hôm nay
+```
+- Database KHÔNG có bài viết published hôm nay
+- Có bài viết published hôm qua
+  
+- Kết quả mong đợi:
+  * Main Center hiển thị bài viết hôm qua
+  * Badge: "Xem nhiều nhất hôm qua"
+```
+
+### Test Case 3: Không có bài viết trong 7 ngày
+```
+- Database KHÔNG có bài viết trong 7 ngày qua
+- Có bài viết published trước đó
+  
+- Kết quả mong đợi:
+  * Main Center hiển thị bài viết xem nhiều nhất tổng thể
+  * Badge: "Xem nhiều nhất X ngày trước" (với X > 7)
+```
+
+### Test Case 4: Không trùng lặp
+```
+- Kiểm tra:
+  * Bài viết ở Main Center không xuất hiện ở Left Sidebar
+  * ArticleId không trùng nhau
+```
+
+## Cấu hình
+
+Có thể điều chỉnh các tham số sau:
+
+**Trong Repository (`ArticleRepository.cs`):**
+```csharp
+// Thay đổi số ngày lùi lại tối đa (hiện tại: 7)
+for (int daysBack = 0; daysBack <= 7; daysBack++)
+
+// Thay đổi số lượng bài viết lấy ra
+.Take(count)
+```
+
+**Trong Controller (`HomeController.cs`):**
+```csharp
+// Số bài viết Main Center (hiện tại: 3)
+var mostViewedToday = await _newsService.GetMostViewedTodayAsync(3);
+
+// Số bài viết Sidebar (hiện tại: 10)
+var sidebarArticles = await _newsService.GetSidebarArticlesAsync(10, mostViewedTodayIds);
+```
+
+## Notes
+
+- **Performance**: Loop tối đa 8 lần (0-7 days) nhưng dừng ngay khi tìm thấy
+- **ViewCount**: Cần được cập nhật khi người dùng xem bài viết (hiện tại chưa implement auto-increment)
+- **Timezone**: Sử dụng `DateTime.Today` của server
+- **Cache**: Có thể thêm cache để tối ưu performance nếu traffic cao
+- **Flexible**: Có thể dễ dàng thay đổi số ngày lùi lại (7 ngày) hoặc thuật toán fallback
+
+## Ví dụ thực tế
+
+**Scenario 1 - Thứ 2:**
+- Hôm nay (Thứ 2): Có 5 bài viết
+- Result: Hiển thị bài viết Thứ 2, badge "Xem nhiều nhất hôm nay"
+
+**Scenario 2 - Thứ 2 (không có bài mới):**
+- Hôm nay (Thứ 2): Không có bài viết
+- Hôm qua (Chủ Nhật): Có 3 bài viết
+- Result: Hiển thị bài viết Chủ Nhật, badge "Xem nhiều nhất hôm qua"
+
+**Scenario 3 - Thứ 2 (sau kỳ nghỉ dài):**
+- Thứ 2 → Thứ 6 tuần trước: Không có bài viết
+- Thứ 5 tuần trước (5 ngày trước): Có 2 bài viết
+- Result: Hiển thị bài viết Thứ 5, badge "Xem nhiều nhất 5 ngày trước"

@@ -1,0 +1,174 @@
+﻿@model SacViet.ViewModels.SearchViewModel
+@{
+    ViewData["Title"] = ViewBag.CategoryName ?? "Chuyên mục";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Category Header -->
+            <div class="category-header mb-4">
+                <h2 class="fw-bold text-danger mb-2">
+                    <i class="fas fa-list me-2"></i>@(ViewBag.CategoryName ?? "Chuyên mục")
+                </h2>
+                <p class="text-muted">Tổng cộng @Model.TotalCount bài viết</p>
+            </div>
+
+            <!-- Articles Grid -->
+            @if (Model.Articles.Any())
+            {
+                <div class="row g-4">
+                    @foreach (var article in Model.Articles)
+                    {
+                        <div class="col-md-6">
+                            <div class="news-card h-100 rounded-3 overflow-hidden bg-white">
+                                <div class="news-image position-relative">
+                                    <img src="@(string.IsNullOrEmpty(article.ThumbnailImage) ? "/images/placeholder-article.jpg" : article.ThumbnailImage)" 
+                                         class="w-100 h-100" alt="@article.Title">
+                                    <div class="category-badge bg-danger text-white px-2 py-1 rounded-pill position-absolute top-0 start-0 m-2 small">
+                                        @article.Category.CategoryName
+                                    </div>
+                                </div>
+                                <div class="news-content p-3">
+                                    <h5 class="news-title mb-2">
+                                        <a href="@Url.Action("Details", "Article", new { slug = article.Slug })" class="text-dark text-decoration-none stretched-link">
+                                            @article.Title
+                                        </a>
+                                    </h5>
+                                    <p class="news-summary text-muted mb-3 clamp-3">@article.Summary</p>
+                                    <div class="news-meta d-flex justify-content-between align-items-center small text-muted">
+                                        <span>
+                                            <i class="fas fa-user me-1"></i>@article.Author.FullName
+                                        </span>
+                                        <span>
+                                            <i class="fas fa-clock me-1"></i>@article.PublishedAt?.ToString("dd/MM/yyyy")
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Pagination -->
+                @if (Model.TotalPages > 1)
+                {
+                    <nav aria-label="Category pagination" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            @if (Model.Page > 1)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("Index", "Category", new { categorySlug = ViewBag.CategorySlug, page = Model.Page - 1 })">
+                                        <i class="fas fa-chevron-left"></i> Trước
+                                    </a>
+                                </li>
+                            }
+                            
+                            @for (int i = Math.Max(1, Model.Page - 2); i <= Math.Min(Model.TotalPages, Model.Page + 2); i++)
+                            {
+                                <li class="page-item @(i == Model.Page ? "active" : "")">
+                                    <a class="page-link" href="@Url.Action("Index", "Category", new { categorySlug = ViewBag.CategorySlug, page = i })">@i</a>
+                                </li>
+                            }
+                            
+                            @if (Model.Page < Model.TotalPages)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("Index", "Category", new { categorySlug = ViewBag.CategorySlug, page = Model.Page + 1 })">
+                                        Sau <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                }
+            }
+            else
+            {
+                <div class="no-results text-center py-5">
+                    <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">Chưa có bài viết nào</h4>
+                    <p class="text-muted">Chuyên mục này hiện chưa có bài viết nào được đăng</p>
+                </div>
+            }
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Categories -->
+            <div class="sidebar-widget mb-4">
+                <h5 class="widget-title bg-danger text-white p-3 mb-0">
+                    <i class="fas fa-list me-2"></i>CHUYÊN MỤC
+                </h5>
+                <div class="widget-content">
+                    @foreach (var category in Model.Categories)
+                    {
+                        <a href="@Url.Action("Index", "Category", new { categorySlug = category.Slug })" 
+                           class="category-item d-flex justify-content-between align-items-center @(Model.CategoryId == category.CategoryId ? "active" : "")">
+                            <span>@category.CategoryName</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Cards */
+    .news-card {
+        border: 1px solid #eee;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .news-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+    }
+    .news-image { 
+        aspect-ratio: 16/9; 
+        background: #f6f6f6;
+    }
+    .news-image img { 
+        object-fit: cover; 
+        display: block; 
+    }
+    .news-title a:hover { color: #dc3545; }
+    .clamp-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* Sidebar categories */
+    .widget-content {
+        background: #fff;
+        border: 1px solid #eee;
+        border-top: none;
+        border-radius: 0 0 .5rem .5rem;
+        overflow: hidden;
+    }
+    .category-item {
+        padding: .75rem 1rem;
+        color: #333;
+        text-decoration: none;
+        background: #fff;
+        border-bottom: 1px solid #f2f2f2;
+        transition: background-color .2s ease, color .2s ease, transform .05s ease;
+    }
+    .category-item:last-child { border-bottom: none; }
+    .category-item i { color: #bdbdbd; transition: transform .2s ease, color .2s ease; }
+    .category-item:hover {
+        background-color: #f9f9f9;
+        color: #dc3545;
+        transform: translateX(2px);
+    }
+    .category-item:hover i { color: #dc3545; transform: translateX(4px); }
+    .category-item.active {
+        background-color: #fff5f5;
+        color: #dc3545;
+        font-weight: 600;
+    }
+</style>

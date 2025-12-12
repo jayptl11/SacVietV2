@@ -1,0 +1,725 @@
+﻿@model SacViet.ViewModels.ArticleCreateViewModel
+@{
+    ViewData["Title"] = "Tạo bài viết mới";
+    var categories = ViewBag.Categories as IEnumerable<SacViet.Models.Category>;
+}
+
+<div class="create-article-container">
+    <!-- Page Header -->
+    <div class="page-header-bar mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="page-title">
+                    <i class="fas fa-plus-circle text-primary me-2"></i>
+                    Tạo bài viết mới
+                </h2>
+                <p class="page-subtitle mb-0">
+                    <i class="fas fa-pen me-2"></i>
+                    Bắt đầu viết câu chuyện của bạn
+                </p>
+            </div>
+            <div>
+                <a href="@Url.Action("MyArticles")" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-arrow-left me-1"></i>Quay lại
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <form asp-action="Create" method="post" enctype="multipart/form-data">
+        <div class="row g-4">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <!-- Content Card -->
+                <div class="content-card mb-4">
+                    <div class="content-card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-file-alt text-primary me-2"></i>
+                            Nội dung bài viết
+                        </h5>
+                    </div>
+                    <div class="content-card-body">
+                        <!-- Title -->
+                        <div class="form-group-modern mb-4">
+                            <label asp-for="Title" class="form-label-modern">
+                                <i class="fas fa-heading me-2"></i>Tiêu đề <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Title" class="form-control-modern"
+                                   placeholder="Nhập tiêu đề hấp dẫn cho bài viết..." />
+                            <span asp-validation-for="Title" class="validation-message"></span>
+                            <small class="form-hint">Tiêu đề nên ngắn gọn, súc tích và thu hút</small>
+                        </div>
+
+                        <!-- Summary -->
+                        <div class="form-group-modern mb-4">
+                            <label asp-for="Summary" class="form-label-modern">
+                                <i class="fas fa-align-left me-2"></i>Tóm tắt
+                            </label>
+                            <textarea asp-for="Summary" class="form-control-modern" rows="3"
+                                      placeholder="Viết tóm tắt ngắn gọn về nội dung bài viết..."></textarea>
+                            <span asp-validation-for="Summary" class="validation-message"></span>
+                            <small class="form-hint">Tóm tắt giúp người đọc nắm nhanh nội dung</small>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="form-group-modern">
+                            <label asp-for="Content" class="form-label-modern">
+                                <i class="fas fa-paragraph me-2"></i>Nội dung <span class="text-danger">*</span>
+                            </label>
+                            <textarea asp-for="Content" id="editor" class="form-control-modern" rows="10"></textarea>
+                            <span asp-validation-for="Content" class="validation-message"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips Card -->
+                <div class="tips-card-horizontal">
+                    <div class="tips-icon">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <div class="tips-content">
+                        <h6>Mẹo viết bài hiệu quả</h6>
+                        <p>• Dùng tiêu đề ngắn gọn, dễ hiểu • Chia nhỏ đoạn văn • Thêm hình ảnh minh họa</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Actions Card -->
+                <div class="action-card mb-4">
+                    <div class="action-card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-cog me-2"></i>Hành động
+                        </h6>
+                    </div>
+                    <div class="action-card-body">
+                        <button type="submit" name="action" value="submit" class="action-btn action-btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                            <div>
+                                <strong>Gửi để duyệt</strong>
+                                <small>Gửi cho Admin xét duyệt</small>
+                            </div>
+                        </button>
+                        <button type="submit" name="action" value="draft" class="action-btn action-btn-secondary">
+                            <i class="fas fa-save"></i>
+                            <div>
+                                <strong>Lưu nháp</strong>
+                                <small>Lưu để chỉnh sửa sau</small>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Category Card -->
+                <div class="sidebar-card mb-4">
+                    <div class="sidebar-card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-folder text-warning me-2"></i>Danh mục
+                        </h6>
+                    </div>
+                    <div class="sidebar-card-body">
+                        <select asp-for="CategoryId" class="form-select-modern">
+                            <option value="">-- Chọn danh mục --</option>
+                            @if (categories != null)
+                            {
+                                @foreach (var category in categories.Where(c => c.ParentCategoryId == null))
+                                {
+                                    <option value="@category.CategoryId">📁 @category.CategoryName</option>
+
+                                    @foreach (var subCategory in categories.Where(c => c.ParentCategoryId == category.CategoryId))
+                                    {
+                                        <option value="@subCategory.CategoryId">  └─ @subCategory.CategoryName</option>
+                                    }
+                                }
+                            }
+                        </select>
+                        <span asp-validation-for="CategoryId" class="validation-message"></span>
+                    </div>
+                </div>
+
+                <!-- Thumbnail Card -->
+                <div class="sidebar-card mb-4">
+                    <div class="sidebar-card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-image text-info me-2"></i>Ảnh đại diện
+                        </h6>
+                    </div>
+                    <div class="sidebar-card-body">
+                        <div id="thumbnail-preview" class="thumbnail-preview" style="display: none;">
+                            <img id="thumbnail-img" src="" alt="Thumbnail" />
+                            <button type="button" class="btn-remove-thumbnail" onclick="removeThumbnail()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div id="thumbnail-upload" class="thumbnail-upload">
+                            <div class="upload-area" onclick="document.getElementById('thumbnail-file').click()">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Chọn ảnh hoặc kéo thả vào đây</p>
+                                <small>JPG, PNG, GIF (Max 5MB)</small>
+                            </div>
+                            <input type="file" id="thumbnail-file" accept="image/*" style="display: none;" onchange="uploadThumbnail()" />
+                        </div>
+                        <input type="hidden" asp-for="ThumbnailImage" id="thumbnail-url" />
+                    </div>
+                </div>
+
+                <!-- Scheduled Publish Card -->
+                <div class="sidebar-card mb-4">
+                    <div class="sidebar-card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-clock text-success me-2"></i>Hẹn giờ đăng
+                        </h6>
+                    </div>
+                    <div class="sidebar-card-body">
+                        <input asp-for="ScheduledPublishDate" type="datetime-local" class="form-control-modern" />
+                        <small class="form-hint">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Bài viết sẽ tự động đăng sau khi duyệt
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Tags Card -->
+                <div class="sidebar-card">
+                    <div class="sidebar-card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-tags text-danger me-2"></i>Thẻ Tags
+                        </h6>
+                    </div>
+                    <div class="sidebar-card-body">
+                        <input type="text" id="tags-input" class="form-control-modern"
+                               placeholder="Nhập tag và nhấn Enter..." />
+                        <div id="tags-container" class="tags-container mt-3"></div>
+                        <small class="form-hint">
+                            <i class="fas fa-keyboard me-1"></i>
+                            Nhấn Enter để thêm tag
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @Html.AntiForgeryToken()
+    </form>
+</div>
+
+<style>
+    .create-article-container {
+        padding: 1.5rem;
+        background: #f8f9fa;
+        min-height: 100vh;
+    }
+
+    .page-header-bar {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .page-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-subtitle {
+        color: #6c757d;
+        font-size: 0.95rem;
+    }
+
+    /* Content Card */
+    .content-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    .content-card-header {
+        padding: 1.25rem;
+        border-bottom: 1px solid #e9ecef;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    }
+
+        .content-card-header h5 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+    .content-card-body {
+        padding: 1.5rem;
+    }
+
+    /* Form Modern */
+    .form-group-modern {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label-modern {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .form-control-modern {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 0.875rem 1rem;
+        font-size: 0.95rem;
+        transition: all 0.3s;
+        width: 100%;
+    }
+
+        .form-control-modern:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.1);
+            outline: none;
+        }
+
+        .form-control-modern::placeholder {
+            color: #adb5bd;
+        }
+
+    .form-select-modern {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 0.875rem 1rem;
+        font-size: 0.95rem;
+        transition: all 0.3s;
+        width: 100%;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        background-size: 16px 12px;
+        padding-right: 3rem;
+    }
+
+        .form-select-modern:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.1);
+            outline: none;
+        }
+
+    .validation-message {
+        display: block;
+        margin-top: 0.5rem;
+        font-size: 0.85rem;
+        color: #dc3545;
+    }
+
+    .form-hint {
+        display: block;
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+
+    /* Tips Card Horizontal */
+    .tips-card-horizontal {
+        background: linear-gradient(135deg, #fff9e6 0%, #ffffff 100%);
+        border-left: 4px solid #ffc107;
+        border-radius: 12px;
+        padding: 1.25rem;
+        display: flex;
+        align-items: start;
+        gap: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .tips-icon {
+        width: 50px;
+        height: 50px;
+        background: #ffc107;
+        color: white;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .tips-content h6 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .tips-content p {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    /* Action Card */
+    .action-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    .action-card-header {
+        padding: 1rem;
+        border-bottom: 1px solid #e9ecef;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    }
+
+        .action-card-header h6 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+    .action-card-body {
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .action-btn {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border: 2px solid;
+        border-radius: 10px;
+        background: transparent;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-align: left;
+        width: 100%;
+    }
+
+        .action-btn i {
+            font-size: 1.5rem;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+
+        .action-btn strong {
+            display: block;
+            font-size: 0.95rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .action-btn small {
+            display: block;
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+    .action-btn-primary {
+        border-color: #0d6efd;
+        color: #0d6efd;
+    }
+
+        .action-btn-primary i {
+            background: rgba(13, 110, 253, 0.1);
+        }
+
+        .action-btn-primary:hover {
+            background: #0d6efd;
+            color: white;
+        }
+
+            .action-btn-primary:hover i {
+                background: rgba(255, 255, 255, 0.2);
+            }
+
+    .action-btn-secondary {
+        border-color: #6c757d;
+        color: #6c757d;
+    }
+
+        .action-btn-secondary i {
+            background: rgba(108, 117, 125, 0.1);
+        }
+
+        .action-btn-secondary:hover {
+            background: #6c757d;
+            color: white;
+        }
+
+            .action-btn-secondary:hover i {
+                background: rgba(255, 255, 255, 0.2);
+            }
+
+    /* Sidebar Card */
+    .sidebar-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    .sidebar-card-header {
+        padding: 1rem;
+        border-bottom: 1px solid #e9ecef;
+        background: #f8f9fa;
+    }
+
+        .sidebar-card-header h6 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+    .sidebar-card-body {
+        padding: 1rem;
+    }
+
+    /* Thumbnail */
+    .thumbnail-preview {
+        position: relative;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+        .thumbnail-preview img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+    .btn-remove-thumbnail {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(220, 53, 69, 0.9);
+        color: white;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+    }
+
+        .btn-remove-thumbnail:hover {
+            background: #dc3545;
+            transform: scale(1.1);
+        }
+
+    .upload-area {
+        border: 2px dashed #dee2e6;
+        border-radius: 10px;
+        padding: 2rem 1rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+        .upload-area:hover {
+            border-color: #0d6efd;
+            background: #f8f9fa;
+        }
+
+        .upload-area i {
+            font-size: 3rem;
+            color: #adb5bd;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-area p {
+            font-size: 0.95rem;
+            color: #6c757d;
+            margin: 0.5rem 0;
+        }
+
+        .upload-area small {
+            font-size: 0.8rem;
+            color: #adb5bd;
+        }
+
+    /* Tags */
+    .tags-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .tag-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.875rem;
+        background: #0d6efd;
+        color: white;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+        .tag-badge i {
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+            .tag-badge i:hover {
+                transform: scale(1.2);
+            }
+
+    /* CKEditor */
+    .cke_top {
+        background: #f8f9fa !important;
+        border-bottom: 2px solid #e9ecef !important;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .create-article-container {
+            padding: 1rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+@section Scripts {
+    <!-- Load CKEditor -->
+    <script src="https://cdn.ckeditor.com/4.20.1/standard/ckeditor.js"></script>
+    <script>
+        CKEDITOR.replace('editor', {
+            height: 450,
+            filebrowserUploadUrl: '@Url.Action("UploadImage")',
+            filebrowserImageUploadUrl: '@Url.Action("UploadImage")',
+            filebrowserUploadMethod: 'form',
+            language: 'vi',
+            toolbar: [
+                { name: 'document', items: ['Source', '-', 'Save', 'NewPage', 'Preview', 'Print'] },
+                { name: 'clipboard', items: ['Cut', 'Copy', 'Paste', 'PasteText', 'PasteFromWord', '-', 'Undo', 'Redo'] },
+                { name: 'editing', items: ['Find', 'Replace', '-', 'SelectAll', '-', 'Scayt'] },
+                '/',
+                { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat'] },
+                { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', 'CreateDiv', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'] },
+                { name: 'links', items: ['Link', 'Unlink', 'Anchor'] },
+                { name: 'insert', items: ['Image', 'Table', 'HorizontalRule', 'SpecialChar', 'PageBreak'] },
+                '/',
+                { name: 'styles', items: ['Styles', 'Format', 'Font', 'FontSize'] },
+                { name: 'colors', items: ['TextColor', 'BGColor'] },
+                { name: 'tools', items: ['Maximize', 'ShowBlocks'] }
+            ],
+            removeButtons: '',
+            format_tags: 'p;h1;h2;h3;h4;h5;h6;pre;address;div',
+            removeDialogTabs: 'image:advanced;link:advanced',
+            autoGrow_minHeight: 450,
+            autoGrow_maxHeight: 800,
+            autoGrow_bottomSpace: 50,
+            extraPlugins: 'autogrow,colorbutton,font,justify',
+            allowedContent: true,
+            pasteFilter: 'semantic-content',
+            pasteFromWordPromptCleanup: true,
+            pasteFromWordRemoveFontStyles: false,
+            pasteFromWordRemoveStyles: false
+        });
+
+        function uploadThumbnail() {
+            const fileInput = document.getElementById('thumbnail-file');
+            const file = fileInput.files[0];
+
+            if (!file) return;
+
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Ảnh quá lớn! Vui lòng chọn ảnh nhỏ hơn 5MB');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('@Url.Action("UploadImage")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('thumbnail-url').value = data.url;
+                    document.getElementById('thumbnail-img').src = data.url;
+                    document.getElementById('thumbnail-preview').style.display = 'block';
+                    document.getElementById('thumbnail-upload').style.display = 'none';
+                } else {
+                    alert(data.message || 'Upload thất bại');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi upload ảnh');
+            });
+        }
+
+        function removeThumbnail() {
+            document.getElementById('thumbnail-url').value = '';
+            document.getElementById('thumbnail-img').src = '';
+            document.getElementById('thumbnail-preview').style.display = 'none';
+            document.getElementById('thumbnail-upload').style.display = 'block';
+            document.getElementById('thumbnail-file').value = '';
+        }
+
+        let tags = [];
+        const tagsInput = document.getElementById('tags-input');
+        const tagsContainer = document.getElementById('tags-container');
+
+        if (tagsInput) {
+            tagsInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const tag = this.value.trim();
+                    if (tag && !tags.includes(tag)) {
+                        tags.push(tag);
+                        renderTags();
+                        this.value = '';
+                    }
+                }
+            });
+        }
+
+        function renderTags() {
+            if (tagsContainer) {
+                tagsContainer.innerHTML = '';
+                tags.forEach((tag, index) => {
+                    const badge = document.createElement('span');
+                    badge.className = 'tag-badge';
+                    badge.innerHTML = `
+                        ${tag}
+                        <i class="fas fa-times" onclick="removeTag(${index})"></i>
+                        <input type="hidden" name="Tags" value="${tag}" />
+                    `;
+                    tagsContainer.appendChild(badge);
+                });
+            }
+        }
+
+        function removeTag(index) {
+            tags.splice(index, 1);
+            renderTags();
+        }
+
+        document.querySelector('form')?.addEventListener('submit', function(e) {
+            for (var instance in CKEDITOR.instances) {
+                CKEDITOR.instances[instance].updateElement();
+            }
+        });
+    </script>
+}

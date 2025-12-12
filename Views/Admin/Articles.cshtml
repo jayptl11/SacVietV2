@@ -1,0 +1,813 @@
+﻿@model AdminArticlesViewModel
+@{
+    ViewData["Title"] = "Quản lý bài viết";
+}
+
+<div class="admin-articles-container">
+    <!-- Page Header -->
+    <div class="page-header mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="page-title">
+                    <i class="fas fa-newspaper text-danger me-2"></i>
+                    Quản lý bài viết
+                </h2>
+                <p class="page-subtitle">
+                    <i class="fas fa-database me-2"></i>
+                    Tổng cộng <strong>@Model.TotalItems</strong> bài viết
+                </p>
+            </div>
+            <div>
+                <a href="@Url.Action("Index")" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-arrow-left me-1"></i>Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Card -->
+    <div class="filter-card mb-4">
+        <form method="get" class="row g-3">
+            <div class="col-lg-3 col-md-6">
+                <label class="form-label">
+                    <i class="fas fa-filter me-1"></i>Trạng thái
+                </label>
+                <select name="status" class="form-select form-select-sm">
+                    <option value="">📋 Tất cả</option>
+                    @if (Model.StatusFilter == "Draft")
+                    {
+                        <option value="Draft" selected>✏️ Nháp</option>
+                    }
+                    else
+                    {
+                        <option value="Draft">✏️ Nháp</option>
+                    }
+                    @if (Model.StatusFilter == "Pending")
+                    {
+                        <option value="Pending" selected>⏰ Chờ duyệt</option>
+                    }
+                    else
+                    {
+                        <option value="Pending">⏰ Chờ duyệt</option>
+                    }
+                    @if (Model.StatusFilter == "Approved")
+                    {
+                        <option value="Approved" selected>✅ Đã duyệt</option>
+                    }
+                    else
+                    {
+                        <option value="Approved">✅ Đã duyệt</option>
+                    }
+                    @if (Model.StatusFilter == "Published")
+                    {
+                        <option value="Published" selected>🌐 Đã đăng</option>
+                    }
+                    else
+                    {
+                        <option value="Published">🌐 Đã đăng</option>
+                    }
+                    @if (Model.StatusFilter == "Rejected")
+                    {
+                        <option value="Rejected" selected>❌ Từ chối</option>
+                    }
+                    else
+                    {
+                        <option value="Rejected">❌ Từ chối</option>
+                    }
+                </select>
+            </div>
+            <div class="col-lg-7 col-md-6">
+                <label class="form-label">
+                    <i class="fas fa-search me-1"></i>Tìm kiếm
+                </label>
+                <input type="text" name="search" class="form-control form-control-sm" 
+                       placeholder="Nhập tiêu đề hoặc tác giả..." value="@Model.SearchQuery">
+            </div>
+            <div class="col-lg-2 col-md-12">
+                <label class="form-label d-none d-md-block">&nbsp;</label>
+                <button type="submit" class="btn btn-primary btn-sm w-100">
+                    <i class="fas fa-search me-1"></i>Tìm kiếm
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Articles Grid/List -->
+    @if (Model.Items.Any())
+    {
+        <div class="articles-grid">
+            @foreach (var article in Model.Items)
+            {
+                <div class="article-card" id="article-@article.ArticleId">
+                    <div class="article-image">
+                        @if (!string.IsNullOrEmpty(article.ThumbnailImage))
+                        {
+                            <img src="@article.ThumbnailImage" alt="@article.Title">
+                        }
+                        else
+                        {
+                            <div class="article-image-placeholder">
+                                <i class="fas fa-image"></i>
+                            </div>
+                        }
+                        <div class="article-status-badge">
+                            @switch (article.Status)
+                            {
+                                case "Draft":
+                                    <span class="badge badge-draft">
+                                        <i class="fas fa-edit"></i>Nháp
+                                    </span>
+                                    break;
+                                case "Pending":
+                                    <span class="badge badge-pending">
+                                        <i class="fas fa-clock"></i>Chờ duyệt
+                                    </span>
+                                    break;
+                                case "Approved":
+                                    <span class="badge badge-approved">
+                                        <i class="fas fa-check-double"></i>Đã duyệt
+                                    </span>
+                                    break;
+                                case "Published":
+                                    <span class="badge badge-published">
+                                        <i class="fas fa-check-circle"></i>Đã đăng
+                                    </span>
+                                    break;
+                                case "Rejected":
+                                    <span class="badge badge-rejected">
+                                        <i class="fas fa-times-circle"></i>Từ chối
+                                    </span>
+                                    break;
+                            }
+                        </div>
+                    </div>
+                    
+                    <div class="article-content">
+                        <h5 class="article-title">@article.Title</h5>
+                        
+                        <div class="article-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-user"></i>
+                                <span>@article.AuthorName</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-folder"></i>
+                                <span>@article.CategoryName</span>
+                            </div>
+                        </div>
+
+                        <div class="article-stats">
+                            <div class="stat-item">
+                                <i class="fas fa-eye"></i>
+                                <span>@article.ViewCount.ToString("N0")</span>
+                            </div>
+                            <div class="stat-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>@article.CreatedAt.ToString("dd/MM/yyyy")</span>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(article.RejectionReason))
+                        {
+                            <div class="rejection-reason">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <small>@article.RejectionReason</small>
+                            </div>
+                        }
+
+                        @if (article.ScheduledPublishDate.HasValue && article.Status == "Approved")
+                        {
+                            <div class="scheduled-info">
+                                <i class="fas fa-clock"></i>
+                                <small>Hẹn đăng: @article.ScheduledPublishDate?.ToString("dd/MM/yyyy HH:mm")</small>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="article-actions">
+                        <!-- Always show detail button -->
+                        <a href="@Url.Action("ArticleDetail", new { id = article.ArticleId })" 
+                           class="btn-action btn-info" title="Xem chi tiết">
+                            <i class="fas fa-eye"></i>
+                        </a>
+
+                        @if (article.Status == "Pending")
+                        {
+                            <button class="btn-action btn-success" onclick="approveArticle(@article.ArticleId)" title="Duyệt bài">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button class="btn-action btn-danger" onclick="rejectArticle(@article.ArticleId)" title="Từ chối">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        }
+                        @if (article.Status == "Published")
+                        {
+                            <a href="@Url.Action("Details", "Article", new { slug = article.Slug })" 
+                               target="_blank" class="btn-action btn-secondary" title="Xem công khai">
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>
+                            <button class="btn-action btn-warning" onclick="unpublishArticle(@article.ArticleId)" title="Gỡ bài">
+                                <i class="fas fa-eye-slash"></i>
+                            </button>
+                        }
+                        @if (article.Status == "Draft")
+                        {
+                            <button class="btn-action btn-success" onclick="publishArticle(@article.ArticleId)" title="Đăng bài">
+                                <i class="fas fa-globe"></i>
+                            </button>
+                        }
+                        <button class="btn-action btn-danger" onclick="deleteArticle(@article.ArticleId)" title="Xóa bài">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Pagination -->
+        @if (Model.TotalPages > 1)
+        {
+            <nav class="pagination-nav mt-4">
+                <ul class="pagination justify-content-center">
+                    @if (Model.HasPreviousPage)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("Articles", new { status = Model.StatusFilter, search = Model.SearchQuery, page = Model.CurrentPage - 1 })">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                    }
+
+                    @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+                    {
+                        <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                            <a class="page-link" href="@Url.Action("Articles", new { status = Model.StatusFilter, search = Model.SearchQuery, page = i })">
+                                @i
+                            </a>
+                        </li>
+                    }
+
+                    @if (Model.HasNextPage)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("Articles", new { status = Model.StatusFilter, search = Model.SearchQuery, page = Model.CurrentPage + 1 })">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+    }
+    else
+    {
+        <div class="empty-state-card">
+            <i class="fas fa-newspaper"></i>
+            <h5>Không tìm thấy bài viết nào</h5>
+            <p>Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
+        </div>
+    }
+</div>
+
+<!-- Rejection Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-times-circle text-danger me-2"></i>
+                    Từ chối bài viết
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Lý do từ chối <span class="text-danger">*</span></label>
+                    <textarea id="rejectionReason" class="form-control" rows="4" 
+                              placeholder="Nhập lý do từ chối bài viết..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Hủy
+                </button>
+                <button type="button" class="btn btn-danger" onclick="confirmReject()">
+                    <i class="fas fa-check me-1"></i>Từ chối
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .admin-articles-container {
+        padding: 1.5rem;
+        background: #f8f9fa;
+        min-height: 100vh;
+    }
+
+    .page-header {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .page-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-subtitle {
+        color: #6c757d;
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    .filter-card {
+        background: white;
+        padding: 1.25rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .filter-card .form-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+
+    .articles-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 1.25rem;
+    }
+
+    .article-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .article-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+
+    .article-image {
+        position: relative;
+        width: 100%;
+        height: 180px;
+        overflow: hidden;
+        background: #f0f0f0;
+    }
+
+    .article-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .article-image-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%);
+        color: #adb5bd;
+        font-size: 3rem;
+    }
+
+    .article-status-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+
+    .article-status-badge .badge {
+        padding: 0.4rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    .badge-draft {
+        background: #6c757d;
+        color: white;
+    }
+
+    .badge-pending {
+        background: #ffc107;
+        color: #000;
+    }
+
+    .badge-approved {
+        background: #0dcaf0;
+        color: #000;
+    }
+
+    .badge-published {
+        background: #198754;
+        color: white;
+    }
+
+    .badge-rejected {
+        background: #dc3545;
+        color: white;
+    }
+
+    .article-content {
+        padding: 1.25rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.875rem;
+    }
+
+    .article-title {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .article-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+    .meta-item i {
+        width: 16px;
+        text-align: center;
+        color: #adb5bd;
+    }
+
+    .article-stats {
+        display: flex;
+        gap: 1rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+
+    .stat-item i {
+        color: #adb5bd;
+    }
+
+    .rejection-reason {
+        background: #ffe6e6;
+        border-left: 3px solid #dc3545;
+        padding: 0.5rem 0.75rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        color: #dc3545;
+        display: flex;
+        align-items: start;
+        gap: 0.5rem;
+    }
+
+    .rejection-reason i {
+        margin-top: 0.15rem;
+    }
+
+    .scheduled-info {
+        background: #e7f3ff;
+        border-left: 3px solid #0dcaf0;
+        padding: 0.5rem 0.75rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        color: #0dcaf0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .article-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        padding: 0.875rem 1.25rem;
+        border-top: 1px solid #e9ecef;
+        background: #f8f9fa;
+    }
+
+    .btn-action {
+        flex: 1;
+        min-width: 36px;
+        border: none;
+        background: transparent;
+        padding: 0.5rem;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.95rem;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-action.btn-success {
+        color: #198754;
+    }
+
+    .btn-action.btn-success:hover {
+        background: #198754;
+        color: white;
+    }
+
+    .btn-action.btn-danger {
+        color: #dc3545;
+    }
+
+    .btn-action.btn-danger:hover {
+        background: #dc3545;
+        color: white;
+    }
+
+    .btn-action.btn-warning {
+        color: #ffc107;
+    }
+
+    .btn-action.btn-warning:hover {
+        background: #ffc107;
+        color: #000;
+    }
+
+    .btn-action.btn-info {
+        color: #0dcaf0;
+    }
+
+    .btn-action.btn-info:hover {
+        background: #0dcaf0;
+        color: #000;
+    }
+
+    .btn-action.btn-secondary {
+        color: #6c757d;
+    }
+
+    .btn-action.btn-secondary:hover {
+        background: #6c757d;
+        color: white;
+    }
+
+    .empty-state-card {
+        background: white;
+        border-radius: 12px;
+        padding: 4rem 2rem;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .empty-state-card i {
+        font-size: 4rem;
+        color: #dee2e6;
+        margin-bottom: 1.5rem;
+    }
+
+    .empty-state-card h5 {
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state-card p {
+        color: #adb5bd;
+        margin: 0;
+    }
+
+    .pagination-nav .pagination {
+        gap: 0.5rem;
+    }
+
+    .pagination-nav .page-link {
+        border: none;
+        background: white;
+        color: #6c757d;
+        border-radius: 8px;
+        padding: 0.5rem 0.875rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        transition: all 0.2s;
+    }
+
+    .pagination-nav .page-link:hover {
+        background: #0d6efd;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .pagination-nav .page-item.active .page-link {
+        background: #0d6efd;
+        color: white;
+    }
+
+    @@media (max-width: 768px) {
+        .admin-articles-container {
+            padding: 1rem;
+        }
+
+        .articles-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+@section Scripts {
+    <script>
+        let currentArticleId = 0;
+
+        function getAntiForgeryToken() {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]');
+            if (!token) {
+                console.error('Anti-forgery token not found!');
+                return '';
+            }
+            return token.value;
+        }
+
+        function approveArticle(articleId) {
+            if (!confirm('Bạn có chắc chắn muốn duyệt bài viết này?')) return;
+
+            const note = prompt('Ghi chú (không bắt buộc):');
+            
+            const formData = new FormData();
+            formData.append('articleId', articleId);
+            formData.append('note', note || '');
+            formData.append('__RequestVerificationToken', getAntiForgeryToken());
+
+            fetch('@Url.Action("ApproveArticle")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('Lỗi: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra: ' + error.message);
+            });
+        }
+
+        function rejectArticle(articleId) {
+            currentArticleId = articleId;
+            document.getElementById('rejectionReason').value = '';
+            new bootstrap.Modal(document.getElementById('rejectModal')).show();
+        }
+
+        function confirmReject() {
+            const reason = document.getElementById('rejectionReason').value.trim();
+            if (!reason) {
+                alert('Vui lòng nhập lý do từ chối');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('articleId', currentArticleId);
+            formData.append('note', reason);
+            formData.append('__RequestVerificationToken', getAntiForgeryToken());
+
+            fetch('@Url.Action("RejectArticle")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('Lỗi: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra: ' + error.message);
+            });
+        }
+
+        function publishArticle(articleId) {
+            if (!confirm('Bạn có chắc chắn muốn đăng bài viết này?')) return;
+
+            const formData = new FormData();
+            formData.append('articleId', articleId);
+            formData.append('__RequestVerificationToken', getAntiForgeryToken());
+
+            fetch('@Url.Action("PublishArticle")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('Lỗi: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra: ' + error.message);
+            });
+        }
+
+        function unpublishArticle(articleId) {
+            if (!confirm('Bạn có chắc chắn muốn gỡ bài viết này?')) return;
+
+            const formData = new FormData();
+            formData.append('articleId', articleId);
+            formData.append('__RequestVerificationToken', getAntiForgeryToken());
+
+            fetch('@Url.Action("UnpublishArticle")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('Lỗi: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra: ' + error.message);
+            });
+        }
+
+        function deleteArticle(articleId) {
+            if (!confirm('CẢNH BÁO: Bạn có chắc chắn muốn xóa bài viết này?\nHành động này không thể hoàn tác!')) return;
+
+            const formData = new FormData();
+            formData.append('articleId', articleId);
+            formData.append('__RequestVerificationToken', getAntiForgeryToken());
+
+            fetch('@Url.Action("DeleteArticle")', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('Lỗi: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra: ' + error.message);
+            });
+        }
+    </script>
+}
+
+@Html.AntiForgeryToken()

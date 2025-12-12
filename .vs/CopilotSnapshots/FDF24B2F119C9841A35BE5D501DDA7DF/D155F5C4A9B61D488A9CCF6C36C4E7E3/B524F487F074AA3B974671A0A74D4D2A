@@ -1,0 +1,941 @@
+﻿@model AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="dashboard-container">
+    <!-- Welcome Header -->
+    <div class="welcome-header mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-1">
+                    <i class="fas fa-tachometer-alt text-danger me-2"></i>
+                    Chào mừng, Admin!
+                </h2>
+                <p class="text-muted mb-0">
+                    <i class="far fa-calendar-alt me-2"></i>
+                    @DateTime.Now.ToString("dddd, dd/MM/yyyy")
+                </p>
+            </div>
+            <div class="text-end">
+                <small class="text-muted d-block">Hệ thống quản lý nội dung</small>
+                <strong class="text-danger">SacViet CMS</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards Row -->
+    <div class="row g-3 mb-4">
+        <!-- Total Articles -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card stat-card-primary">
+                <div class="stat-icon">
+                    <i class="fas fa-newspaper"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-label">Tổng bài viết</div>
+                    <div class="stat-value">@Model.TotalArticles.ToString("N0")</div>
+                </div>
+                <div class="stat-footer">
+                    <a href="@Url.Action("Articles", "Admin")" class="stat-link">
+                        Xem chi tiết <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Articles -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card stat-card-warning">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-label">Chờ duyệt</div>
+                    <div class="stat-value">@Model.PendingArticles.ToString("N0")</div>
+                </div>
+                <div class="stat-footer">
+                    <a href="@Url.Action("Articles", "Admin", new { status = "Pending" })" class="stat-link">
+                        Duyệt ngay <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Users -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card stat-card-success">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-label">Người dùng</div>
+                    <div class="stat-value">@Model.TotalUsers.ToString("N0")</div>
+                </div>
+                <div class="stat-footer">
+                    <a href="@Url.Action("Users", "Admin")" class="stat-link">
+                        Quản lý <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Views -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card stat-card-info">
+                <div class="stat-icon">
+                    <i class="fas fa-eye"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-label">Lượt xem</div>
+                    <div class="stat-value">@Model.TotalViews.ToString("N0")</div>
+                </div>
+                <div class="stat-footer">
+                    <span class="stat-link text-muted">
+                        <i class="fas fa-chart-line me-1"></i>Tổng số
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Row -->
+    <div class="row g-3">
+        <!-- Left Column -->
+        <div class="col-lg-8">
+            <!-- Recent Articles -->
+            <div class="content-card mb-3">
+                <div class="content-card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-newspaper text-primary me-2"></i>
+                            Bài viết mới nhất
+                        </h5>
+                        <a href="@Url.Action("Articles", "Admin")" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-list me-1"></i>Tất cả
+                        </a>
+                    </div>
+                </div>
+                <div class="content-card-body p-0">
+                    @if (Model.RecentArticles.Any())
+                    {
+                        <div class="article-list">
+                            @foreach (var article in Model.RecentArticles)
+                            {
+                                <div class="article-item">
+                                    <div class="article-content">
+                                        <h6 class="article-title mb-1">@article.Title</h6>
+                                        <div class="article-meta">
+                                            <span class="meta-item">
+                                                <i class="fas fa-user"></i>
+                                                @article.AuthorName
+                                            </span>
+                                            <span class="meta-item">
+                                                <i class="fas fa-calendar"></i>
+                                                @article.CreatedAt.ToString("dd/MM/yyyy")
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="article-status">
+                                        @switch (article.Status)
+                                        {
+                                            case "Draft":
+                                                <span class="status-badge status-draft">
+                                                    <i class="fas fa-edit"></i>Nháp
+                                                </span>
+                                                break;
+                                            case "Pending":
+                                                <span class="status-badge status-pending">
+                                                    <i class="fas fa-clock"></i>Chờ duyệt
+                                                </span>
+                                                break;
+                                            case "Published":
+                                                <span class="status-badge status-published">
+                                                    <i class="fas fa-check"></i>Đã đăng
+                                                </span>
+                                                break;
+                                            case "Rejected":
+                                                <span class="status-badge status-rejected">
+                                                    <i class="fas fa-times"></i>Từ chối
+                                                </span>
+                                                break;
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <p>Chưa có bài viết nào</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Monthly Stats Chart -->
+            <div class="content-card">
+                <div class="content-card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line text-success me-2"></i>
+                        Thống kê theo tháng
+                    </h5>
+                </div>
+                <div class="content-card-body">
+                    <canvas id="monthlyChart" style="max-height: 280px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="content-card mb-3">
+                <div class="content-card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bolt text-warning me-2"></i>
+                        Thao tác nhanh
+                    </h5>
+                </div>
+                <div class="content-card-body">
+                    <div class="quick-actions">
+                        <a href="@Url.Action("Articles", "Admin", new { status = "Pending" })" class="quick-action-btn btn-warning">
+                            <i class="fas fa-clock"></i>
+                            <div>
+                                <strong>Duyệt bài viết</strong>
+                                @if (Model.PendingArticles > 0)
+                                {
+                                    <span class="action-badge">@Model.PendingArticles</span>
+                                }
+                            </div>
+                        </a>
+                        <a href="@Url.Action("Articles", "Admin")" class="quick-action-btn btn-primary">
+                            <i class="fas fa-newspaper"></i>
+                            <div>
+                                <strong>Quản lý bài viết</strong>
+                            </div>
+                        </a>
+                        <a href="@Url.Action("Users", "Admin")" class="quick-action-btn btn-success">
+                            <i class="fas fa-users"></i>
+                            <div>
+                                <strong>Quản lý người dùng</strong>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Articles -->
+            <div class="content-card mb-3">
+                <div class="content-card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-fire text-danger me-2"></i>
+                        Top bài viết
+                    </h5>
+                </div>
+                <div class="content-card-body p-0">
+                    @if (Model.TopArticles.Any())
+                    {
+                        <div class="top-list">
+                            @for (int i = 0; i < Model.TopArticles.Count && i < 5; i++)
+                            {
+                                var article = Model.TopArticles[i];
+                                <div class="top-item">
+                                    <div class="top-rank rank-@(i + 1)">@(i + 1)</div>
+                                    <div class="top-content">
+                                        <h6 class="top-title">@article.Title</h6>
+                                        <div class="top-meta">
+                                            <i class="fas fa-eye"></i>
+                                            @article.ViewCount.ToString("N0") lượt xem
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-state small">
+                            <i class="fas fa-chart-line"></i>
+                            <p>Chưa có dữ liệu</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Recent Users -->
+            <div class="content-card">
+                <div class="content-card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-user-plus text-info me-2"></i>
+                            Người dùng mới
+                        </h5>
+                        <a href="@Url.Action("Users", "Admin")" class="btn btn-sm btn-outline-info">
+                            <i class="fas fa-list me-1"></i>Tất cả
+                        </a>
+                    </div>
+                </div>
+                <div class="content-card-body p-0">
+                    @if (Model.RecentUsers.Any())
+                    {
+                        <div class="user-list">
+                            @foreach (var user in Model.RecentUsers.Take(5))
+                            {
+                                <div class="user-item">
+                                    <div class="user-avatar">
+                                        @user.FullName.Substring(0, 1).ToUpper()
+                                    </div>
+                                    <div class="user-info">
+                                        <h6 class="user-name">@user.FullName</h6>
+                                        <div class="user-email">@user.Email</div>
+                                    </div>
+                                    <div class="user-role">
+                                        <span class="role-badge role-@user.Role.ToLower()">
+                                            @user.Role
+                                        </span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-state small">
+                            <i class="fas fa-users"></i>
+                            <p>Chưa có người dùng mới</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .dashboard-container {
+        padding: 1.5rem;
+        background: #f8f9fa;
+        min-height: 100vh;
+    }
+
+    /* Welcome Header */
+    .welcome-header {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .welcome-header h2 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    /* Stat Cards */
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.25rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+        height: 100%;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+
+    .stat-card-primary { border-left-color: #0d6efd; }
+    .stat-card-warning { border-left-color: #ffc107; }
+    .stat-card-success { border-left-color: #198754; }
+    .stat-card-info { border-left-color: #0dcaf0; }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .stat-card-primary .stat-icon {
+        background: rgba(13, 110, 253, 0.1);
+        color: #0d6efd;
+    }
+
+    .stat-card-warning .stat-icon {
+        background: rgba(255, 193, 7, 0.1);
+        color: #ffc107;
+    }
+
+    .stat-card-success .stat-icon {
+        background: rgba(25, 135, 84, 0.1);
+        color: #198754;
+    }
+
+    .stat-card-info .stat-icon {
+        background: rgba(13, 202, 240, 0.1);
+        color: #0dcaf0;
+    }
+
+    .stat-label {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-bottom: 0.25rem;
+        font-weight: 500;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2c3e50;
+        line-height: 1;
+        margin-bottom: 0.75rem;
+    }
+
+    .stat-footer {
+        padding-top: 0.75rem;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .stat-link {
+        font-size: 0.875rem;
+        color: #6c757d;
+        text-decoration: none;
+        transition: color 0.3s;
+    }
+
+    .stat-link:hover {
+        color: #0d6efd;
+    }
+
+    /* Content Cards */
+    .content-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    .content-card-header {
+        padding: 1.25rem;
+        border-bottom: 1px solid #e9ecef;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    }
+
+    .content-card-header h5 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .content-card-body {
+        padding: 1.25rem;
+    }
+
+    /* Article List */
+    .article-list {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .article-item {
+        padding: 1rem 1.25rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #f0f0f0;
+        transition: background 0.2s;
+    }
+
+    .article-item:last-child {
+        border-bottom: none;
+    }
+
+    .article-item:hover {
+        background: #f8f9fa;
+    }
+
+    .article-content {
+        flex: 1;
+    }
+
+    .article-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .article-meta {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .meta-item {
+        font-size: 0.8rem;
+        color: #6c757d;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .meta-item i {
+        font-size: 0.75rem;
+    }
+
+    .article-status {
+        margin-left: 1rem;
+    }
+
+    .status-badge {
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        white-space: nowrap;
+    }
+
+    .status-draft {
+        background: #e9ecef;
+        color: #6c757d;
+    }
+
+    .status-pending {
+        background: #fff3cd;
+        color: #997404;
+    }
+
+    .status-published {
+        background: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .status-rejected {
+        background: #f8d7da;
+        color: #842029;
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .quick-action-btn {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border-radius: 10px;
+        text-decoration: none;
+        transition: all 0.3s;
+        border: 2px solid;
+        position: relative;
+    }
+
+    .quick-action-btn i {
+        font-size: 1.5rem;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+    }
+
+    .quick-action-btn strong {
+        font-size: 0.95rem;
+    }
+
+    .quick-action-btn.btn-warning {
+        background: #fff9e6;
+        border-color: #ffc107;
+        color: #997404;
+    }
+
+    .quick-action-btn.btn-warning i {
+        background: #ffc107;
+        color: white;
+    }
+
+    .quick-action-btn.btn-warning:hover {
+        background: #ffc107;
+        color: white;
+    }
+
+    .quick-action-btn.btn-primary {
+        background: #e7f1ff;
+        border-color: #0d6efd;
+        color: #084298;
+    }
+
+    .quick-action-btn.btn-primary i {
+        background: #0d6efd;
+        color: white;
+    }
+
+    .quick-action-btn.btn-primary:hover {
+        background: #0d6efd;
+        color: white;
+    }
+
+    .quick-action-btn.btn-success {
+        background: #e6f4ea;
+        border-color: #198754;
+        color: #0f5132;
+    }
+
+    .quick-action-btn.btn-success i {
+        background: #198754;
+        color: white;
+    }
+
+    .quick-action-btn.btn-success:hover {
+        background: #198754;
+        color: white;
+    }
+
+    .action-badge {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #dc3545;
+        color: white;
+        border-radius: 12px;
+        padding: 0.25rem 0.6rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+    }
+
+    /* Top List */
+    .top-list {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .top-item {
+        padding: 0.875rem 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.875rem;
+        border-bottom: 1px solid #f0f0f0;
+        transition: background 0.2s;
+    }
+
+    .top-item:last-child {
+        border-bottom: none;
+    }
+
+    .top-item:hover {
+        background: #f8f9fa;
+    }
+
+    .top-rank {
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.875rem;
+        flex-shrink: 0;
+    }
+
+    .top-rank.rank-1 {
+        background: linear-gradient(135deg, #ffd700, #ffed4e);
+        color: #997404;
+    }
+
+    .top-rank.rank-2 {
+        background: linear-gradient(135deg, #c0c0c0, #e0e0e0);
+        color: #6c757d;
+    }
+
+    .top-rank.rank-3 {
+        background: linear-gradient(135deg, #cd7f32, #daa06d);
+        color: #664d03;
+    }
+
+    .top-rank.rank-4,
+    .top-rank.rank-5 {
+        background: #e9ecef;
+        color: #6c757d;
+    }
+
+    .top-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .top-title {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.25rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .top-meta {
+        font-size: 0.75rem;
+        color: #6c757d;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    /* User List */
+    .user-list {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .user-item {
+        padding: 0.875rem 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.875rem;
+        border-bottom: 1px solid #f0f0f0;
+        transition: background 0.2s;
+    }
+
+    .user-item:last-child {
+        border-bottom: none;
+    }
+
+    .user-item:hover {
+        background: #f8f9fa;
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .user-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .user-name {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.25rem;
+    }
+
+    .user-email {
+        font-size: 0.75rem;
+        color: #6c757d;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .user-role {
+        flex-shrink: 0;
+    }
+
+    .role-badge {
+        padding: 0.25rem 0.6rem;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .role-badge.role-admin {
+        background: #f8d7da;
+        color: #842029;
+    }
+
+    .role-badge.role-writer {
+        background: #fff3cd;
+        color: #997404;
+    }
+
+    .role-badge.role-reader {
+        background: #e9ecef;
+        color: #6c757d;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #adb5bd;
+    }
+
+    .empty-state.small {
+        padding: 2rem 1rem;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .empty-state.small i {
+        font-size: 2rem;
+    }
+
+    .empty-state p {
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .dashboard-container {
+            padding: 1rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+        }
+
+        .welcome-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .article-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .article-status {
+            margin-left: 0;
+        }
+    }
+</style>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Monthly Stats Chart
+        const ctx = document.getElementById('monthlyChart').getContext('2d');
+        const monthlyData = @Html.Raw(Json.Serialize(Model.MonthlyStats));
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: monthlyData.map(d => d.month),
+                datasets: [{
+                    label: 'Bài viết',
+                    data: monthlyData.map(d => d.articles),
+                    borderColor: '#dc3545',
+                    backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    pointBackgroundColor: '#dc3545',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                }, {
+                    label: 'Người dùng',
+                    data: monthlyData.map(d => d.users),
+                    borderColor: '#198754',
+                    backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    pointBackgroundColor: '#198754',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 15,
+                            font: {
+                                size: 12,
+                                weight: '600'
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        titleFont: {
+                            size: 13,
+                            weight: '600'
+                        },
+                        bodyFont: {
+                            size: 12
+                        },
+                        cornerRadius: 8
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            drawBorder: false,
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            font: {
+                                size: 11
+                            },
+                            padding: 8
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false,
+                            drawBorder: false
+                        },
+                        ticks: {
+                            font: {
+                                size: 11
+                            },
+                            padding: 8
+                        }
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                }
+            }
+        });
+    </script>
+}

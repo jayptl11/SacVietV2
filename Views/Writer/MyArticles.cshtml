@@ -1,0 +1,265 @@
+﻿@model IEnumerable<SacViet.ViewModels.ArticleListItemViewModel>
+@{
+    ViewData["Title"] = "Bài viết của tôi";
+    var currentStatus = ViewBag.CurrentStatus as string;
+    var currentPage = (int)ViewBag.CurrentPage;
+    var totalPages = (int)ViewBag.TotalPages;
+}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h2 class="text-danger">
+                <i class="fas fa-list me-2"></i>Bài viết của tôi
+            </h2>
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="@Url.Action("Create")" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-2"></i>Tạo bài viết mới
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <div class="btn-group" role="group">
+                <a href="@Url.Action("MyArticles")" 
+                   class="btn @(string.IsNullOrEmpty(currentStatus) ? "btn-danger" : "btn-outline-danger")">
+                    <i class="fas fa-list me-1"></i>Tất cả
+                </a>
+                <a href="@Url.Action("MyArticles", new { status = "Draft" })" 
+                   class="btn @(currentStatus == "Draft" ? "btn-danger" : "btn-outline-danger")">
+                    <i class="fas fa-file-alt me-1"></i>Nháp
+                </a>
+                <a href="@Url.Action("MyArticles", new { status = "Pending" })" 
+                   class="btn @(currentStatus == "Pending" ? "btn-danger" : "btn-outline-danger")">
+                    <i class="fas fa-clock me-1"></i>Chờ duyệt
+                </a>
+                <a href="@Url.Action("MyArticles", new { status = "Published" })" 
+                   class="btn @(currentStatus == "Published" ? "btn-danger" : "btn-outline-danger")">
+                    <i class="fas fa-check-circle me-1"></i>Đã đăng
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Articles List -->
+    @if (Model.Any())
+    {
+        <div class="row g-4">
+            @foreach (var article in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        @if (!string.IsNullOrEmpty(article.ThumbnailImage))
+                        {
+                            <img src="@article.ThumbnailImage" class="card-img-top" alt="@article.Title" 
+                                 style="height: 200px; object-fit: cover;">
+                        }
+                        else
+                        {
+                            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <i class="fas fa-image fa-3x text-muted"></i>
+                            </div>
+                        }
+                        
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge bg-secondary">@article.CategoryName</span>
+                                @switch (article.Status)
+                                {
+                                    case "Draft":
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-file-alt me-1"></i>Nháp
+                                        </span>
+                                        break;
+                                    case "Pending":
+                                        <span class="badge bg-warning">
+                                            <i class="fas fa-clock me-1"></i>Chờ duyệt
+                                        </span>
+                                        break;
+                                    case "Published":
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check-circle me-1"></i>Đã đăng
+                                        </span>
+                                        break;
+                                    case "Rejected":
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-times-circle me-1"></i>Bị từ chối
+                                        </span>
+                                        break;
+                                }
+                            </div>
+
+                            <h5 class="card-title">
+                                <a href="@Url.Action("Edit", new { id = article.ArticleId })" 
+                                   class="text-dark text-decoration-none">
+                                    @article.Title
+                                </a>
+                            </h5>
+
+                            @if (!string.IsNullOrEmpty(article.RejectionReason))
+                            {
+                                <div class="alert alert-danger alert-sm py-2 px-3 mb-2">
+                                    <small>
+                                        <strong>Lý do từ chối:</strong><br/>
+                                        @article.RejectionReason
+                                    </small>
+                                </div>
+                            }
+
+                            <div class="d-flex justify-content-between text-muted small mb-3">
+                                <span>
+                                    <i class="fas fa-eye me-1"></i>@article.ViewCount lượt xem
+                                </span>
+                                <span>
+                                    <i class="fas fa-calendar me-1"></i>
+                                    @article.CreatedAt?.ToString("dd/MM/yyyy")
+                                </span>
+                            </div>
+
+                            @if (article.ScheduledPublishDate.HasValue && article.ScheduledPublishDate > DateTime.Now)
+                            {
+                                <div class="alert alert-info alert-sm py-2 px-3 mb-2">
+                                    <small>
+                                        <i class="fas fa-clock me-1"></i>
+                                        <strong>Hẹn giờ đăng:</strong> @article.ScheduledPublishDate?.ToString("dd/MM/yyyy HH:mm")
+                                    </small>
+                                </div>
+                            }
+
+                            <div class="btn-group w-100" role="group">
+                                <a href="@Url.Action("Edit", new { id = article.ArticleId })" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-edit me-1"></i>Sửa
+                                </a>
+                                
+                                @if (article.Status == "Published")
+                                {
+                                    <a href="@Url.Action("Details", "Article", new { slug = article.Slug })" 
+                                       class="btn btn-sm btn-outline-info" target="_blank">
+                                        <i class="fas fa-eye me-1"></i>Xem
+                                    </a>
+                                }
+
+                                @if (article.LatestApprovalStatus != null)
+                                {
+                                    <a href="@Url.Action("ApprovalHistory", new { articleId = article.ArticleId })" 
+                                       class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-history me-1"></i>Lịch sử
+                                    </a>
+                                }
+
+                                @if (article.Status == "Draft")
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline-danger" 
+                                            onclick="deleteArticle(@article.ArticleId)">
+                                        <i class="fas fa-trash me-1"></i>Xóa
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Pagination -->
+        @if (totalPages > 1)
+        {
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    @if (currentPage > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("MyArticles", new { status = currentStatus, page = currentPage - 1 })">
+                                Trước
+                            </a>
+                        </li>
+                    }
+
+                    @for (int i = 1; i <= totalPages; i++)
+                    {
+                        <li class="page-item @(i == currentPage ? "active" : "")">
+                            <a class="page-link" href="@Url.Action("MyArticles", new { status = currentStatus, page = i })">
+                                @i
+                            </a>
+                        </li>
+                    }
+
+                    @if (currentPage < totalPages)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" href="@Url.Action("MyArticles", new { status = currentStatus, page = currentPage + 1 })">
+                                Sau
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                <h5 class="text-muted">Chưa có bài viết nào</h5>
+                <p class="text-muted">Hãy tạo bài viết đầu tiên của bạn!</p>
+                <a href="@Url.Action("Create")" class="btn btn-primary">
+                    <i class="fas fa-plus-circle me-2"></i>Tạo bài viết mới
+                </a>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+    }
+
+    .alert-sm {
+        font-size: 0.875rem;
+    }
+</style>
+
+<script>
+    function deleteArticle(articleId) {
+        if (!confirm('Bạn có chắc chắn muốn xóa bài viết này?')) {
+            return;
+        }
+
+        fetch('@Url.Action("Delete")', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                id: articleId,
+                __RequestVerificationToken: document.querySelector('input[name="__RequestVerificationToken"]').value
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra. Vui lòng thử lại.');
+        });
+    }
+</script>
+
+@Html.AntiForgeryToken()

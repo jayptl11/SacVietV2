@@ -1,0 +1,346 @@
+﻿@* Partial View: Article Sidebar (Category, Thumbnail, Schedule, Tags) *@
+@{
+    var categories = ViewData["Categories"] as IEnumerable<SacViet.Models.Category>;
+    var thumbnailImage = ViewData["ThumbnailImage"] as string;
+    var scheduledPublishDate = ViewData["ScheduledPublishDate"] as DateTime?;
+    var tags = ViewData["Tags"] as List<string>;
+    var canEdit = ViewData["CanEdit"] as bool? ?? true;
+    
+    // Get CategoryId from Model
+    var model = Model as dynamic;
+    var categoryId = model?.CategoryId ?? 0;
+}
+
+<!-- Category Card -->
+<div class="sidebar-card mb-4">
+    <div class="sidebar-card-header">
+        <h6 class="mb-0">
+            <i class="fas fa-folder text-warning me-2"></i>Danh mục <span class="text-danger">*</span>
+        </h6>
+    </div>
+    <div class="sidebar-card-body">
+        @if (canEdit)
+        {
+            <select name="CategoryId" id="category-select" class="form-select-modern" required>
+                <option value="">-- Chọn danh mục --</option>
+                @if (categories != null)
+                {
+                    @foreach (var category in categories.Where(c => c.ParentCategoryId == null))
+                    {
+                        @* Check if parent category has subcategories *@
+                        var hasSubCategories = categories.Any(c => c.ParentCategoryId == category.CategoryId);
+                        
+                        @if (hasSubCategories)
+                        {
+                            @* Parent with subcategories - DISABLED *@
+                            <option value="@category.CategoryId" disabled selected="@(categoryId == category.CategoryId)" class="parent-category" data-slug="@category.Slug">
+                                📁 @category.CategoryName (Chọn danh mục con bên dưới)
+                            </option>
+                        }
+                        else
+                        {
+                            @* Parent without subcategories - ENABLED *@
+                            <option value="@category.CategoryId" selected="@(categoryId == category.CategoryId)" data-slug="@category.Slug">
+                                📁 @category.CategoryName
+                            </option>
+                        }
+                        
+                        @* Subcategories - Always ENABLED *@
+                        @foreach (var subCategory in categories.Where(c => c.ParentCategoryId == category.CategoryId))
+                        {
+                            <option value="@subCategory.CategoryId" selected="@(categoryId == subCategory.CategoryId)" data-slug="@subCategory.Slug" data-parent-slug="@category.Slug">
+                                  └─ @subCategory.CategoryName
+                            </option>
+                        }
+                    }
+                }
+            </select>
+        }
+        else
+        {
+            <select name="CategoryId" id="category-select" class="form-select-modern" disabled>
+                <option value="">-- Chọn danh mục --</option>
+                @if (categories != null)
+                {
+                    @foreach (var category in categories.Where(c => c.ParentCategoryId == null))
+                    {
+                        var hasSubCategories = categories.Any(c => c.ParentCategoryId == category.CategoryId);
+                        
+                        @if (hasSubCategories)
+                        {
+                            <option value="@category.CategoryId" disabled selected="@(categoryId == category.CategoryId)" class="parent-category" data-slug="@category.Slug">
+                                📁 @category.CategoryName (Danh mục cha)
+                            </option>
+                        }
+                        else
+                        {
+                            <option value="@category.CategoryId" selected="@(categoryId == category.CategoryId)" data-slug="@category.Slug">
+                                📁 @category.CategoryName
+                            </option>
+                        }
+                        
+                        @foreach (var subCategory in categories.Where(c => c.ParentCategoryId == category.CategoryId))
+                        {
+                            <option value="@subCategory.CategoryId" selected="@(categoryId == subCategory.CategoryId)" data-slug="@subCategory.Slug" data-parent-slug="@category.Slug">
+                                  └─ @subCategory.CategoryName
+                            </option>
+                        }
+                    }
+                }
+            </select>
+        }
+        <span class="validation-message"></span>
+        <small class="form-hint">
+            <i class="fas fa-info-circle me-1"></i>
+            <strong>Lưu ý:</strong> Nếu danh mục có danh mục con, vui lòng chọn danh mục con
+        </small>
+    </div>
+</div>
+
+<!-- NEW: Media Insert Card (Videos + Images for any category) -->
+<div class="sidebar-card mb-4" id="media-insert-card">
+    <div class="sidebar-card-header">
+        <h6 class="mb-0">
+            <i class="fas fa-photo-video text-danger me-2"></i>Chèn Video/Ảnh vào nội dung
+        </h6>
+    </div>
+    <div class="sidebar-card-body">
+        @if (canEdit)
+        {
+            <div class="mb-3">
+                <label class="form-label-modern small mb-1"><i class="fas fa-video me-1"></i>Video URL (Google Drive/YouTube)</label>
+                <input type="url" id="inline-video-url-input" class="form-control-modern" placeholder="https://...">
+                <input type="text" id="inline-video-title-input" class="form-control-modern mt-2" placeholder="Tiêu đề video (bắt buộc nếu có)" maxlength="200">
+                <div class="d-flex gap-2 mt-2">
+                    <button type="button" class="btn btn-primary flex-fill" onclick="insertVideoFromInputs()">
+                        <i class="fas fa-plus me-1"></i>Chèn video vào nội dung
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary flex-fill" onclick="copyVideoToken()">
+                        <i class="fas fa-code me-1"></i>Chèn token rỗng [SV-VIDEO]
+                    </button>
+                </div>
+                <small class="text-muted d-block mt-1">Bạn có thể chèn nhiều video. Dạng token: [SV-VIDEO url="..." title="..."]</small>
+            </div>
+            <hr>
+            <div>
+                <label class="form-label-modern small mb-1"><i class="fas fa-image me-1"></i>Chèn ảnh</label>
+                <div class="d-grid gap-2">
+                    <div>
+                        <input type="file" id="inline-image-file" accept="image/*" class="form-control-modern" onchange="uploadInlineImageAndInsert('@Url.Action("UploadImage", "Writer")')">
+                        <small class="text-muted">Chọn ảnh từ máy để upload và chèn vào bài</small>
+                    </div>
+                    <div class="d-flex gap-2 align-items-start">
+                        <input type="url" id="inline-image-url-input" class="form-control-modern" placeholder="Hoặc dán URL ảnh...">
+                        <button type="button" class="btn btn-outline-primary" onclick="insertImageFromUrl()"><i class="fas fa-plus me-1"></i>Chèn</button>
+                    </div>
+                </div>
+                <small class="text-muted d-block mt-1">Dạng token: [SV-IMAGE url="..."]</small>
+            </div>
+        }
+        else
+        {
+            <p class="text-muted mb-0">Không thể chỉnh sửa nội dung media ở trạng thái này.</p>
+        }
+    </div>
+</div>
+
+<!-- Audio Card (kept) -->
+<div class="sidebar-card mb-4" id="audio-card" style="display: none;">
+    <div class="sidebar-card-header">
+        <h6 class="mb-0">
+            <i class="fas fa-podcast text-purple me-2"></i>File âm thanh Podcast
+            <span class="text-danger ms-2">*</span>
+        </h6>
+    </div>
+    <div class="sidebar-card-body">
+        @{
+            var audioUrl = ViewData["AudioUrl"] as string;
+        }
+        
+        <!-- Audio Preview (if exists) -->
+        <div id="audio-preview" style="@(!string.IsNullOrEmpty(audioUrl) ? "" : "display: none;")">
+            @if (!string.IsNullOrEmpty(audioUrl))
+            {
+                var fileId = "";
+                var match = System.Text.RegularExpressions.Regex.Match(audioUrl, @"[?&]id=([^&]+)");
+                if (match.Success)
+                {
+                    fileId = match.Groups[1].Value;
+                }
+                
+                @if (!string.IsNullOrEmpty(fileId))
+                {
+                    <div class="audio-player-wrapper-compact mb-2">
+                        <iframe 
+                            id="audio-player-iframe"
+                            src="https://drive.google.com/file/d/@fileId/preview" 
+                            width="100%" 
+                            height="80"
+                            allow="autoplay"
+                            style="border: none; border-radius: 8px;"
+                            class="audio-iframe-compact">
+                        </iframe>
+                    </div>
+                    <small class="text-muted d-block text-center" style="font-size: 0.75rem;">
+                        <i class="fab fa-google-drive me-1"></i>Google Drive
+                    </small>
+                }
+                else
+                {
+                    <div class="audio-player-wrapper-compact mb-2">
+                        <audio id="audio-player" controls class="w-100 audio-compact" style="height: 40px;">
+                            <source id="audio-source" src="@audioUrl" type="audio/mpeg">
+                            Trình duyệt không hỗ trợ.
+                        </audio>
+                    </div>
+                }
+            }
+            
+            @if (canEdit)
+            {
+                <button type="button" class="btn btn-sm btn-outline-danger w-100 mt-2" onclick="removeAudio()">
+                    <i class="fas fa-times me-1"></i>Xóa
+                </button>
+            }
+        </div>
+        
+        <!-- Audio URL Input -->
+        <div id="audio-upload" style="@(string.IsNullOrEmpty(audioUrl) ? "" : "display: none;")">
+            @if (canEdit)
+            {
+                <div class="audio-input-group">
+                    <label class="form-label-modern small">
+                        <i class="fas fa-link me-1"></i>Google Drive Audio URL
+                    </label>
+                    <input type="url" id="audio-url-input" class="form-control-modern" 
+                           placeholder="https://drive.google.com/file/d/..." />
+                    <button type="button" class="btn btn-primary mt-2 w-100" onclick="setAudioUrl()">
+                        <i class="fas fa-check me-1"></i>Sử dụng URL này
+                    </button>
+                </div>
+                
+                <div class="audio-hint mt-3">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        <strong>Hướng dẫn:</strong>
+                    </small>
+                    <ol class="small text-muted mb-0 ps-3 mt-2">
+                        <li>Upload file audio lên Google Drive</li>
+                        <li>Đổi quyền file thành "Anyone with the link can view"</li>
+                        <li>Copy link share và paste vào ô trên</li>
+                        <li>Nhấn "Sử dụng URL này"</li>
+                    </ol>
+                </div>
+            }
+            else
+            {
+                <p class="text-muted text-center">Không có file âm thanh</p>
+            }
+        </div>
+        
+        <input type="hidden" name="AudioUrl" id="audio-url" value="@audioUrl" />
+    </div>
+</div>
+
+<!-- Thumbnail Card -->
+<div class="sidebar-card mb-4" id="thumbnail-card">
+    <div class="sidebar-card-header">
+        <h6 class="mb-0">
+            <i class="fas fa-image text-info me-2"></i>Ảnh đại diện
+            <span class="text-danger ms-2" title="Bắt buộc khi gửi duyệt">*</span>
+        </h6>
+    </div>
+    <div class="sidebar-card-body">
+        <div id="thumbnail-preview" class="thumbnail-preview" style="@(!string.IsNullOrEmpty(thumbnailImage) ? "" : "display: none;")">
+            <img id="thumbnail-img" src="@thumbnailImage" alt="Thumbnail" />
+            @if (canEdit)
+            {
+                <button type="button" class="btn-remove-thumbnail" onclick="removeThumbnail()">
+                    <i class="fas fa-times"></i>
+                </button>
+            }
+        </div>
+        <div id="thumbnail-upload" class="thumbnail-upload" style="@(string.IsNullOrEmpty(thumbnailImage) ? "" : "display: none;")">
+            @if (canEdit)
+            {
+                <div class="upload-area" onclick="document.getElementById('thumbnail-file').click()">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Chọn ảnh hoặc kéo thả vào đây</p>
+                    <small>JPG, PNG, GIF (Max 5MB)</small>
+                </div>
+                <input type="file" id="thumbnail-file" accept="image/*" style="display: none;" 
+                       onchange="uploadThumbnail('@Url.Action("UploadImage", "Writer")')" />
+                
+                <div class="text-center my-3">
+                    <small class="text-muted">── HOẶC ──</small>
+                </div>
+                
+                <div class="url-input-group">
+                    <input type="url" id="thumbnail-url-input" class="form-control form-control-sm" 
+                           placeholder="Paste URL hình ảnh vào đây..." />
+                    <button type="button" class="btn btn-sm btn-primary mt-2 w-100" onclick="setThumbnailByUrl()">
+                        <i class="fas fa-link me-1"></i>Dùng URL này
+                    </button>
+                </div>
+            }
+            else
+            {
+                <p class="text-muted text-center">Không có ảnh</p>
+            }
+        </div>
+        <input type="hidden" name="ThumbnailImage" id="thumbnail-url" value="@thumbnailImage" />
+        <small class="form-hint mt-2">
+            <i class="fas fa-exclamation-triangle text-warning me-1"></i>
+            <strong>Bắt buộc:</strong> Cần có ảnh đại diện để gửi duyệt
+        </small>
+    </div>
+</div>
+
+<!-- Scheduled Publish Card -->
+<div class="sidebar-card mb-4">
+    <div class="sidebar-card-header">
+        <h6 class="mb-0">
+            <i class="fas fa-clock text-success me-2"></i>Hẹn giờ đăng
+        </h6>
+    </div>
+    <div class="sidebar-card-body">
+        @if (canEdit)
+        {
+            <input name="ScheduledPublishDate" type="datetime-local" class="form-control-modern" 
+                   value="@(scheduledPublishDate?.ToString("yyyy-MM-ddTHH:mm"))" />
+        }
+        else
+        {
+            <input name="ScheduledPublishDate" type="datetime-local" class="form-control-modern" 
+                   value="@(scheduledPublishDate?.ToString("yyyy-MM-ddTHH:mm"))" readonly />
+        }
+        <small class="form-hint">
+            <i class="fas fa-info-circle me-1"></i>
+            Bài viết sẽ tự động đăng sau khi duyệt
+        </small>
+    </div>
+</div>
+
+<!-- Tags Card -->
+<div class="sidebar-card">
+    <div class="sidebar-card-header">
+        <h6 class="mb-0">
+            <i class="fas fa-tags text-danger me-2"></i>Thẻ Tags
+        </h6>
+    </div>
+    <div class="sidebar-card-body">
+        @if (canEdit)
+        {
+            <input type="text" id="tags-input" class="form-control-modern" 
+                   placeholder="Nhập tag và nhấn Enter..." />
+        }
+        <div id="tags-container" class="tags-container mt-3"></div>
+        @if (canEdit)
+        {
+            <small class="form-hint">
+                <i class="fas fa-keyboard me-1"></i>
+                Nhấn Enter để thêm tag
+            </small>
+        }
+    </div>
+</div>

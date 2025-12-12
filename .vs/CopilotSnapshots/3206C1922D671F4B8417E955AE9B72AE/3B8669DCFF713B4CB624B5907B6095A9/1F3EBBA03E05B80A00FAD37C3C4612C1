@@ -1,0 +1,95 @@
+﻿# Tóm tắt thay đổi: Trang chủ - Bài viết xem nhiều nhất trong ngày
+
+## Mô tả thay đổi
+
+Đã cập nhật logic trang chủ để hiển thị các bài viết xem nhiều nhất trong ngày (most viewed today) ở phần **Main Center Content** và đảm bảo các bài viết ở **Left Sidebar** không trùng lặp với các bài viết đã hiển thị ở Main Center.
+
+## Các thay đổi chi tiết
+
+### 1. Repository Layer (`Repositories/ArticleRepository.cs`)
+
+**Thêm method mới:**
+
+- `GetMostViewedTodayAsync(int count)`: Lấy các bài viết có lượt xem cao nhất được xuất bản trong ngày hôm nay
+  - Lọc bài viết published trong ngày (từ 00:00 đến 23:59)
+  - Sắp xếp theo ViewCount giảm dần
+  - Sắp xếp phụ theo PublishedAt giảm dần
+  
+- `GetSidebarArticlesAsync(int count, IEnumerable<int> excludeArticleIds)`: Lấy bài viết cho sidebar với khả năng loại trừ các bài viết đã hiển thị
+  - Nhận danh sách các ArticleId cần loại trừ
+  - Lọc các bài viết published
+  - Sắp xếp theo PublishedAt giảm dần
+
+### 2. Service Layer (`Services/NewsService.cs`)
+
+**Thêm method mới:**
+
+- `GetMostViewedTodayAsync(int count)`: Wrapper cho repository method
+- `GetSidebarArticlesAsync(int count, IEnumerable<int> excludeArticleIds)`: Wrapper cho repository method
+
+### 3. Controller (`Controllers/HomeController.cs`)
+
+**Cập nhật logic trong `Index()` action:**
+
+```csharp
+// Lấy các bài viết xem nhiều nhất trong ngày cho Main Center
+var mostViewedToday = await _newsService.GetMostViewedTodayAsync(3);
+var mostViewedTodayIds = mostViewedToday.Select(a => a.ArticleId).ToList();
+
+// Lấy bài viết cho Left Sidebar, loại trừ các bài đã hiển thị ở Main Center
+var sidebarArticles = await _newsService.GetSidebarArticlesAsync(10, mostViewedTodayIds);
+```
+
+### 4. ViewModel (`ViewModels/HomePageViewModel.cs`)
+
+**Đã có sẵn các properties:**
+
+- `MostViewedTodayArticles`: Danh sách bài viết xem nhiều nhất trong ngày
+- `SidebarArticles`: Danh sách bài viết cho left sidebar (không trùng với main center)
+
+### 5. View (`Views/Home/Index.cshtml`)
+
+**Cập nhật hiển thị:**
+
+- **Left Sidebar**: Sử dụng `Model.SidebarArticles` thay vì `Model.LatestArticles`
+- **Main Center Content**: 
+  - Sử dụng `Model.MostViewedTodayArticles` 
+  - Hiển thị badge "Xem nhiều nhất hôm nay" với icon fire
+  - Hiển thị số lượt xem trong meta info
+  - Fallback về `Model.FeaturedArticles` nếu không có bài viết xem nhiều nhất trong ngày
+- **Secondary Articles**: Sử dụng `Model.SidebarArticles.Skip(3).Take(3)`
+
+## Logic hoạt động
+
+1. **Main Center**: Hiển thị top 3 bài viết có lượt xem cao nhất được xuất bản trong ngày hôm nay
+2. **Left Sidebar**: Hiển thị 3 bài viết mới nhất, KHÔNG bao gồm các bài đã hiển thị ở Main Center
+3. **Secondary Articles** (dưới Main Center): Hiển thị 3 bài viết tiếp theo từ Sidebar
+4. **Right Sidebar**: Vẫn hiển thị tin mới nhất như cũ
+
+## Lợi ích
+
+✅ Không có bài viết trùng lặp giữa Main Center và Left Sidebar
+✅ Nội dung dynamic dựa trên lượt xem thực tế trong ngày
+✅ Tự động fallback về bài viết featured nếu không có dữ liệu xem nhiều trong ngày
+✅ Hiển thị badge và số lượt xem để highlight bài viết hot
+
+## Testing
+
+Để test chức năng này:
+
+1. Đảm bảo database có các bài viết với:
+   - Status = "Published"
+   - PublishedAt = hôm nay
+   - ViewCount > 0
+
+2. Kiểm tra:
+   - Main Center hiển thị bài viết xem nhiều nhất hôm nay
+   - Left Sidebar không có bài viết trùng với Main Center
+   - Badge "Xem nhiều nhất hôm nay" xuất hiện
+   - Số lượt xem được hiển thị đúng
+
+## Notes
+
+- Nếu không có bài viết nào published trong ngày hôm nay, hệ thống sẽ fallback về logic cũ (FeaturedArticles)
+- ViewCount cần được cập nhật khi người dùng xem bài viết (hiện tại chưa implement auto-increment)
+- Có thể điều chỉnh số lượng bài viết hiển thị bằng cách thay đổi parameters trong controller

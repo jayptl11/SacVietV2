@@ -1,0 +1,168 @@
+﻿using System.ComponentModel.DataAnnotations;
+using SacViet.Models;
+
+namespace SacViet.ViewModels
+{
+    // Dashboard Statistics
+    public class AdminDashboardViewModel
+    {
+        public int TotalArticles { get; set; }
+        public int PendingArticles { get; set; }
+        public int PublishedArticles { get; set; }
+        public int TotalUsers { get; set; }
+        public int TotalWriters { get; set; }
+        public int TotalCategories { get; set; }
+        public int TodayViews { get; set; }
+        public int TotalViews { get; set; }
+        
+        public List<AdminRecentArticleViewModel> RecentArticles { get; set; } = new();
+        public List<AdminTopArticleViewModel> TopArticles { get; set; } = new();
+        public List<AdminRecentUserViewModel> RecentUsers { get; set; } = new();
+        public List<AdminMonthlyStatsViewModel> MonthlyStats { get; set; } = new();
+    }
+
+    public class AdminRecentArticleViewModel
+    {
+        public int ArticleId { get; set; }
+        public string Title { get; set; }
+        public string AuthorName { get; set; }
+        public string Status { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public int ViewCount { get; set; }
+    }
+
+    public class AdminTopArticleViewModel
+    {
+        public int ArticleId { get; set; }
+        public string Title { get; set; }
+        public string AuthorName { get; set; }
+        public int ViewCount { get; set; }
+        public string Slug { get; set; }
+    }
+
+    public class AdminRecentUserViewModel
+    {
+        public int UserId { get; set; }
+        public string FullName { get; set; }
+        public string Email { get; set; }
+        public string Role { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public bool IsActive { get; set; }
+    }
+
+    public class AdminMonthlyStatsViewModel
+    {
+        public string Month { get; set; }
+        public int Articles { get; set; }
+        public int Users { get; set; }
+        public int Views { get; set; }
+    }
+
+    // Article Management
+    public class AdminArticlesViewModel : PaginatedViewModel<AdminArticleListItemViewModel>
+    {
+        public string StatusFilter { get; set; }
+        public string SearchQuery { get; set; }
+    }
+
+    public class AdminArticleListItemViewModel
+    {
+        public int ArticleId { get; set; }
+        public string Title { get; set; }
+        public string Slug { get; set; }
+        public string AuthorName { get; set; }
+        public string CategoryName { get; set; }
+        public string Status { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime? PublishedAt { get; set; }
+        public DateTime? ScheduledPublishDate { get; set; }
+        public int ViewCount { get; set; }
+        public string ThumbnailImage { get; set; }
+        public bool IsFeatured { get; set; }
+        public string LatestApprovalStatus { get; set; }
+        public string RejectionReason { get; set; }
+    }
+
+    // User Management
+    public class AdminUsersViewModel : PaginatedViewModel<AdminUserListItemViewModel>
+    {
+        public string RoleFilter { get; set; }
+        public string SearchQuery { get; set; }
+    }
+
+    public class AdminUserListItemViewModel
+    {
+        public int UserId { get; set; }
+        public string FullName { get; set; }
+        public string Email { get; set; }
+        public string Role { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime? LastLoginAt { get; set; }
+        public bool IsActive { get; set; }
+        public bool IsBanned { get; set; }
+        public string BanReason { get; set; }
+        public int ArticleCount { get; set; }
+        public string Avatar { get; set; }
+    }
+
+    // System Settings
+    public class AdminSystemSettingsViewModel
+    {
+        [Required(ErrorMessage = "Tên website là bắt buộc")]
+        public string SiteName { get; set; }
+
+        [Required(ErrorMessage = "Mô tả website là bắt buộc")]
+        public string SiteDescription { get; set; }
+
+        [EmailAddress(ErrorMessage = "Email không đúng định dạng")]
+        public string ContactEmail { get; set; }
+
+        public string SiteLogo { get; set; }
+        public string SiteFavicon { get; set; }
+
+        [Range(1, 100, ErrorMessage = "Số bài viết trên trang phải từ 1 đến 100")]
+        public int ArticlesPerPage { get; set; } = 10;
+
+        public bool RequireApproval { get; set; } = true;
+        public bool AllowGuestComments { get; set; } = false;
+        public bool EnableRegistration { get; set; } = true;
+
+        public string FacebookUrl { get; set; }
+        public string TwitterUrl { get; set; }
+        public string InstagramUrl { get; set; }
+        public string YouTubeUrl { get; set; }
+
+        public string GoogleAnalyticsId { get; set; }
+        public string MetaKeywords { get; set; }
+        public string MetaDescription { get; set; }
+    }
+
+    // Base paginated view model
+    public class PaginatedViewModel<T>
+    {
+        public List<T> Items { get; set; } = new();
+        public int CurrentPage { get; set; }
+        public int TotalPages { get; set; }
+        public int TotalItems { get; set; }
+        public int PageSize { get; set; }
+        public bool HasPreviousPage => CurrentPage > 1;
+        public bool HasNextPage => CurrentPage < TotalPages;
+    }
+
+    // Service Result
+    public class ServiceResult
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+        
+        public static ServiceResult CreateSuccess(string message = "Thành công")
+        {
+            return new ServiceResult { Success = true, Message = message };
+        }
+        
+        public static ServiceResult CreateError(string message)
+        {
+            return new ServiceResult { Success = false, Message = message };
+        }
+    }
+}

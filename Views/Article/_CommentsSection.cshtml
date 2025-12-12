@@ -1,0 +1,78 @@
+﻿@model SacViet.Models.Article
+@{
+    var comments = ViewBag.Comments as IEnumerable<SacViet.Models.Comment> ?? new List<SacViet.Models.Comment>();
+    var commentCount = ViewBag.CommentCount as int? ?? 0;
+}
+
+<!-- Comments Section -->
+<div id="comments" class="comments-section mt-5 no-print">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <h4 class="mb-0">
+            <i class="fas fa-comments me-2"></i>Bình luận (<span id="commentCountHeader">@commentCount</span>)
+        </h4>
+    </div>
+
+    <!-- Login Required Message or Add Comment Form -->
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <div class="add-comment-section mb-4 p-4 bg-light rounded">
+            <h6 class="mb-3">
+                <i class="fas fa-user-circle me-2"></i>Viết bình luận của bạn:
+            </h6>
+            <form id="mainCommentForm" class="comment-form-ajax" data-article-id="@Model.ArticleId">
+                @Html.AntiForgeryToken()
+                <div class="mb-3">
+                    <textarea name="content" class="form-control comment-textarea" rows="4" placeholder="Nhập nội dung bình luận..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-danger submit-comment-btn">
+                    <i class="fas fa-paper-plane me-1"></i>Gửi bình luận
+                </button>
+            </form>
+        </div>
+    }
+    else
+    {
+        <div class="mb-4 p-3 bg-light border-start border-4 border-warning rounded">
+            <p class="mb-0 text-muted">
+                <i class="fas fa-lock me-2"></i>
+                <a href="@Url.Action("Login", "Account", new { returnUrl = Context.Request.Path })" class="text-decoration-none fw-semibold">
+                    Đăng nhập
+                </a> để bình luận
+            </p>
+        </div>
+    }
+
+    <!-- Comments List -->
+    <div id="commentsListContainer">
+        @if (comments.Any())
+        {
+            <div class="comments-list">
+                @foreach (var comment in comments)
+                {
+                    @await Html.PartialAsync("_CommentItem", comment)
+                }
+            </div>
+        }
+        else
+        {
+            <div class="no-comments text-center py-5 text-muted">
+                <i class="fas fa-comment-slash fa-3x mb-3 opacity-50"></i>
+                <h5>Chưa có bình luận nào</h5>
+                <p>
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <span>Hãy là người đầu tiên bình luận!</span>
+                    }
+                    else
+                    {
+                        <span>
+                            <a href="@Url.Action("Login", "Account", new { returnUrl = Context.Request.Path })" class="text-decoration-none">
+                                Đăng nhập
+                            </a> để là người đầu tiên bình luận!
+                        </span>
+                    }
+                </p>
+            </div>
+        }
+    </div>
+</div>

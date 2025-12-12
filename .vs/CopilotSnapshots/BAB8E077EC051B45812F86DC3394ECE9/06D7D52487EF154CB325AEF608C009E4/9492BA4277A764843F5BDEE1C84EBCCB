@@ -1,0 +1,118 @@
+﻿@model SacViet.Models.Article
+@using System.Text.RegularExpressions
+
+<!-- Article Image -->
+@if (!string.IsNullOrEmpty(Model.ThumbnailImage))
+{
+    var altText = System.Net.WebUtility.HtmlDecode(Model.Title ?? string.Empty);
+    <div class="article-image mb-4">
+        <img src="@Model.ThumbnailImage" class="img-fluid w-100 rounded" alt="@altText">
+    </div>
+}
+
+@{
+    // Render content with support for media tokens
+    var raw = Model.Content ?? string.Empty;
+
+    // 1) Normalize a bare token possibly wrapped by <p> tags
+    raw = Regex.Replace(raw, @"(<p[^>]*>\s*)?\[\s*SV-VIDEO\s*\](\s*</p>)?", "[SV-VIDEO]", RegexOptions.IgnoreCase);
+
+    // Placeholders
+    const string VPlaceholder = "##SVTOKEN_VIDEO##";
+    const string IPlaceholder = "##SVTOKEN_IMAGE##";
+
+    var videos = new List<(string? Url, string? Title)>();
+    var images = new List<(string Url, string? Title)>();
+
+    // 2) VIDEO token: accept both " and &quot;, allow line breaks between attributes
+    raw = Regex.Replace(
+        raw,
+        @"\[SV-VIDEO(?:\s+url=(?:""|&quot;)(?<url>.*?)(?:""|&quot;))?(?:\s+title=(?:""|&quot;)(?<title>.*?)(?:""|&quot;))?\s*\]",
+        m =>
+        {
+            var url = m.Groups["url"].Success ? m.Groups["url"].Value : (Model.VideoUrl ?? string.Empty);
+            var title = m.Groups["title"].Success ? m.Groups["title"].Value : (Model.VideoTitle ?? string.Empty);
+            // Decode any HTML entities in captured attributes
+            url = System.Net.WebUtility.HtmlDecode(url);
+            title = System.Net.WebUtility.HtmlDecode(title);
+            videos.Add((string.IsNullOrWhiteSpace(url) ? null : url, string.IsNullOrWhiteSpace(title) ? null : title));
+            return VPlaceholder;
+        },
+        RegexOptions.IgnoreCase | RegexOptions.Singleline);
+
+    // 3) IMAGE token: accept url and optional title, order-insensitive, and both " and &quot;
+    raw = Regex.Replace(
+        raw,
+        @"\[SV-IMAGE(?:(?:\s+url=(?:""|&quot;)(?<url>.*?)(?:""|&quot;))|(?:\s+title=(?:""|&quot;)(?<ititle>.*?)(?:""|&quot;)))*\s*\]",
+        m =>
+        {
+            var url = m.Groups["url"].Success ? m.Groups["url"].Value : string.Empty;
+            var title = m.Groups["ititle"].Success ? m.Groups["ititle"].Value : null;
+            url = System.Net.WebUtility.HtmlDecode(url);
+            title = title != null ? System.Net.WebUtility.HtmlDecode(title) : null;
+            if (!string.IsNullOrWhiteSpace(url))
+            {
+                images.Add((url, string.IsNullOrWhiteSpace(title) ? null : title));
+            }
+            return IPlaceholder;
+        },
+        RegexOptions.IgnoreCase | RegexOptions.Singleline);
+
+    // 4) Split and render
+    var parts = Regex.Split(raw, $"({Regex.Escape(VPlaceholder)}|{Regex.Escape(IPlaceholder)})");
+    var vIndex = 0;
+    var iIndex = 0;
+}
+
+<div class="article-content" id="articleContent">
+    @foreach (var part in parts)
+    {
+        if (part == VPlaceholder)
+        {
+            var info = vIndex < videos.Count ? videos[vIndex++] : (Url: Model.VideoUrl, Title: Model.VideoTitle);
+            if (!string.IsNullOrWhiteSpace(info.Url))
+            {
+                var clone = new SacViet.Models.Article
+                {
+                    VideoUrl = info.Url,
+                    VideoTitle = info.Title
+                };
+                @await Html.PartialAsync("~/Views/Article/_VideoPlayer.cshtml", clone)
+            }
+        }
+        else if (part == IPlaceholder)
+        {
+            var info = iIndex < images.Count ? images[iIndex++] : (Url: (string?)null, Title: (string?)null);
+            if (!string.IsNullOrWhiteSpace(info.Url))
+            {
+                var caption = info.Title;
+                <figure class="my-3 text-center">
+                    <img src="@info.Url" alt="@caption" class="img-fluid rounded" />
+                    @if (!string.IsNullOrWhiteSpace(caption))
+                    {
+                        <figcaption class="mt-1 text-muted small">@caption</figcaption>
+                    }
+                </figure>
+            }
+        }
+        else
+        {
+            @Html.Raw(part)
+        }
+    }
+</div>
+
+<!-- Article Tags -->
+@if (Model.Tags.Any())
+{
+    <div class="article-tags mt-4 pt-3 border-top no-print">
+        <h6 class="mb-2">Từ khóa:</h6>
+        @foreach (var tag in Model.Tags)
+        {
+            <a href="@Url.Action("Search", "Home", new { keyword = tag.TagName })" 
+               class="badge bg-outline-danger me-2 mb-2 text-decoration-none">
+                @tag.TagName
+            </a>
+        }
+    </div>
+}

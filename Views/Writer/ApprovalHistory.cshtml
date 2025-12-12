@@ -1,0 +1,177 @@
+﻿@model IEnumerable<SacViet.ViewModels.ApprovalHistoryViewModel>
+@{
+    ViewData["Title"] = "Lịch sử duyệt bài";
+    var article = ViewBag.Article as SacViet.ViewModels.ArticleEditViewModel;
+}
+
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <h2 class="text-danger mb-2">
+                        <i class="fas fa-history me-2"></i>Lịch sử duyệt bài
+                    </h2>
+                    @if (article != null)
+                    {
+                        <h5 class="text-muted">@article.Title</h5>
+                    }
+                </div>
+                <a href="@Url.Action("Edit", new { id = article?.ArticleId })" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Quay lại
+                </a>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <!-- Timeline -->
+                <div class="timeline">
+                    @foreach (var history in Model)
+                    {
+                        <div class="timeline-item mb-4">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-start">
+                                        <div class="timeline-icon me-3">
+                                            @switch (history.Status)
+                                            {
+                                                case "Pending":
+                                                    <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                                         style="width: 50px; height: 50px;">
+                                                        <i class="fas fa-clock fa-lg"></i>
+                                                    </div>
+                                                    break;
+                                                case "Approved":
+                                                    <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                                         style="width: 50px; height: 50px;">
+                                                        <i class="fas fa-check-circle fa-lg"></i>
+                                                    </div>
+                                                    break;
+                                                case "Rejected":
+                                                    <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                                         style="width: 50px; height: 50px;">
+                                                        <i class="fas fa-times-circle fa-lg"></i>
+                                                    </div>
+                                                    break;
+                                            }
+                                        </div>
+                                        
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <div>
+                                                    <h5 class="mb-1">
+                                                        @switch (history.Status)
+                                                        {
+                                                            case "Pending":
+                                                                <span class="badge bg-warning">
+                                                                    <i class="fas fa-clock me-1"></i>Chờ duyệt
+                                                                </span>
+                                                                break;
+                                                            case "Approved":
+                                                                <span class="badge bg-success">
+                                                                    <i class="fas fa-check-circle me-1"></i>Đã duyệt
+                                                                </span>
+                                                                break;
+                                                            case "Rejected":
+                                                                <span class="badge bg-danger">
+                                                                    <i class="fas fa-times-circle me-1"></i>Bị từ chối
+                                                                </span>
+                                                                break;
+                                                        }
+                                                    </h5>
+                                                </div>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-calendar me-1"></i>
+                                                    @history.SubmittedAt?.ToString("dd/MM/yyyy HH:mm")
+                                                </small>
+                                            </div>
+
+                                            @if (history.Status == "Pending")
+                                            {
+                                                <p class="text-muted mb-0">
+                                                    Bài viết đã được gửi để chờ duyệt
+                                                </p>
+                                            }
+                                            else
+                                            {
+                                                <div class="mt-3">
+                                                    <p class="mb-2">
+                                                        <strong>Người duyệt:</strong> @history.ReviewerName
+                                                    </p>
+                                                    <p class="mb-2">
+                                                        <strong>Thời gian duyệt:</strong> @history.ReviewedAt?.ToString("dd/MM/yyyy HH:mm")
+                                                    </p>
+                                                    
+                                                    @if (!string.IsNullOrEmpty(history.ReviewNote))
+                                                    {
+                                                        <div class="alert @(history.Status == "Rejected" ? "alert-danger" : "alert-info") mt-3 mb-0">
+                                                            <strong>
+                                                                @(history.Status == "Rejected" ? "Lý do từ chối:" : "Ghi chú:")
+                                                            </strong>
+                                                            <p class="mb-0 mt-2">@history.ReviewNote</p>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-lg-6 mx-auto">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                        <h5 class="text-muted">Chưa có lịch sử duyệt</h5>
+                        <p class="text-muted mb-0">Bài viết chưa được gửi để duyệt</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .timeline {
+        position: relative;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 25px;
+        top: 50px;
+        bottom: 0;
+        width: 2px;
+        background: #dee2e6;
+    }
+
+    .timeline-item {
+        position: relative;
+    }
+
+    .timeline-item:last-child .timeline::before {
+        display: none;
+    }
+
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+</style>

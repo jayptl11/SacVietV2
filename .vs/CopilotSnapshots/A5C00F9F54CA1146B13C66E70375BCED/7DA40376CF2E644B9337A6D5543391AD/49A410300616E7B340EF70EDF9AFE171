@@ -1,0 +1,98 @@
+﻿// FIX: Modal Backdrop Cleanup
+// Add this to bottom of Create.cshtml and Edit.cshtml
+
+// Force cleanup modal backdrop when modal is closed
+document.addEventListener('DOMContentLoaded', function() {
+    const videoModal = document.getElementById('videoEmbedModal');
+    
+    if (videoModal) {
+        // When modal is fully hidden
+        videoModal.addEventListener('hidden.bs.modal', function () {
+            console.log('Modal hidden - cleaning up...');
+            
+            // Remove all modal backdrops
+            document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+                backdrop.remove();
+            });
+            
+            // Reset body styles
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+            
+            console.log('Cleanup complete');
+        });
+        
+        // Also cleanup when clicking outside modal
+        videoModal.addEventListener('click', function(e) {
+            if (e.target === videoModal) {
+                const modal = bootstrap.Modal.getInstance(videoModal);
+                if (modal) {
+                    modal.hide();
+                }
+            }
+        });
+    }
+});
+
+// Fix insertVideoIntoCKEditor function
+function insertVideoIntoCKEditor() {
+    const videoUrl = document.getElementById('embed-video-url').value.trim();
+    const videoTitle = document.getElementById('embed-video-title').value.trim();
+    
+    if (!videoUrl) {
+        alert('Vui lòng nhập URL video!');
+        return;
+    }
+    
+    if (!videoTitle) {
+        alert('Vui lòng nhập tiêu đề video!');
+        return;
+    }
+    
+    // Validate URL
+    try {
+        new URL(videoUrl);
+    } catch (e) {
+        alert('URL không hợp lệ!');
+        return;
+    }
+    
+    // Generate embed HTML (use existing function from video-embed-manager.js)
+    const embedHTML = createVideoEmbedHTML(videoUrl, videoTitle);
+    
+    // Insert into CKEditor
+    if (CKEDITOR.instances.editor) {
+        CKEDITOR.instances.editor.insertHtml(embedHTML);
+        
+        // Clear inputs
+        document.getElementById('embed-video-url').value = '';
+        document.getElementById('embed-video-title').value = '';
+        
+        // Close modal PROPERLY
+        const modalElement = document.getElementById('videoEmbedModal');
+        if (modalElement) {
+            const modal = bootstrap.Modal.getInstance(modalElement);
+            if (modal) {
+                modal.hide();
+            }
+            
+            // IMPORTANT: Force cleanup after animation completes
+            setTimeout(() => {
+                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+            }, 500); // Wait for Bootstrap animation
+        }
+        
+        // Show success message
+        if (typeof showNotification === 'function') {
+            showNotification('✅ Video đã được chèn vào bài viết!', 'success');
+        } else {
+            alert('✅ Video đã được chèn vào bài viết!');
+        }
+    } else {
+        alert('Lỗi: Không tìm thấy CKEditor instance');
+    }
+}

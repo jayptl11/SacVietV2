@@ -1,0 +1,279 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using SacViet.Services;
+using SacViet.ViewModels;
+using SacViet.Models;
+
+namespace SacViet.Controllers
+{
+    [Authorize(Roles = "Admin")]
+    public class AdminController : Controller
+    {
+        private readonly IAdminService _adminService;
+        private readonly IWriterService _writerService;
+        private readonly INewsService _newsService;
+
+        public AdminController(IAdminService adminService, IWriterService writerService, INewsService newsService)
+        {
+            _adminService = adminService;
+            _writerService = writerService;
+            _newsService = newsService;
+        }
+
+        // Dashboard
+        public async Task<IActionResult> Index()
+        {
+            var stats = await _adminService.GetDashboardStatsAsync();
+            return View(stats);
+        }
+
+        // Article Management
+        public async Task<IActionResult> Articles(string status = "", string search = "", int page = 1)
+        {
+            var articles = await _adminService.GetArticlesAsync(status, search, page);
+            ViewBag.CurrentStatus = status;
+            ViewBag.CurrentSearch = search;
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = articles.TotalPages;
+            return View(articles);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApproveArticle(int articleId, string note = "")
+        {
+            try
+            {
+                var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                {
+                    return Json(new { success = false, message = "Không thể xác thực người dùng" });
+                }
+
+                var result = await _adminService.ApproveArticleAsync(articleId, userId, note);
+                return Json(new { success = result.Success, message = result.Message });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RejectArticle(int articleId, string note)
+        {
+            try
+            {
+                var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                {
+                    return Json(new { success = false, message = "Không thể xác thực người dùng" });
+                }
+
+                var result = await _adminService.RejectArticleAsync(articleId, userId, note);
+                return Json(new { success = result.Success, message = result.Message });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> PublishArticle(int articleId)
+        {
+            try
+            {
+                var result = await _adminService.PublishArticleAsync(articleId);
+                return Json(new { success = result.Success, message = result.Message });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UnpublishArticle(int articleId)
+        {
+            try
+            {
+                var result = await _adminService.UnpublishArticleAsync(articleId);
+                return Json(new { success = result.Success, message = result.Message });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteArticle(int articleId)
+        {
+            try
+            {
+                var result = await _adminService.DeleteArticleAsync(articleId);
+                return Json(new { success = result.Success, message = result.Message });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleFeaturedArticle(int articleId)
+        {
+            try
+            {
+                var result = await _adminService.ToggleFeaturedArticleAsync(articleId);
+                return Json(new { success = result.Success, message = result.Message });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
+            }
+        }
+
+        // User Management
+        public async Task<IActionResult> Users(string role = "", string search = "", int page = 1)
+        {
+            var users = await _adminService.GetUsersAsync(role, search, page);
+            ViewBag.CurrentRole = role;
+            ViewBag.CurrentSearch = search;
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = users.TotalPages;
+            return View(users);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateUserRole(int userId, string role)
+        {
+            try
+            {
+                var result = await _adminService.UpdateUserRoleAsync(userId, role);
+                return Json(new { success = result.Success, message = result.Message });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> BanUser(int userId, string reason)
+        {
+            try
+            {
+                var result = await _adminService.BanUserAsync(userId, reason);
+                return Json(new { success = result.Success, message = result.Message });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UnbanUser(int userId)
+        {
+            try
+            {
+                var result = await _adminService.UnbanUserAsync(userId);
+                return Json(new { success = result.Success, message = result.Message });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteUser(int userId)
+        {
+            try
+            {
+                var result = await _adminService.DeleteUserAsync(userId);
+                return Json(new { success = result.Success, message = result.Message });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
+            }
+        }
+
+        // Category Management
+        public async Task<IActionResult> Categories()
+        {
+            var categories = await _adminService.GetCategoriesAsync();
+            return View(categories);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateCategory(AdminCategoryViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = await _adminService.CreateCategoryAsync(model);
+                if (result.Success)
+                {
+                    return RedirectToAction(nameof(Categories));
+                }
+                ModelState.AddModelError("", result.Message);
+            }
+            return View("Categories", await _adminService.GetCategoriesAsync());
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateCategory(AdminCategoryViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = await _adminService.UpdateCategoryAsync(model);
+                return Json(new { success = result.Success, message = result.Message });
+            }
+            return Json(new { success = false, message = "Dữ liệu không hợp lệ" });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteCategory(int categoryId)
+        {
+            var result = await _adminService.DeleteCategoryAsync(categoryId);
+            return Json(new { success = result.Success, message = result.Message });
+        }
+
+        // System Settings
+        public async Task<IActionResult> Settings()
+        {
+            var settings = await _adminService.GetSystemSettingsAsync();
+            return View(settings);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateSettings(AdminSystemSettingsViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = await _adminService.UpdateSystemSettingsAsync(model);
+                if (result.Success)
+                {
+                    ViewBag.Message = result.Message;
+                }
+                else
+                {
+                    ViewBag.Error = result.Message;
+                }
+            }
+            return View("Settings", model);
+        }
+    }
+}

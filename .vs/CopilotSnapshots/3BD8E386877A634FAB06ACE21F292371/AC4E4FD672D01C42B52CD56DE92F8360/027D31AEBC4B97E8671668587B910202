@@ -1,0 +1,41 @@
+﻿using SacViet.ViewModels;
+
+namespace SacViet.Services
+{
+    public interface IAdminService
+    {
+        // Dashboard
+        Task<AdminDashboardViewModel> GetDashboardStatsAsync();
+
+        // Article Management
+        Task<AdminArticlesViewModel> GetArticlesAsync(string status, string search, int page, int pageSize = 20);
+        Task<ServiceResult> ApproveArticleAsync(int articleId, string adminName, string note = "");
+        Task<ServiceResult> RejectArticleAsync(int articleId, string adminName, string note);
+        Task<ServiceResult> PublishArticleAsync(int articleId);
+        Task<ServiceResult> UnpublishArticleAsync(int articleId);
+        Task<ServiceResult> DeleteArticleAsync(int articleId);
+        Task<ServiceResult> ToggleFeaturedArticleAsync(int articleId);
+
+        // User Management
+        Task<AdminUsersViewModel> GetUsersAsync(string role, string search, int page, int pageSize = 20);
+        Task<ServiceResult> UpdateUserRoleAsync(int userId, string role);
+        Task<ServiceResult> BanUserAsync(int userId, string reason);
+        Task<ServiceResult> UnbanUserAsync(int userId);
+        Task<ServiceResult> DeleteUserAsync(int userId);
+
+        // Category Management
+        Task<AdminCategoriesViewModel> GetCategoriesAsync();
+        Task<ServiceResult> CreateCategoryAsync(AdminCategoryViewModel model);
+        Task<ServiceResult> UpdateCategoryAsync(AdminCategoryViewModel model);
+        Task<ServiceResult> DeleteCategoryAsync(int categoryId);
+
+        // System Settings
+        Task<AdminSystemSettingsViewModel> GetSystemSettingsAsync();
+        Task<ServiceResult> UpdateSystemSettingsAsync(AdminSystemSettingsViewModel model);
+
+        // Statistics
+        Task<List<AdminMonthlyStatsViewModel>> GetMonthlyStatsAsync(int months = 12);
+        Task<Dictionary<string, int>> GetArticleStatusStatsAsync();
+        Task<Dictionary<string, int>> GetUserRoleStatsAsync();
+    }
+}

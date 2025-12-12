@@ -1,0 +1,110 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using SacViet.Services;
+using System.Security.Claims;
+
+namespace SacViet.Controllers
+{
+    public class ArticleController : Controller
+    {
+        private readonly INewsService _newsService;
+
+        public ArticleController(INewsService newsService)
+        {
+            _newsService = newsService;
+        }
+
+        [Route("bai-viet/{slug}")]
+        public async Task<IActionResult> Details(string slug)
+        {
+            var article = await _newsService.GetArticleDetailsAsync(slug);
+            
+            if (article == null)
+            {
+                return NotFound();
+            }
+
+            // Increment view count with basic duplicate prevention
+            // Check if this article was already viewed in this session recently (last 30 minutes)
+            var sessionKey = $"article_viewed_{article.ArticleId}";
+            var lastViewed = HttpContext.Session.GetString(sessionKey);
+            
+            bool shouldIncrementView = true;
+            if (!string.IsNullOrEmpty(lastViewed))
+            {
+                if (DateTime.TryParse(lastViewed, out DateTime lastViewTime))
+                {
+                    // Only increment if more than 30 minutes have passed
+                    shouldIncrementView = DateTime.Now.Subtract(lastViewTime).TotalMinutes > 30;
+                }
+            }
+
+            if (shouldIncrementView)
+            {
+                await _newsService.IncrementArticleViewCountAsync(article.ArticleId);
+                // Record this view in session
+                HttpContext.Session.SetString(sessionKey, DateTime.Now.ToString());
+            }
+
+            // Get related articles
+            var relatedArticles = await _newsService.GetRelatedArticlesAsync(article.ArticleId, article.CategoryId);
+            
+            // Get comments for the article
+            var comments = await _newsService.GetArticleCommentsAsync(article.ArticleId);
+            var commentCount = await _newsService.GetCommentCountAsync(article.ArticleId);
+            
+            ViewBag.RelatedArticles = relatedArticles;
+            ViewBag.Comments = comments;
+            ViewBag.CommentCount = commentCount;
+            
+            // Article URL for social sharing
+            ViewBag.ArticleUrl = $"{Request.Scheme}://{Request.Host}{Url.Action("Details", "Article", new { slug = article.Slug })}";
+            ViewBag.ArticleTitle = article.Title;
+            ViewBag.ArticleSummary = article.Summary ?? "";
+            
+            return View(article);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddComment(int articleId, string content, int? parentCommentId = null)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                TempData["ErrorMessage"] = "Nội dung bình luận không được để trống.";
+                return RedirectToAction("Details", new { slug = Request.Headers["Referer"].ToString().Split('/').LastOrDefault() });
+            }
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            {
+                TempData["ErrorMessage"] = "Bạn cần đăng nhập để bình luận.";
+                return RedirectToAction("Login", "Account");
+            }
+
+            try
+            {
+                await _newsService.AddCommentAsync(articleId, userId, content, parentCommentId);
+                TempData["SuccessMessage"] = "Bình luận của bạn đã được thêm thành công.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi thêm bình luận. Vui lòng thử lại.";
+            }
+
+            // Get the article slug to redirect back to the article
+            var article = await _newsService.GetArticleDetailsAsync("");
+            var articleFromId = await _newsService.GetArticleDetailsAsync("");
+            
+            // Find article by ID to get slug (we need a method for this)
+            var referrer = Request.Headers["Referer"].ToString();
+            if (!string.IsNullOrEmpty(referrer))
+            {
+                return Redirect(referrer + "#comments");
+            }
+            
+            return RedirectToAction("Index", "Home");
+        }
+    }
+}

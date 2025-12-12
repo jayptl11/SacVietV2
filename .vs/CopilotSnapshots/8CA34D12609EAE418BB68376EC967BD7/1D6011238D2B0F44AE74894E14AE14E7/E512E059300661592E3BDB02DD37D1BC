@@ -1,0 +1,127 @@
+﻿@model SacViet.ViewModels.SearchViewModel
+@{
+    ViewData["Title"] = ViewBag.CategoryName ?? "Chuyên mục";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Category Header -->
+            <div class="category-header mb-4">
+                <h2 class="fw-bold text-danger mb-2">
+                    <i class="fas fa-list me-2"></i>@(ViewBag.CategoryName ?? "Chuyên mục")
+                </h2>
+                <p class="text-muted">Tổng cộng @Model.TotalCount bài viết</p>
+            </div>
+
+            <!-- Articles Grid -->
+            @if (Model.Articles.Any())
+            {
+                <div class="row g-4">
+                    @foreach (var article in Model.Articles)
+                    {
+                        <div class="col-md-6">
+                            <div class="news-card h-100 border rounded">
+                                <div class="news-image position-relative">
+                                    <img src="@(string.IsNullOrEmpty(article.ThumbnailImage) ? "/images/placeholder-article.jpg" : article.ThumbnailImage)" 
+                                         class="img-fluid w-100" alt="@article.Title" style="height: 200px; object-fit: cover;">
+                                    <div class="category-badge bg-danger text-white px-2 py-1 position-absolute top-0 start-0 m-2">
+                                        @article.Category.CategoryName
+                                    </div>
+                                </div>
+                                <div class="news-content p-3">
+                                    <h5 class="news-title mb-2">
+                                        <a href="@Url.Action("Details", "Article", new { slug = article.Slug })" class="text-dark text-decoration-none">
+                                            @article.Title
+                                        </a>
+                                    </h5>
+                                    <p class="news-summary text-muted mb-2">@article.Summary</p>
+                                    <div class="news-meta d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">
+                                            <i class="fas fa-user me-1"></i>@article.Author.FullName
+                                        </small>
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock me-1"></i>@article.PublishedAt?.ToString("dd/MM/yyyy")
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Pagination -->
+                @if (Model.TotalPages > 1)
+                {
+                    <nav aria-label="Category pagination" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            @if (Model.Page > 1)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("Index", "Category", new { categorySlug = ViewBag.CategorySlug, page = Model.Page - 1 })">
+                                        <i class="fas fa-chevron-left"></i> Trước
+                                    </a>
+                                </li>
+                            }
+                            
+                            @for (int i = Math.Max(1, Model.Page - 2); i <= Math.Min(Model.TotalPages, Model.Page + 2); i++)
+                            {
+                                <li class="page-item @(i == Model.Page ? "active" : "")">
+                                    <a class="page-link" href="@Url.Action("Index", "Category", new { categorySlug = ViewBag.CategorySlug, page = i })">@i</a>
+                                </li>
+                            }
+                            
+                            @if (Model.Page < Model.TotalPages)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("Index", "Category", new { categorySlug = ViewBag.CategorySlug, page = Model.Page + 1 })">
+                                        Sau <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                }
+            }
+            else
+            {
+                <div class="no-results text-center py-5">
+                    <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">Chưa có bài viết nào</h4>
+                    <p class="text-muted">Chuyên mục này hiện chưa có bài viết nào được đăng</p>
+                </div>
+            }
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Categories -->
+            <div class="sidebar-widget mb-4">
+                <h5 class="widget-title bg-danger text-white p-3 mb-0">
+                    <i class="fas fa-list me-2"></i>CHUYÊN MỤC
+                </h5>
+                <div class="widget-content bg-light">
+                    @foreach (var category in Model.Categories)
+                    {
+                        <a href="@Url.Action("Index", "Category", new { categorySlug = category.Slug })" 
+                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center @(Model.CategoryId == category.CategoryId ? "active" : "")">
+                            @category.CategoryName
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .news-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .news-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+</style>

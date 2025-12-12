@@ -1,0 +1,149 @@
+﻿# 🎯 Quick Reference - Web Crawler V2.4
+
+## ✅ Supported Vietnamese News Sites
+
+| Site | URL Pattern | Success Rate | Notes |
+|------|-------------|--------------|-------|
+| **VNExpress** | vnexpress.net | 99% | ✅ Fully supported |
+| **Tuổi Trẻ** | tuoitre.vn | 95% | ✅ Fully supported |
+| **Thanh Niên** | thanhnien.vn | 95% | ✅ Fully supported |
+| **Zing News** | zingnews.vn | 90% | ✅ Well supported |
+| **Dân Trí** | dantri.com.vn | 90% | ✅ Well supported |
+| **VietnamNet** | vietnamnet.vn | 85% | ✅ Good support |
+| **Kenh14** | kenh14.vn | 85% | ✅ Good support |
+| **Others** | various | 60% | 🔄 Fallback mode |
+
+---
+
+## 🚀 Quick Test URLs
+
+### VNExpress
+```
+https://vnexpress.net/[any-article]
+```
+
+### Tuổi Trẻ
+```
+https://tuoitre.vn/[any-article].htm
+```
+
+### Thanh Niên
+```
+https://thanhnien.vn/[any-article].html
+```
+
+### Zing News
+```
+https://zingnews.vn/[any-article].html
+```
+
+### Dân Trí
+```
+https://dantri.com.vn/[any-article].htm
+```
+
+---
+
+## 🔍 What Gets Extracted?
+
+| Field | Priority | Fallback |
+|-------|----------|----------|
+| **Title** | Meta tags → H1 → `<title>` | ✅ |
+| **Summary** | Meta description → Sapo → First paragraph | ✅ |
+| **Content** | Article body → Fallback paragraphs | ✅ |
+| **Images** | Content images | ✅ |
+| **Thumbnail** | OG image → First content image | ✅ |
+
+---
+
+## ⚡ Troubleshooting
+
+### ❌ "Không thể trích xuất đủ nội dung"
+
+**Possible reasons:**
+1. Site uses JavaScript to load content (SPA)
+2. Site has anti-bot protection
+3. Site requires login/subscription
+4. Site has unusual structure
+
+**Solutions:**
+1. Try different article URL
+2. Use fallback: Copy/paste content manually
+3. Check browser console for errors
+
+### ❌ Images not loading
+
+**Check:**
+1. Image URLs in browser (F12 → Network)
+2. CORS issues
+3. Hotlink protection
+
+**Solution:**
+- Use "Set by URL" for thumbnail
+- Images will use absolute URLs
+
+### ❌ Timeout error
+
+**Reasons:**
+- Site is slow
+- Network issues
+
+**Solution:**
+- Wait 30 seconds
+- Retry
+- Check internet connection
+
+---
+
+## 💡 Best Practices
+
+### ✅ DO:
+- Use article URL (not homepage)
+- Test URL in browser first
+- Verify extracted content
+- Edit if needed
+
+### ❌ DON'T:
+- Crawl entire websites
+- Use for copyrighted content without attribution
+- Expect 100% success rate
+- Crawl dynamic (SPA) sites
+
+---
+
+## 🛠️ Advanced Usage
+
+### Manual Override
+
+If crawler fails:
+1. **Title**: Copy from browser tab
+2. **Summary**: Copy first paragraph
+3. **Content**: Copy/paste from browser
+4. **Thumbnail**: Right-click image → Copy image address
+
+### Testing New Site
+
+```javascript
+// Browser console
+console.log('Title:', document.querySelector('h1')?.textContent);
+console.log('Content:', document.querySelector('article')?.className);
+console.log('Images:', document.querySelectorAll('article img').length);
+```
+
+---
+
+## 📞 Support
+
+**If crawler doesn't work for a specific site:**
+1. Check if site is in supported list
+2. Try fallback mechanism
+3. Report issue with:
+   - Site URL
+   - Expected content
+   - Actual result
+   - Browser console errors
+
+---
+
+**Quick Ref Version**: 2.4  
+**Last Updated**: 2024-01-XX

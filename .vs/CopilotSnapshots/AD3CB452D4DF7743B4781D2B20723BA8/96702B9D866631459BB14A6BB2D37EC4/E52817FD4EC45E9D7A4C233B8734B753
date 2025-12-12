@@ -1,0 +1,91 @@
+﻿using Microsoft.Extensions.Caching.Memory;
+using SacViet.Models;
+
+namespace SacViet.Services
+{
+    public class CacheService : ICacheService
+    {
+        private readonly IMemoryCache _cache;
+        private readonly INewsService _newsService;
+        private readonly ILogger<CacheService> _logger;
+        
+        private const string MOST_VIEWED_TODAY_KEY = "most_viewed_today";
+        private const string CACHE_UPDATE_TIME_KEY = "cache_update_time";
+        private readonly TimeSpan CACHE_DURATION = TimeSpan.FromMinutes(5); // Cache for 5 minutes
+
+        public CacheService(IMemoryCache cache, INewsService newsService, ILogger<CacheService> logger)
+        {
+            _cache = cache;
+            _newsService = newsService;
+            _logger = logger;
+        }
+
+        public async Task<IEnumerable<Article>> GetCachedMostViewedTodayAsync(int count = 5)
+        {
+            var cacheKey = $"{MOST_VIEWED_TODAY_KEY}_{count}";
+            
+            if (_cache.TryGetValue(cacheKey, out IEnumerable<Article>? cachedArticles) && cachedArticles != null)
+            {
+                var lastUpdate = await GetLastCacheUpdateTime();
+                var cacheAge = DateTime.Now - lastUpdate;
+                
+                // If cache is still fresh, return cached data
+                if (cacheAge < CACHE_DURATION)
+                {
+                    return cachedArticles;
+                }
+            }
+
+            // Cache miss or expired, refresh the cache
+            await RefreshMostViewedTodayCache();
+            
+            // Try to get from cache again
+            if (_cache.TryGetValue(cacheKey, out cachedArticles) && cachedArticles != null)
+            {
+                return cachedArticles;
+            }
+
+            // Fallback to direct service call
+            return await _newsService.GetMostViewedArticlesTodayAsync(count);
+        }
+
+        public async Task RefreshMostViewedTodayCache()
+        {
+            try
+            {
+                _logger.LogInformation("Refreshing most viewed today cache...");
+                
+                // Get fresh data for different counts
+                var articles5 = await _newsService.GetMostViewedArticlesTodayAsync(5);
+                var articles10 = await _newsService.GetMostViewedArticlesTodayAsync(10);
+                
+                // Cache with expiration
+                var cacheOptions = new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = CACHE_DURATION,
+                    SlidingExpiration = TimeSpan.FromMinutes(2)
+                };
+
+                _cache.Set($"{MOST_VIEWED_TODAY_KEY}_5", articles5, cacheOptions);
+                _cache.Set($"{MOST_VIEWED_TODAY_KEY}_10", articles10, cacheOptions);
+                _cache.Set(CACHE_UPDATE_TIME_KEY, DateTime.Now, cacheOptions);
+                
+                _logger.LogInformation("Most viewed today cache refreshed successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error refreshing most viewed today cache");
+            }
+        }
+
+        public async Task<DateTime> GetLastCacheUpdateTime()
+        {
+            if (_cache.TryGetValue(CACHE_UPDATE_TIME_KEY, out DateTime lastUpdate))
+            {
+                return lastUpdate;
+            }
+            
+            return DateTime.MinValue;
+        }
+    }
+}

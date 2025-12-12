@@ -1,0 +1,896 @@
+﻿@model SacViet.Models.Article
+@{
+    ViewData["Title"] = Model.Title;
+    var articleUrl = ViewBag.ArticleUrl as string ?? "";
+    var encodedUrl = Uri.EscapeDataString(articleUrl);
+    var encodedTitle = Uri.EscapeDataString(Model.Title);
+    var encodedSummary = Uri.EscapeDataString(ViewBag.ArticleSummary as string ?? "");
+    var comments = ViewBag.Comments as IEnumerable<SacViet.Models.Comment> ?? new List<SacViet.Models.Comment>();
+    var commentCount = ViewBag.CommentCount as int? ?? 0;
+    var currentUserName = User.Identity?.Name ?? "";
+}
+
+@* Link external CSS for podcast player *@
+<link rel="stylesheet" href="~/css/podcast-audio-player.css" />
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Article Header -->
+            <article class="article-detail">
+                <div class="article-header mb-4">
+                    <div class="category-badge bg-danger text-white px-3 py-1 d-inline-block mb-3">
+                        @Model.Category.CategoryName
+                    </div>
+                    <h1 class="article-title fw-bold mb-3">@Model.Title</h1>
+                    
+                    @* NEW: Podcast Audio Player *@
+                    @if (!string.IsNullOrEmpty(Model.AudioUrl) && Model.Category.CategoryName.ToLower().Contains("podcast"))
+                    {
+                        <div class="podcast-player-container mb-4 p-4 bg-light rounded border border-purple">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-podcast text-purple fa-2x me-3"></i>
+                                <div>
+                                    <h5 class="mb-0 text-purple">🎙️ Podcast Audio</h5>
+                                    <small class="text-muted">Nghe trực tiếp</small>
+                                </div>
+                            </div>
+                            <audio controls class="w-100 podcast-audio-player">
+                                <source src="@Model.AudioUrl" type="audio/mpeg">
+                                Trình duyệt của bạn không hỗ trợ audio player.
+                            </audio>
+                            <small class="text-muted d-block mt-2">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Sử dụng các nút điều khiển để play/pause/seek
+                            </small>
+                        </div>
+                    }
+                    
+                    @if (!string.IsNullOrEmpty(Model.Summary))
+                    {
+                        <p class="article-summary lead text-muted mb-4">@Model.Summary</p>
+                    }
+                    
+                    <div class="article-meta d-flex align-items-center mb-4 pb-3 border-bottom">
+                        <div class="author-info me-4">
+                            <small class="text-muted">
+                                <i class="fas fa-user me-1"></i>
+                                <strong>@Model.Author.FullName</strong>
+                            </small>
+                        </div>
+                        <div class="publish-date me-4">
+                            <small class="text-muted">
+                                <i class="fas fa-clock me-1"></i>
+                                @Model.PublishedAt?.ToString("dd/MM/yyyy HH:mm")
+                            </small>
+                        </div>
+                        @if (Model.ViewCount.HasValue && Model.ViewCount > 0)
+                        {
+                            <div class="view-count me-4">
+                                <small class="text-muted">
+                                    <i class="fas fa-eye me-1"></i>
+                                    @Model.ViewCount lượt xem
+                                </small>
+                            </div>
+                        }
+                        <div class="comment-count">
+                            <small class="text-muted">
+                                <i class="fas fa-comments me-1"></i>
+                                <span id="commentCountDisplay">@commentCount</span> bình luận
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Text Size Adjustment Actions Only -->
+                    <div class="article-actions d-flex align-items-center mb-4 no-print">
+                        <button class="btn btn-outline-secondary btn-sm me-2" onclick="changeTextSize('increase')">
+                            <i class="fas fa-plus me-1"></i>A+
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="changeTextSize('decrease')">
+                            <i class="fas fa-minus me-1"></i>A-
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Article Image -->
+                @if (!string.IsNullOrEmpty(Model.ThumbnailImage))
+                {
+                    <div class="article-image mb-4">
+                        <img src="@Model.ThumbnailImage" class="img-fluid w-100 rounded" alt="@Model.Title">
+                    </div>
+                }
+
+                <!-- Article Content -->
+                <div class="article-content" id="articleContent">
+                    @Html.Raw(Model.Content)
+                </div>
+
+                <!-- Article Tags -->
+                @if (Model.Tags.Any())
+                {
+                    <div class="article-tags mt-4 pt-3 border-top no-print">
+                        <h6 class="mb-2">Từ khóa:</h6>
+                        @foreach (var tag in Model.Tags)
+                        {
+                            <a href="@Url.Action("Search", "Home", new { keyword = tag.TagName })" 
+                               class="badge bg-outline-danger me-2 mb-2 text-decoration-none">
+                                @tag.TagName
+                            </a>
+                        }
+                    </div>
+                }
+
+                <!-- Enhanced Social Share -->
+                <div class="social-share mt-4 pt-3 border-top no-print">
+                    <h6 class="mb-3">
+                        <i class="fas fa-share-alt me-2"></i>Chia sẻ bài viết:
+                    </h6>
+                    <div class="share-buttons d-flex flex-wrap align-items-center">
+                        <a href="https://www.facebook.com/sharer/sharer.php?u=@encodedUrl" 
+                           target="_blank" 
+                           class="btn btn-outline-primary btn-sm share-btn"
+                           onclick="shareWindow(this.href); return false;">
+                            <i class="fab fa-facebook-f"></i>Facebook
+                        </a>
+                        <a href="https://twitter.com/intent/tweet?url=@encodedUrl&text=@encodedTitle" 
+                           target="_blank" 
+                           class="btn btn-outline-info btn-sm share-btn"
+                           onclick="shareWindow(this.href); return false;">
+                            <i class="fab fa-twitter"></i>Twitter
+                        </a>
+                        <a href="https://api.whatsapp.com/send?text=@encodedTitle @encodedUrl" 
+                           target="_blank" 
+                           class="btn btn-outline-success btn-sm share-btn">
+                            <i class="fab fa-whatsapp"></i>WhatsApp
+                        </a>
+                        <a href="https://www.linkedin.com/sharing/share-offsite/?url=@encodedUrl" 
+                           target="_blank" 
+                           class="btn btn-outline-primary btn-sm share-btn"
+                           onclick="shareWindow(this.href); return false;">
+                            <i class="fab fa-linkedin-in"></i>LinkedIn
+                        </a>
+                        <button class="btn btn-outline-secondary btn-sm share-btn" onclick="copyToClipboard('@articleUrl')">
+                            <i class="fas fa-link"></i>Sao chép liên kết
+                        </button>
+
+                    </div>
+                </div>
+
+                <!-- Comments Section -->
+                <div id="comments" class="comments-section mt-5 no-print">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h4 class="mb-0">
+                            <i class="fas fa-comments me-2"></i>Bình luận (<span id="commentCountHeader">@commentCount</span>)
+                        </h4>
+                    </div>
+
+                    <!-- Login Required Message or Add Comment Form -->
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <div class="add-comment-section mb-4 p-4 bg-light rounded">
+                            <h6 class="mb-3">
+                                <i class="fas fa-user-circle me-2"></i>Viết bình luận của bạn:
+                            </h6>
+                            <form id="mainCommentForm" class="comment-form-ajax" data-article-id="@Model.ArticleId">
+                                @Html.AntiForgeryToken()
+                                <div class="mb-3">
+                                    <textarea name="content" class="form-control comment-textarea" rows="4" placeholder="Nhập nội dung bình luận..." required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-danger submit-comment-btn">
+                                    <i class="fas fa-paper-plane me-1"></i>Gửi bình luận
+                                </button>
+                            </form>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="mb-4 p-3 bg-light border-start border-4 border-warning rounded">
+                            <p class="mb-0 text-muted">
+                                <i class="fas fa-lock me-2"></i>
+                                <a href="@Url.Action("Login", "Account", new { returnUrl = Context.Request.Path })" class="text-decoration-none fw-semibold">
+                                    Đăng nhập
+                                </a> để bình luận
+                            </p>
+                        </div>
+                    }
+
+                    <!-- Comments List -->
+                    <div id="commentsListContainer">
+                        @if (comments.Any())
+                        {
+                            <div class="comments-list">
+                                @foreach (var comment in comments)
+                                {
+                                    <div class="comment mb-4 p-3 border rounded" data-comment-id="@comment.CommentId">
+                                        <div class="comment-header d-flex align-items-center mb-2">
+                                            <div class="comment-avatar me-3">
+                                                @if (!string.IsNullOrEmpty(comment.User.Avatar))
+                                                {
+                                                    <img src="@comment.User.Avatar" class="rounded-circle" alt="@comment.User.FullName" style="width: 40px; height: 40px; object-fit: cover;">
+                                                }
+                                                else
+                                                {
+                                                    <div class="avatar-placeholder bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                                         style="width: 40px; height: 40px; font-size: 1.2rem;">
+                                                        @comment.User.FullName.Substring(0, 1).ToUpper()
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div class="comment-meta">
+                                                <h6 class="mb-0">@comment.User.FullName</h6>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-clock me-1"></i>
+                                                    @comment.CreatedAt?.ToString("dd/MM/yyyy HH:mm")
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <div class="comment-content">
+                                            <p class="mb-2">@comment.Content</p>
+                                        </div>
+
+                                        <!-- Replies -->
+                                        <div class="replies-container mt-3 ms-5">
+                                            @if (comment.InverseParentComment.Any())
+                                            {
+                                                @foreach (var reply in comment.InverseParentComment.Where(r => r.IsApproved == true).OrderBy(r => r.CreatedAt))
+                                                {
+                                                    <div class="reply mb-3 p-3 bg-light rounded">
+                                                        <div class="reply-header d-flex align-items-center mb-2">
+                                                            <div class="reply-avatar me-2">
+                                                                @if (!string.IsNullOrEmpty(reply.User.Avatar))
+                                                                {
+                                                                    <img src="@reply.User.Avatar" class="rounded-circle" alt="@reply.User.FullName" style="width: 30px; height: 30px; object-fit: cover;">
+                                                                }
+                                                                else
+                                                                {
+                                                                    <div class="avatar-placeholder bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                                                         style="width: 30px; height: 30px; font-size: 0.9rem;">
+                                                                        @reply.User.FullName.Substring(0, 1).ToUpper()
+                                                                    </div>
+                                                                }
+                                                            </div>
+                                                            <div class="reply-meta">
+                                                                <h6 class="mb-0 small">@reply.User.FullName</h6>
+                                                                <small class="text-muted">
+                                                                    @reply.CreatedAt?.ToString("dd/MM/yyyy HH:mm")
+                                                                </small>
+                                                            </div>
+                                                        </div>
+                                                        <div class="reply-content">
+                                                            <p class="mb-0 small">@reply.Content</p>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
+
+                                        <!-- Reply Form - Only for Logged-in Users -->
+                                        @if (User.Identity?.IsAuthenticated == true)
+                                        {
+                                            <div class="reply-form mt-3" style="display: none;" id="replyForm@(comment.CommentId)">
+                                                <form class="comment-form-ajax reply-form-ajax" data-article-id="@Model.ArticleId" data-parent-id="@comment.CommentId">
+                                                    @Html.AntiForgeryToken()
+                                                    <div class="mb-2">
+                                                        <textarea name="content" class="form-control form-control-sm comment-textarea" rows="2" placeholder="Trả lời bình luận..." required></textarea>
+                                                    </div>
+                                                    <div class="d-flex gap-2">
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger submit-comment-btn">
+                                                            <i class="fas fa-paper-plane me-1"></i>Gửi
+                                                        </button>
+                                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleReplyForm(@comment.CommentId)">
+                                                            <i class="fas fa-times me-1"></i>Hủy
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                            <button class="btn btn-sm btn-link text-decoration-none p-0 mt-2" onclick="toggleReplyForm(@comment.CommentId)">
+                                                <i class="fas fa-reply me-1"></i>Trả lời
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <div class="mt-2">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-lock me-1"></i>
+                                                    <a href="@Url.Action("Login", "Account", new { returnUrl = Context.Request.Path })" class="text-decoration-none">
+                                                        Đăng nhập
+                                                    </a> để trả lời bình luận này
+                                                </small>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="no-comments text-center py-5 text-muted">
+                                <i class="fas fa-comment-slash fa-3x mb-3 opacity-50"></i>
+                                <h5>Chưa có bình luận nào</h5>
+                                <p>
+                                    @if (User.Identity?.IsAuthenticated == true)
+                                    {
+                                        <span>Hãy là người đầu tiên bình luận!</span>
+                                    }
+                                    else
+                                    {
+                                        <span>
+                                            <a href="@Url.Action("Login", "Account", new { returnUrl = Context.Request.Path })" class="text-decoration-none">
+                                                Đăng nhập
+                                            </a> để là người đầu tiên bình luận!
+                                        </span>
+                                    }
+                                </p>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+
+            </article>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4 no-print">
+            <!-- Related Articles -->
+            @if (ViewBag.RelatedArticles != null && ((IEnumerable<SacViet.Models.Article>)ViewBag.RelatedArticles).Any())
+            {
+                <div class="sidebar-widget mb-4">
+                    <h5 class="widget-title bg-danger text-white p-3 mb-0">
+                        <i class="fas fa-newspaper me-2"></i>BÀI VIẾT LIÊN QUAN
+                    </h5>
+                    <div class="widget-content bg-light p-3">
+                        @foreach (var relatedArticle in (IEnumerable<SacViet.Models.Article>)ViewBag.RelatedArticles)
+                        {
+                            <div class="related-article d-flex mb-3">
+                                <div class="related-image me-3">
+                                    <img src="@(string.IsNullOrEmpty(relatedArticle.ThumbnailImage) ? "/images/placeholder-article.jpg" : relatedArticle.ThumbnailImage)" 
+                                         class="img-fluid rounded" alt="@relatedArticle.Title" style="width: 80px; height: 60px; object-fit: cover;">
+                                </div>
+                                <div class="related-content">
+                                    <h6 class="mb-1">
+                                        <a href="@Url.Action("Details", "Article", new { slug = relatedArticle.Slug })" 
+                                           class="text-dark text-decoration-none">
+                                            @relatedArticle.Title
+                                        </a>
+                                    </h6>
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>
+                                        @relatedArticle.PublishedAt?.ToString("dd/MM/yyyy")
+                                    </small>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Newsletter -->
+            <div class="sidebar-widget">
+                <h5 class="widget-title bg-danger text-white p-3 mb-0">
+                    <i class="fas fa-envelope me-2"></i>ĐĂNG KÝ NHẬN TIN
+                </h5>
+                <div class="widget-content bg-light p-3">
+                    <p class="mb-3">Nhận tin tức mới nhất qua email</p>
+                    <form>
+                        <div class="mb-3">
+                            <input type="email" class="form-control" placeholder="Nhập địa chỉ email của bạn">
+                        </div>
+                        <button type="submit" class="btn btn-danger w-100">Đăng ký</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* === ARTICLE CONTENT === */
+    .article-content {
+        font-size: 1.1rem;
+        line-height: 1.8;
+    }
+    
+    .article-content p {
+        margin-bottom: 1.5rem;
+    }
+    
+    .article-content h2, .article-content h3, .article-content h4 {
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        color: var(--text-dark);
+    }
+    
+    /* Google Drive Video Styling */
+    .article-content .drive-video-container {
+        margin: 30px 0;
+        padding: 25px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        text-align: center;
+        border: 1px solid #e9ecef;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .article-content .drive-video-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #dc3545, #fd7e14, #ffc107, #198754, #0dcaf0, #0d6efd, #6f42c1);
+    }
+    
+    .article-content .drive-video-container h4 {
+        color: #2c3e50;
+        font-weight: 700;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #dc3545;
+        display: inline-block;
+        font-size: 1.4rem;
+        position: relative;
+    }
+    
+    .article-content .drive-video-container h4::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 2px;
+        background: linear-gradient(90deg, #dc3545, #fd7e14);
+    }
+    
+    .article-content .drive-video-container iframe {
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        transition: all 0.3s ease;
+        max-width: 100%;
+        height: auto;
+        background: #000;
+    }
+    
+    .article-content .drive-video-container iframe:hover {
+        transform: scale(1.02);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    }
+    
+    .article-content .drive-video-container p {
+        margin-top: 20px;
+        color: #6c757d;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        font-weight: 500;
+        background: rgba(255,255,255,0.7);
+        padding: 8px 16px;
+        border-radius: 20px;
+        display: inline-flex;
+        margin-bottom: 0;
+    }
+    
+    .article-content .drive-video-container p i {
+        color: #4285f4;
+        font-size: 16px;
+        animation: pulse 2s infinite;
+    }
+    
+    @@keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+    
+    /* Responsive video */
+    @@media (max-width: 768px) {
+        .article-content .drive-video-container {
+            margin: 20px 0;
+            padding: 20px 15px;
+        }
+        
+        .article-content .drive-video-container h4 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+        
+        .article-content .drive-video-container iframe {
+            width: 100% !important;
+            height: 250px !important;
+        }
+        
+        .article-content .drive-video-container p {
+            font-size: 13px;
+            padding: 6px 12px;
+        }
+    }
+    
+    @@media (max-width: 480px) {
+        .article-content .drive-video-container iframe {
+            height: 200px !important;
+        }
+    }
+    
+    .article-title {
+        font-size: 2.2rem;
+        line-height: 1.3;
+        color: var(--text-dark);
+    }
+    
+    .article-summary {
+        font-size: 1.2rem;
+        line-height: 1.6;
+    }
+    
+    .related-article:last-child {
+        margin-bottom: 0 !important;
+    }
+    
+    .share-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .75rem;
+        align-items: center;
+    }
+
+    .share-buttons .btn {
+        transition: all 0.2s ease-in-out;
+        display: inline-flex;
+        align-items: center;
+        gap: .5rem;
+        padding: .45rem .8rem;
+        height: 40px;
+        border-radius: .5rem;
+        font-weight: 500;
+    }
+    
+    .share-buttons .btn i {
+        width: 1rem;
+        text-align: center;
+        line-height: 1;
+    }
+
+    .share-buttons .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+    }
+    
+    .comment {
+        transition: all 0.3s ease;
+    }
+    
+    .comment:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .comment.fade-in {
+        animation: fadeIn 0.5s ease-in;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .print-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        padding: 2rem;
+        border-radius: 0.5rem;
+    }
+
+    .print-section .btn-lg {
+        padding: 0.75rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+
+    @@media (max-width: 576px) {
+        .share-buttons .btn {
+            flex: 1 1 calc(50% - .75rem);
+            justify-content: center;
+        }
+    }
+</style>
+
+<!-- Print Styles in separate style block -->
+<style type="text/css">
+    @@media print {
+        body {
+            font-family: "Times New Roman", serif !important;
+            font-size: 12pt !important;
+            line-height: 1.6 !important;
+            color: #000 !important;
+            background: #fff !important;
+        }
+        
+        .no-print {
+            display: none !important;
+        }
+        
+        .container {
+            max-width: none !important;
+            padding: 0 !important;
+        }
+        
+        .article-title {
+            font-size: 18pt !important;
+            font-weight: bold !important;
+            margin-bottom: 12pt !important;
+        }
+        
+        .article-summary {
+            font-size: 14pt !important;
+            font-style: italic !important;
+            margin-bottom: 12pt !important;
+        }
+        
+        .article-meta {
+            font-size: 10pt !important;
+            margin-bottom: 12pt !important;
+            padding-bottom: 6pt !important;
+            border-bottom: 1pt solid #ccc !important;
+        }
+        
+        .article-content {
+            font-size: 12pt !important;
+            line-height: 1.6 !important;
+            text-align: justify !important;
+        }
+        
+        .article-content h2 {
+            font-size: 16pt !important;
+            font-weight: bold !important;
+            margin-top: 18pt !important;
+            margin-bottom: 12pt !important;
+        }
+        
+        .article-content h3 {
+            font-size: 14pt !important;
+            font-weight: bold !important;
+            margin-top: 15pt !important;
+            margin-bottom: 9pt !important;
+        }
+        
+        .article-content p {
+            margin-bottom: 12pt !important;
+        }
+        
+        .article-image img {
+            max-width: 100% !important;
+            height: auto !important;
+        }
+        
+        .category-badge {
+            font-size: 10pt !important;
+            padding: 2pt 6pt !important;
+            background: #000 !important;
+            color: #fff !important;
+        }
+        
+        a {
+            color: #000 !important;
+            text-decoration: none !important;
+        }
+    }
+    
+    @@media (max-width: 768px) {
+        .article-title {
+            font-size: 1.8rem;
+        }
+        
+        .article-content {
+            font-size: 1rem;
+        }
+        
+        .share-buttons .btn {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.6rem;
+        }
+    }
+</style>
+
+<script>
+    // Social sharing functionality
+    function shareWindow(url) {
+        window.open(url, 'share', 'width=550,height=450,scrollbars=yes,resizable=yes');
+        return false;
+    }
+    
+    // Copy to clipboard
+    function copyToClipboard(url) {
+        navigator.clipboard.writeText(url).then(function() {
+            const button = event.target.closest('button');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-check me-1"></i>Đã sao chép!';
+            button.classList.remove('btn-outline-secondary');
+            button.classList.add('btn-success');
+            
+            setTimeout(function() {
+                button.innerHTML = originalText;
+                button.classList.remove('btn-success');
+                button.classList.add('btn-outline-secondary');
+            }, 2000);
+        }).catch(function(err) {
+            console.error('Could not copy text: ', err);
+        });
+    }
+    
+    // Text size adjustment
+    let currentSize = 1.1;
+    function changeTextSize(action) {
+        const content = document.getElementById('articleContent');
+        if (action === 'increase' && currentSize < 1.6) {
+            currentSize += 0.1;
+        } else if (action === 'decrease' && currentSize > 0.8) {
+            currentSize -= 0.1;
+        }
+        content.style.fontSize = currentSize + 'rem';
+    }
+    
+    // Reply form toggle
+    function toggleReplyForm(commentId) {
+        const form = document.getElementById('replyForm' + commentId);
+        if (form.style.display === 'none' || form.style.display === '') {
+            form.style.display = 'block';
+            form.querySelector('textarea').focus();
+        } else {
+            form.style.display = 'none';
+        }
+    }
+
+    // AJAX Comment Submission
+    document.addEventListener('DOMContentLoaded', function() {
+        // Use event delegation for dynamically added forms
+        document.addEventListener('submit', function(e) {
+            if (e.target.classList.contains('comment-form-ajax')) {
+                e.preventDefault();
+                
+                const form = e.target;
+                const submitBtn = form.querySelector('.submit-comment-btn');
+                const textarea = form.querySelector('.comment-textarea');
+                const content = textarea.value.trim();
+                const articleId = form.getAttribute('data-article-id');
+                const parentId = form.getAttribute('data-parent-id');
+                const token = form.querySelector('input[name="__RequestVerificationToken"]').value;
+                
+                if (!content) {
+                    return;
+                }
+                
+                // Disable button and show loading
+                submitBtn.disabled = true;
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Đang gửi...';
+                
+                // Show notification
+                const notification = document.createElement('div');
+                notification.className = 'comment-notification alert alert-info';
+                notification.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+                notification.innerHTML = `
+                    <i class="fas fa-spinner fa-spin me-2"></i>Đang gửi bình luận, vui lòng chờ...
+                `;
+                document.body.appendChild(notification);
+                
+                // Send AJAX request
+                fetch('@Url.Action("AddComment", "Article")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': token
+                    },
+                    body: new URLSearchParams({
+                        articleId: articleId,
+                        content: content,
+                        parentCommentId: parentId || '',
+                        __RequestVerificationToken: token
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Clear textarea
+                        textarea.value = '';
+                        
+                        // Add comment to DOM
+                        addCommentToDOM(data.comment);
+                        
+                        // Update comment count
+                        updateCommentCount();
+                        
+                        // If it's a reply form, hide it
+                        if (parentId) {
+                            form.closest('.reply-form').style.display = 'none';
+                        }
+                        
+                        // Show success message
+                        showNotification('Bình luận đã được gửi thành công!', 'success');
+                    } else {
+                        alert(data.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra. Vui lòng thử lại.');
+                })
+                .finally(() => {
+                    // Re-enable button
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                    
+                    // Remove notification after 3 seconds
+                    setTimeout(() => {
+                        if (notification) {
+                            notification.remove();
+                        }
+                    }, 3000);
+                });
+            }
+        });
+        
+        // Also handle Enter key in textarea (Shift+Enter for new line, Enter to submit)
+        document.addEventListener('keydown', function(e) {
+            if (e.target.classList.contains('comment-textarea')) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    const form = e.target.closest('.comment-form-ajax');
+                    if (form) {
+                        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                    }
+                }
+            }
+        });
+    });
+
+    function addCommentToDOM(comment) {
+        const currentUserName = '@currentUserName';
+        const currentUserAvatar = '@(User.FindFirst("Avatar")?.Value ?? "")';
+        
+        if (comment.parentCommentId) {
+            // It's a reply
+            const parentComment = document.querySelector(`[data-comment-id="${comment.parentCommentId}"]`);
+            if (parentComment) {
+                const repliesContainer = parentComment.querySelector('.replies-container');
+                const replyHTML = createReplyHTML(comment, currentUserAvatar);
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = replyHTML;
+                const replyElement = tempDiv.firstElementChild;
+                replyElement.classList.add('fade-in');
+                repliesContainer.appendChild(replyElement);
+            }
+        } else {
+            // It's a new comment
+            const commentsContainer = document.querySelector('#commentsListContainer');
+            const noCommentsMsg = commentsContainer.querySelector('.no-comments');
+            
+            if (noCommentsMsg) {
+                noCommentsMsg.remove();
+                commentsContainer.innerHTML = '<div class="comments-list"></div>';
+            }
+            
+            const commentsList = commentsContainer.querySelector('.comments-list');
+            const commentHTML = createCommentHTML(comment, currentUserAvatar);
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = commentHTML;
+            const commentElement = tempDiv.firstElementChild;
+            commentElement.classList.add('fade-in');
+            commentsList.insertBefore(commentElement, commentsList.firstChild);
+        }
+    }
+
+    function createCommentHTML(comment, avatar) {
+        const avatarHTML = avatar && avatar !== '' 
+            ? `<img src="${avatar}" class="rounded-circle" alt="${comment.userName}" style="width: 40px; height: 40px; object-fit: cover;">`
+            : `<div class="avatar-placeholder bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; font-size: 1.2rem;">${comment.userName.substring(0, 1).toUpperCase()}</div>`;
+    }
+</script>

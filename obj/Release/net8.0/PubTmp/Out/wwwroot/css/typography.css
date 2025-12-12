@@ -1,0 +1,168 @@
+/* Font Imports and Typography System */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Alata:wght@400&display=swap');
+
+html {
+    font-size: 14px;
+    font-family: Arial, sans-serif;
+    scroll-padding-top: 120px;
+    scroll-behavior: smooth;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    color: var(--text-dark);
+    background-color: #f8f9fa;
+}
+
+/* ============================================
+   TYPOGRAPHY SYSTEM
+   ============================================ */
+
+/* All Titles - Playfair Display */
+h1, h2, h3, h4, h5, h6,
+.article-title,
+.main-title,
+.news-title,
+.news-title-small,
+.news-card-title,
+.timeline-title,
+.section-heading,
+.widget-title,
+.category-heading,
+.logo-large,
+.logo-vietnam {
+    font-family: 'Playfair Display', serif !important;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--text-dark);
+}
+
+/* Summaries và Category Names - Alata */
+.article-summary,
+.main-summary,
+.news-summary,
+.news-card-summary,
+.timeline-summary,
+.lead,
+.nav-link-cat,
+.category-badge,
+.badge,
+.section-heading {
+    font-family: 'Alata', sans-serif !important;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--text-muted);
+}
+
+/* Content - Arial (sans-serif) */
+.article-content,
+.article-content p,
+.article-content div,
+.article-content span,
+.content-text,
+p,
+.btn,
+.form-control,
+.dropdown-item,
+small,
+.text-muted,
+.timeline-time,
+.offcanvas-body {
+    font-family: Arial, sans-serif !important;
+    font-weight: 400;
+    line-height: 1.8;
+}
+
+/* Section Heading - Alata cho tên danh m?c */
+.section-heading {
+    font-size: 1.2rem;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    color: var(--primary-red);
+    font-family: 'Alata', sans-serif !important;
+}
+
+@media (min-width: 768px) {
+    .section-heading {
+        font-size: 1.3rem;
+    }
+}
+
+.section-heading i {
+    color: var(--primary-red);
+}
+
+/* Article Detail Page Typography */
+.article-content {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: var(--text-dark);
+    font-family: Arial, sans-serif !important;
+}
+
+@media (min-width: 768px) {
+    .article-content {
+        font-size: 1.15rem;
+    }
+}
+
+.article-content p {
+    margin-bottom: 1.5rem;
+    font-family: Arial, sans-serif !important;
+}
+
+.article-content h2,
+.article-content h3,
+.article-content h4 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    color: var(--text-dark);
+    font-family: 'Playfair Display', serif !important;
+    font-weight: 700;
+}
+
+.article-content h2 {
+    font-size: 1.8rem;
+}
+
+.article-content h3 {
+    font-size: 1.5rem;
+}
+
+.article-content h4 {
+    font-size: 1.3rem;
+}
+
+.article-title {
+    font-size: 1.8rem;
+    line-height: 1.3;
+    color: var(--text-dark);
+    font-weight: 900;
+    font-family: 'Playfair Display', serif !important;
+}
+
+@media (min-width: 768px) {
+    .article-title {
+        font-size: 2.5rem;
+    }
+}
+
+.article-summary {
+    font-size: 1.15rem;
+    line-height: 1.6;
+    font-family: 'Alata', sans-serif !important;
+}
+
+@media (min-width: 768px) {
+    .article-summary {
+        font-size: 1.3rem;
+    }
+}

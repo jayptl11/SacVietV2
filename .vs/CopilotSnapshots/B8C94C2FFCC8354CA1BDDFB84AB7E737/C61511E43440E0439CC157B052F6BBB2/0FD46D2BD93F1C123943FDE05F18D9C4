@@ -1,0 +1,18 @@
+﻿{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "ConnectionStrings": {
+    "MyCnn": "Data Source=137.59.106.46;Initial Catalog=SacViet;User ID=SacViet;Password=Long9z01a@;TrustServerCertificate=True;Connection Timeout=30;Encrypt=False;"
+  },
+  "Authentication": {
+    "Google": {
+      "ClientId": "YOUR_GOOGLE_CLIENT_ID_HERE",
+      "ClientSecret": "YOUR_GOOGLE_CLIENT_SECRET_HERE"
+    }
+  }
+}

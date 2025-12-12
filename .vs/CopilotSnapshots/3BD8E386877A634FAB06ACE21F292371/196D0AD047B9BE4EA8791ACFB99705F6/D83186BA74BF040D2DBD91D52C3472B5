@@ -1,0 +1,220 @@
+﻿-- ========================================
+-- SCRIPT KIỂM TRA VÀ SỬA LỖI DATABASE
+-- ========================================
+
+-- 0. FIX STATUS CHECK CONSTRAINT (PHẢI CHẠY TRƯỚC!)
+PRINT '========================================';
+PRINT 'Step 0: Fixing Status CHECK constraint';
+PRINT '========================================';
+
+-- Drop old constraint
+IF EXISTS (
+    SELECT * FROM sys.check_constraints 
+    WHERE name = 'CK_Articles_Status' 
+    AND parent_object_id = OBJECT_ID('Articles')
+)
+BEGIN
+    PRINT 'Dropping old constraint CK_Articles_Status...';
+    ALTER TABLE Articles DROP CONSTRAINT CK_Articles_Status;
+    PRINT 'Old constraint dropped.';
+END
+
+-- Add new constraint with Approved status
+ALTER TABLE Articles
+ADD CONSTRAINT CK_Articles_Status 
+CHECK (Status IN ('Draft', 'Pending', 'Approved', 'Published', 'Rejected'));
+
+PRINT 'New constraint created with Approved status included.';
+PRINT '';
+
+-- 1. Kiểm tra Articles không có Approval record khi Status = Pending
+PRINT '========================================';
+PRINT 'Step 1: Checking Articles without Approvals';
+PRINT '========================================';
+
+SELECT 
+    a.ArticleID,
+    a.Title,
+    a.Status,
+    a.AuthorID,
+    a.CreatedAt,
+    COUNT(aa.ApprovalID) AS ApprovalCount
+FROM Articles a
+LEFT JOIN ArticleApprovals aa ON a.ArticleID = aa.ArticleID
+WHERE a.Status = 'Pending'
+GROUP BY a.ArticleID, a.Title, a.Status, a.AuthorID, a.CreatedAt
+HAVING COUNT(aa.ApprovalID) = 0;
+
+-- 2. Tạo Approval records cho Articles Pending nhưng chưa có Approval
+INSERT INTO ArticleApprovals (ArticleID, SubmittedByUserID, Status, SubmittedAt)
+SELECT 
+    a.ArticleID,
+    a.AuthorID,
+    'Pending',
+    ISNULL(a.CreatedAt, GETDATE())
+FROM Articles a
+LEFT JOIN ArticleApprovals aa ON a.ArticleID = aa.ArticleID
+WHERE a.Status = 'Pending'
+GROUP BY a.ArticleID, a.AuthorID, a.CreatedAt
+HAVING COUNT(aa.ApprovalID) = 0;
+
+-- 3. Kiểm tra Articles với nhiều Pending Approvals
+SELECT 
+    a.ArticleID,
+    a.Title,
+    a.Status,
+    COUNT(aa.ApprovalID) AS PendingApprovalCount
+FROM Articles a
+JOIN ArticleApprovals aa ON a.ArticleID = aa.ArticleID
+WHERE aa.Status = 'Pending'
+GROUP BY a.ArticleID, a.Title, a.Status
+HAVING COUNT(aa.ApprovalID) > 1;
+
+-- 4. Dọn dẹp: Chỉ giữ Approval gần nhất cho mỗi Article với Status Pending
+WITH LatestApprovals AS (
+    SELECT 
+        ApprovalID,
+        ArticleID,
+        ROW_NUMBER() OVER (PARTITION BY ArticleID ORDER BY SubmittedAt DESC) AS rn
+    FROM ArticleApprovals
+    WHERE Status = 'Pending'
+)
+DELETE FROM ArticleApprovals
+WHERE ApprovalID IN (
+    SELECT ApprovalID 
+    FROM LatestApprovals 
+    WHERE rn > 1
+);
+
+-- 5. Kiểm tra ScheduledPublishDate column exists
+IF NOT EXISTS (
+    SELECT * FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_NAME = 'Articles' AND COLUMN_NAME = 'ScheduledPublishDate'
+)
+BEGIN
+    PRINT 'WARNING: ScheduledPublishDate column does not exist!';
+    PRINT 'Run: ALTER TABLE Articles ADD ScheduledPublishDate DATETIME NULL;';
+END
+ELSE
+BEGIN
+    PRINT 'OK: ScheduledPublishDate column exists';
+END
+
+-- 6. Kiểm tra Articles với Status không hợp lệ
+SELECT 
+    ArticleID,
+    Title,
+    Status,
+    AuthorID
+FROM Articles
+WHERE Status NOT IN ('Draft', 'Pending', 'Approved', 'Published', 'Rejected')
+   OR Status IS NULL;
+
+-- 7. Cập nhật Status NULL thành Draft
+UPDATE Articles
+SET Status = 'Draft'
+WHERE Status IS NULL;
+
+-- 8. Kiểm tra Foreign Key integrity - Articles vs Users
+SELECT 
+    a.ArticleID,
+    a.Title,
+    a.AuthorID
+FROM Articles a
+LEFT JOIN Users u ON a.AuthorID = u.UserID
+WHERE u.UserID IS NULL;
+
+-- 9. Kiểm tra Foreign Key integrity - ArticleApprovals vs Users
+SELECT 
+    aa.ApprovalID,
+    aa.ArticleID,
+    aa.SubmittedByUserID,
+    aa.ReviewedByUserID
+FROM ArticleApprovals aa
+LEFT JOIN Users u1 ON aa.SubmittedByUserID = u1.UserID
+LEFT JOIN Users u2 ON aa.ReviewedByUserID = u2.UserID
+WHERE u1.UserID IS NULL 
+   OR (aa.ReviewedByUserID IS NOT NULL AND u2.UserID IS NULL);
+
+-- 10. Tổng hợp thống kê
+SELECT 
+    'Total Articles' AS Metric,
+    COUNT(*) AS Count
+FROM Articles
+UNION ALL
+SELECT 
+    'Draft Articles',
+    COUNT(*)
+FROM Articles
+WHERE Status = 'Draft'
+UNION ALL
+SELECT 
+    'Pending Articles',
+    COUNT(*)
+FROM Articles
+WHERE Status = 'Pending'
+UNION ALL
+SELECT 
+    'Approved Articles (waiting publish)',
+    COUNT(*)
+FROM Articles
+WHERE Status = 'Approved'
+UNION ALL
+SELECT 
+    'Published Articles',
+    COUNT(*)
+FROM Articles
+WHERE Status = 'Published'
+UNION ALL
+SELECT 
+    'Rejected Articles',
+    COUNT(*)
+FROM Articles
+WHERE Status = 'Rejected'
+UNION ALL
+SELECT 
+    'Total Approvals',
+    COUNT(*)
+FROM ArticleApprovals
+UNION ALL
+SELECT 
+    'Pending Approvals',
+    COUNT(*)
+FROM ArticleApprovals
+WHERE Status = 'Pending';
+
+-- 11. Chi tiết Articles Pending với Approvals
+SELECT 
+    a.ArticleID,
+    a.Title,
+    a.Status AS ArticleStatus,
+    a.AuthorID,
+    u.FullName AS AuthorName,
+    a.ScheduledPublishDate,
+    a.CreatedAt,
+    aa.ApprovalID,
+    aa.Status AS ApprovalStatus,
+    aa.SubmittedAt,
+    aa.ReviewedAt
+FROM Articles a
+JOIN Users u ON a.AuthorID = u.UserID
+LEFT JOIN ArticleApprovals aa ON a.ArticleID = aa.ArticleID
+WHERE a.Status = 'Pending'
+ORDER BY a.CreatedAt DESC;
+
+-- 12. Kiểm tra ArticleApprovals orphans (không có Article)
+SELECT 
+    aa.ApprovalID,
+    aa.ArticleID,
+    aa.Status
+FROM ArticleApprovals aa
+LEFT JOIN Articles a ON aa.ArticleID = a.ArticleID
+WHERE a.ArticleID IS NULL;
+
+-- 13. Xóa ArticleApprovals orphans
+DELETE FROM ArticleApprovals
+WHERE ArticleID NOT IN (SELECT ArticleID FROM Articles);
+
+PRINT '========================================';
+PRINT 'Database integrity check completed!';
+PRINT '========================================';

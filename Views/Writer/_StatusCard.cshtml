@@ -1,0 +1,44 @@
+﻿@model SacViet.ViewModels.ArticleEditViewModel
+@* Partial View: Status Card *@
+
+<div class="status-card mb-4">
+    <div class="status-card-header">
+        <h6 class="mb-0">Trạng thái</h6>
+    </div>
+    <div class="status-card-body">
+        @switch (Model.Status)
+        {
+            case "Draft":
+                <div class="status-badge-large status-draft">
+                    <i class="fas fa-edit"></i>
+                    <span>Nháp</span>
+                </div>
+                break;
+            case "Pending":
+                <div class="status-badge-large status-pending">
+                    <i class="fas fa-clock"></i>
+                    <span>Chờ duyệt</span>
+                </div>
+                break;
+            case "Published":
+                <div class="status-badge-large status-published">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Đã đăng</span>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.Slug))
+                {
+                    <a href="@Url.Action("Details", "Article", new { slug = Model.Slug })" 
+                       target="_blank" class="btn-view-article">
+                        <i class="fas fa-external-link-alt me-2"></i>Xem bài viết
+                    </a>
+                }
+                break;
+            case "Rejected":
+                <div class="status-badge-large status-rejected">
+                    <i class="fas fa-times-circle"></i>
+                    <span>Bị từ chối</span>
+                </div>
+                break;
+        }
+    </div>
+</div>

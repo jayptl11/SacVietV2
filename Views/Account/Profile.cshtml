@@ -1,0 +1,107 @@
+﻿@model SacViet.Models.User
+@{
+    ViewData["Title"] = "Thông tin cá nhân";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-5">
+                    <h2 class="text-center text-danger mb-4">
+                        <i class="fas fa-user-circle me-2"></i>Thông tin cá nhân
+                    </h2>
+
+                    <div class="text-center mb-4">
+                        @if (!string.IsNullOrEmpty(Model.Avatar))
+                        {
+                            <img src="@Model.Avatar" alt="@Model.FullName" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover;">
+                        }
+                        else
+                        {
+                            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-danger text-white" style="width: 120px; height: 120px; font-size: 3rem;">
+                                @Model.FullName.Substring(0, 1).ToUpper()
+                            </div>
+                        }
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4 text-muted">
+                            <i class="fas fa-user me-2"></i>Họ và tên:
+                        </div>
+                        <div class="col-md-8">
+                            <strong>@Model.FullName</strong>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4 text-muted">
+                            <i class="fas fa-envelope me-2"></i>Email:
+                        </div>
+                        <div class="col-md-8">
+                            <strong>@Model.Email</strong>
+                            @if (Model.IsEmailVerified == true)
+                            {
+                                <span class="badge bg-success ms-2">
+                                    <i class="fas fa-check-circle"></i> Đã xác thực
+                                </span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4 text-muted">
+                            <i class="fas fa-shield-alt me-2"></i>Vai trò:
+                        </div>
+                        <div class="col-md-8">
+                            <span class="badge bg-primary">@Model.Role.RoleName</span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4 text-muted">
+                            <i class="fas fa-calendar-alt me-2"></i>Ngày tham gia:
+                        </div>
+                        <div class="col-md-8">
+                            <strong>@Model.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</strong>
+                        </div>
+                    </div>
+
+                    @if (Model.LastLogin.HasValue)
+                    {
+                        <div class="row mb-3">
+                            <div class="col-md-4 text-muted">
+                                <i class="fas fa-sign-in-alt me-2"></i>Đăng nhập gần nhất:
+                            </div>
+                            <div class="col-md-8">
+                                <strong>@Model.LastLogin?.ToString("dd/MM/yyyy HH:mm")</strong>
+                            </div>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.GoogleId))
+                    {
+                        <div class="row mb-3">
+                            <div class="col-md-4 text-muted">
+                                <i class="fab fa-google me-2"></i>Tài khoản Google:
+                            </div>
+                            <div class="col-md-8">
+                                <span class="badge bg-info">
+                                    <i class="fas fa-link"></i> Đã liên kết
+                                </span>
+                            </div>
+                        </div>
+                    }
+
+                    <hr class="my-4">
+
+                    <div class="text-center">
+                        <a asp-action="Index" asp-controller="Home" class="btn btn-outline-danger">
+                            <i class="fas fa-arrow-left me-2"></i>Quay lại trang chủ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

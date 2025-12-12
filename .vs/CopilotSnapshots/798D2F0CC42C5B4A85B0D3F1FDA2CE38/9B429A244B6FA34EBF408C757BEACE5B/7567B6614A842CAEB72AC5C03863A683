@@ -1,0 +1,104 @@
+﻿using System.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
+using SacViet.Models;
+using SacViet.Services;
+using SacViet.ViewModels;
+
+namespace SacViet.Controllers
+{
+    public class HomeController : Controller
+    {
+        private readonly ILogger<HomeController> _logger;
+        private readonly INewsService _newsService;
+
+        public HomeController(ILogger<HomeController> logger, INewsService newsService)
+        {
+            _logger = logger;
+            _newsService = newsService;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            try
+            {
+                // Lấy tất cả các danh mục (bao gồm cả danh mục con)
+                var navigationCategories = await _newsService.GetNavigationCategoriesAsync();
+                
+                // Lấy tất cả các danh mục (cả chính và con) để hiển thị bài viết
+                var allCategories = await _newsService.GetAllCategoriesAsync();
+                
+                // Lấy tất cả các category ID (bao gồm cả danh mục chính và danh mục con)
+                var allCategoryIds = allCategories
+                    .Select(c => c.CategoryId)
+                    .ToList();
+                
+                // Lấy bài viết cho tất cả các danh mục
+                var articlesByCategory = await _newsService.GetArticlesByCategoriesForHomeAsync(allCategoryIds, 6);
+                
+                // Lấy tin hot (hôm nay hoặc gần đây)
+                var (hotArticles, isToday) = await _newsService.GetHotArticlesAsync(6);
+                
+                var viewModel = new HomePageViewModel
+                {
+                    FeaturedArticles = await _newsService.GetFeaturedArticlesAsync(),
+                    LatestArticles = await _newsService.GetLatestArticlesAsync(),
+                    HotArticlesToday = hotArticles, // Tin hot (hôm nay hoặc gần đây)
+                    IsHotArticlesToday = isToday, // Flag để biết có phải tin hot hôm nay
+                    NavigationCategories = navigationCategories,
+                    AllCategories = allCategories, // Thêm tất cả danh mục để sử dụng trong view
+                    ArticlesByCategory = articlesByCategory
+                };
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi tải trang chủ");
+                // Return empty view model if there's an error
+                return View(new HomePageViewModel());
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Search(string keyword, int? categoryId, int? authorId, DateTime? fromDate, DateTime? toDate, int page = 1)
+        {
+            try
+            {
+                var (articles, totalCount) = await _newsService.SearchArticlesAsync(keyword, categoryId, authorId, fromDate, toDate, page, 10);
+                var categories = await _newsService.GetNavigationCategoriesAsync();
+
+                var viewModel = new SearchViewModel
+                {
+                    Keyword = keyword,
+                    CategoryId = categoryId,
+                    AuthorId = authorId,
+                    FromDate = fromDate,
+                    ToDate = toDate,
+                    Page = page,
+                    PageSize = 10,
+                    TotalCount = totalCount,
+                    Articles = articles,
+                    Categories = categories
+                };
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi tìm kiếm");
+                return View(new SearchViewModel());
+            }
+        }
+
+        public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+    }
+}

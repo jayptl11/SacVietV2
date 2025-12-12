@@ -1,0 +1,18 @@
+﻿using SacViet.Models;
+
+namespace SacViet.ViewModels
+{
+    public class HomePageViewModel
+    {
+        public IEnumerable<Article> FeaturedArticles { get; set; } = new List<Article>();
+        public IEnumerable<Article> LatestArticles { get; set; } = new List<Article>();
+        
+        // New properties for most viewed articles today and sidebar articles
+        public IEnumerable<Article> MostViewedTodayArticles { get; set; } = new List<Article>();
+        public IEnumerable<Article> SidebarArticles { get; set; } = new List<Article>();
+        
+        public IEnumerable<Category> NavigationCategories { get; set; } = new List<Category>();
+        public IEnumerable<Category> AllCategories { get; set; } = new List<Category>();
+        public Dictionary<int, IEnumerable<Article>> ArticlesByCategory { get; set; } = new Dictionary<int, IEnumerable<Article>>();
+    }
+}
