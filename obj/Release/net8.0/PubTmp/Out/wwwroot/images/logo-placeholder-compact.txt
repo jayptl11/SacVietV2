@@ -1,0 +1,4 @@
+<!-- This is a placeholder. Replace with your actual transparent PNG logo image -->
+<!-- Recommended size: 140px width x 32px height -->
+<!-- File: sacviet-logo-compact-white.png -->
+<!-- White version for red navbar background -->

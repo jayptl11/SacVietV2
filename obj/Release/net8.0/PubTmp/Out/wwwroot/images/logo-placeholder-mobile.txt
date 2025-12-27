@@ -1,0 +1,4 @@
+<!-- This is a placeholder. Replace with your actual transparent PNG logo image -->
+<!-- Recommended size: 100px width x 24px height -->
+<!-- File: sacviet-logo-mobile-white.png -->
+<!-- White version for mobile menu header -->

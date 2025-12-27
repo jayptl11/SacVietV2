@@ -37,6 +37,7 @@ namespace SacViet.Repositories
 
         public async Task<IEnumerable<Article>> GetMostViewedTodayAsync(int count = 5)
         {
+            // ?u tiên tin g?n nh?t tr??c (theo PublishedAt DESC), sau ?ó m?i ??n ViewCount
             // Th? tìm bài vi?t t? hôm nay và lùi d?n v? các ngày tr??c (t?i ?a 7 ngày)
             for (int daysBack = 0; daysBack <= 7; daysBack++)
             {
@@ -50,8 +51,8 @@ namespace SacViet.Repositories
                         && a.PublishedAt <= DateTime.Now
                         && a.PublishedAt >= targetDate
                         && a.PublishedAt < nextDate)
-                    .OrderByDescending(a => a.ViewCount)
-                    .ThenByDescending(a => a.PublishedAt)
+                    .OrderByDescending(a => a.PublishedAt)  // ?u tiên tin m?i nh?t tr??c
+                    .ThenByDescending(a => a.ViewCount)     // Sau ?ó m?i ??n view count
                     .Take(count)
                     .ToListAsync();
 
@@ -62,19 +63,20 @@ namespace SacViet.Repositories
                 }
             }
 
-            // N?u không tìm th?y bài vi?t nào trong 7 ngày qua, tr? v? bài vi?t xem nhi?u nh?t t?ng th?
+            // N?u không tìm th?y bài vi?t nào trong 7 ngày qua, tr? v? bài vi?t m?i nh?t
             return await _context.Articles
                 .Include(a => a.Author)
                 .Include(a => a.Category)
                 .Where(a => a.Status == "Published" && a.PublishedAt <= DateTime.Now)
-                .OrderByDescending(a => a.ViewCount)
-                .ThenByDescending(a => a.PublishedAt)
+                .OrderByDescending(a => a.PublishedAt)
+                .ThenByDescending(a => a.ViewCount)
                 .Take(count)
                 .ToListAsync();
         }
 
         public async Task<IEnumerable<Article>> GetSidebarArticlesAsync(int count = 10, IEnumerable<int> excludeArticleIds = null)
         {
+            // ?u tiên tin m?i nh?t tr??c (theo PublishedAt DESC), sau ?ó m?i ??n ViewCount
             var query = _context.Articles
                 .Include(a => a.Author)
                 .Include(a => a.Category)
@@ -86,7 +88,8 @@ namespace SacViet.Repositories
             }
 
             return await query
-                .OrderByDescending(a => a.PublishedAt)
+                .OrderByDescending(a => a.PublishedAt)  // ?u tiên tin m?i nh?t tr??c
+                .ThenByDescending(a => a.ViewCount)     // Sau ?ó m?i ??n view count
                 .Take(count)
                 .ToListAsync();
         }

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.DataProtection;
@@ -55,6 +56,66 @@ var authBuilder = builder.Services.AddAuthentication(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.SameSite = SameSiteMode.Lax;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    
+    // Add event handlers for better error handling
+    options.Events = new CookieAuthenticationEvents
+    {
+        OnValidatePrincipal = async context =>
+        {
+            var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+            var userIdClaim = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            {
+                logger.LogWarning("Invalid or missing user ID claim in cookie, rejecting principal");
+                context.RejectPrincipal();
+                await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return;
+            }
+            
+            // Optionally validate user still exists and is active (cache this in production)
+            // For now, just validate the claim structure is correct
+            var emailClaim = context.Principal?.FindFirst(ClaimTypes.Email)?.Value;
+            var roleClaim = context.Principal?.FindFirst(ClaimTypes.Role)?.Value;
+            
+            if (string.IsNullOrEmpty(emailClaim) || string.IsNullOrEmpty(roleClaim))
+            {
+                logger.LogWarning("Missing email or role claim for user {UserId}, rejecting principal", userId);
+                context.RejectPrincipal();
+                await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            }
+        },
+        OnRedirectToLogin = context =>
+        {
+            var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+            logger.LogDebug("Redirecting to login from: {Path}", context.Request.Path);
+            
+            // Handle AJAX requests differently
+            if (context.Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                return Task.CompletedTask;
+            }
+            
+            context.Response.Redirect(context.RedirectUri);
+            return Task.CompletedTask;
+        },
+        OnSignedIn = context =>
+        {
+            var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+            var userId = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var email = context.Principal?.FindFirst(ClaimTypes.Email)?.Value;
+            logger.LogInformation("User signed in successfully - UserId: {UserId}, Email: {Email}", userId, email);
+            return Task.CompletedTask;
+        },
+        OnSigningOut = context =>
+        {
+            var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+            var userId = context.HttpContext.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            logger.LogInformation("User signing out - UserId: {UserId}", userId);
+            return Task.CompletedTask;
+        }
+    };
 });
 
 // Add Google only when configured properly
@@ -164,7 +225,36 @@ if (!app.Environment.IsDevelopment())
 app.UseForwardedHeaders();
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+
+// Configure static files v?i caching headers t?i ?u
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        // Thêm cache headers cho static files
+        var headers = ctx.Context.Response.Headers;
+        
+        // Cache static files trong 1 n?m (vì có asp-append-version)
+        // asp-append-version s? t? ??ng thêm hash vào URL khi file thay ??i
+        var contentType = ctx.Context.Response.ContentType ?? "";
+        
+        if (contentType.Contains("text/css") || 
+            contentType.Contains("application/javascript") ||
+            contentType.Contains("image/"))
+        {
+            // Cache lâu cho CSS, JS, images - có th? invalidate b?ng query string version
+            headers["Cache-Control"] = "public, max-age=31536000, immutable";
+        }
+        else
+        {
+            // Cache ng?n h?n cho các file khác
+            headers["Cache-Control"] = "public, max-age=604800";
+        }
+        
+        // Thêm header ?? debug
+        headers["X-Content-Type-Options"] = "nosniff";
+    }
+});
 
 app.UseRouting();
 

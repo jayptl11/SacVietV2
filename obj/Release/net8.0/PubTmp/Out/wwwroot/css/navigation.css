@@ -74,7 +74,7 @@
     transform: scale(1.1);
 }
 
-/* Logo in Navbar */
+/* Logo in Navbar - Updated for Image Logo with Fallback */
 .navbar-logo-compact {
     text-decoration: none;
     opacity: 0;
@@ -90,6 +90,43 @@
         pointer-events: auto;
     }
 
+.logo-img-compact {
+    height: 28px;
+    max-width: 120px;
+    object-fit: contain;
+    transition: all 0.3s ease;
+    /* Fallback styles for loading */
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+/* Image load error fallback */
+.logo-img-compact[alt]:empty::before {
+    content: attr(alt);
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 700;
+    font-family: var(--font-title);
+    display: inline-block;
+    padding: 4px 8px;
+}
+
+@media (min-width: 768px) {
+    .logo-img-compact {
+        height: 32px;
+        max-width: 140px;
+    }
+    
+    .logo-img-compact[alt]:empty::before {
+        font-size: 1.3rem;
+    }
+}
+
+.navbar-logo-compact:hover .logo-img-compact {
+    transform: scale(1.05);
+}
+
+/* Legacy text logo styles (kept for fallback) */
 .logo-text-compact {
     font-size: 1.3rem;
     font-weight: 700;
@@ -108,6 +145,27 @@
 .logo-text-compact .plus-sign {
     color: white;
     font-weight: 400;
+}
+
+/* Mobile Offcanvas Logo */
+.offcanvas-logo {
+    height: 24px;
+    max-width: 100px;
+    object-fit: contain;
+    /* Fallback for loading */
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+/* Image load error fallback for mobile */
+.offcanvas-logo[alt]:empty::before {
+    content: attr(alt);
+    color: white;
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: var(--font-title);
+    display: inline-block;
+    padding: 2px 6px;
 }
 
 /* Category Menu - Enhanced with #980700 text */

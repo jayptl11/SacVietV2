@@ -50,6 +50,14 @@
     .badge.bg-danger {
         background-color: var(--primary-red) !important;
     }
+    
+    .badge.bg-purple {
+        background-color: #9c27b0 !important;
+    }
+    
+    .badge.bg-magazine {
+        background-color: #980700 !important;
+    }
 
 /* Category Badge */
 .category-badge {
@@ -68,6 +76,30 @@
 
 .text-danger {
     color: var(--primary-red) !important;
+}
+
+.bg-purple {
+    background-color: #9c27b0 !important;
+}
+
+.text-purple {
+    color: #9c27b0 !important;
+}
+
+.border-purple {
+    border-color: #9c27b0 !important;
+}
+
+.bg-magazine {
+    background-color: #980700 !important;
+}
+
+.text-magazine {
+    color: #980700 !important;
+}
+
+.border-magazine {
+    border-color: #980700 !important;
 }
 
 /* Form Controls */

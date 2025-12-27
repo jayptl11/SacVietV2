@@ -1,0 +1,128 @@
+﻿using System.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
+using SacViet.Models;
+using SacViet.Services;
+using SacViet.ViewModels;
+
+namespace SacViet.Controllers
+{
+    public class HomeController : Controller
+    {
+        private readonly ILogger<HomeController> _logger;
+        private readonly INewsService _newsService;
+
+        public HomeController(ILogger<HomeController> logger, INewsService newsService)
+        {
+            _logger = logger;
+            _newsService = newsService;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            try
+            {
+                // Lấy 12 bài viết mới nhất (ưu tiên ngày đăng, sau đó view count)
+                // Phân bố: tin 1-6 cho Main Center, tin 7-12 cho Left Sidebar
+                var allArticles = await _newsService.GetSidebarArticlesAsync(12, null);
+                var articlesList = allArticles.ToList();
+
+                // Tin 1-3: Main center featured (3 tin đầu)
+                var mostViewedToday = articlesList.Take(3).ToList();
+                
+                // Tin 4-6: Main center secondary (3 tin tiếp theo)
+                // Tin 7-12: Left sidebar (6 tin tiếp theo)
+                var sidebarArticles = articlesList.Skip(3).Take(9).ToList(); // Lấy tin 4-12
+
+                // Lấy các ID của 12 tin đã hiển thị để loại trừ
+                var displayedArticleIds = articlesList.Select(a => a.ArticleId).ToList();
+
+                // Lấy tin cho Right Sidebar "Tin mới nhất" timeline - loại trừ 12 tin đã hiển thị
+                var timelineArticles = await _newsService.GetSidebarArticlesAsync(12, displayedArticleIds);
+
+                // Lấy tin cho "Tin nổi bật khác" - loại trừ tất cả tin đã hiển thị (12 tin đầu + 12 tin timeline)
+                var allDisplayedIds = displayedArticleIds
+                    .Concat(timelineArticles.Select(a => a.ArticleId))
+                    .ToList();
+                var otherFeaturedArticles = await _newsService.GetSidebarArticlesAsync(18, allDisplayedIds);
+
+                // Lấy tất cả các danh mục (bao gồm cả danh mục con)
+                var navigationCategories = await _newsService.GetNavigationCategoriesAsync();
+
+                // Lấy tất cả các danh mục (cả chính và con) để hiển thị bài viết
+                var allCategories = await _newsService.GetAllCategoriesAsync();
+
+                // Lấy tất cả các category ID (bao gồm cả danh mục chính và danh mục con)
+                var allCategoryIds = allCategories
+                    .Select(c => c.CategoryId)
+                    .ToList();
+
+                // Lấy bài viết cho tất cả các danh mục
+                var articlesByCategory = await _newsService.GetArticlesByCategoriesForHomeAsync(allCategoryIds, 6);
+
+                var viewModel = new HomePageViewModel
+                {
+                    FeaturedArticles = mostViewedToday,
+                    MostViewedTodayArticles = mostViewedToday,
+                    SidebarArticles = sidebarArticles,  // Chứa tin 4-12
+                    LatestArticles = otherFeaturedArticles,  // Tin nổi bật khác (khác với tất cả tin đã hiển thị)
+                    NavigationCategories = navigationCategories,
+                    AllCategories = allCategories,
+                    ArticlesByCategory = articlesByCategory
+                };
+
+                // Thêm timeline articles vào ViewBag để dùng cho Right Sidebar
+                ViewBag.TimelineArticles = timelineArticles;
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi tải trang chủ");
+                // Return empty view model if there's an error
+                return View(new HomePageViewModel());
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Search(string keyword, int? categoryId, int? authorId, DateTime? fromDate, DateTime? toDate, int page = 1)
+        {
+            try
+            {
+                var (articles, totalCount) = await _newsService.SearchArticlesAsync(keyword, categoryId, authorId, fromDate, toDate, page, 10);
+                var categories = await _newsService.GetNavigationCategoriesAsync();
+
+                var viewModel = new SearchViewModel
+                {
+                    Keyword = keyword,
+                    CategoryId = categoryId,
+                    AuthorId = authorId,
+                    FromDate = fromDate,
+                    ToDate = toDate,
+                    Page = page,
+                    PageSize = 10,
+                    TotalCount = totalCount,
+                    Articles = articles,
+                    Categories = categories
+                };
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi tìm kiếm");
+                return View(new SearchViewModel());
+            }
+        }
+
+        public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+    }
+}

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\VisualStudio\\source\\repos\\SacViet\\SacViet.csproj": {}
+    "C:\\Users\\admin\\Downloads\\CoccocDownload\\SacVietV2\\SacViet.csproj": {}
   },
   "projects": {
-    "D:\\VisualStudio\\source\\repos\\SacViet\\SacViet.csproj": {
+    "C:\\Users\\admin\\Downloads\\CoccocDownload\\SacVietV2\\SacViet.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\VisualStudio\\source\\repos\\SacViet\\SacViet.csproj",
+        "projectUniqueName": "C:\\Users\\admin\\Downloads\\CoccocDownload\\SacVietV2\\SacViet.csproj",
         "projectName": "SacViet",
-        "projectPath": "D:\\VisualStudio\\source\\repos\\SacViet\\SacViet.csproj",
+        "projectPath": "C:\\Users\\admin\\Downloads\\CoccocDownload\\SacVietV2\\SacViet.csproj",
         "packagesPath": "C:\\Users\\admin\\.nuget\\packages\\",
-        "outputPath": "D:\\VisualStudio\\source\\repos\\SacViet\\obj\\",
+        "outputPath": "C:\\Users\\admin\\Downloads\\CoccocDownload\\SacVietV2\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "D:\\VisualStudio\\Shared\\NuGetPackages"

@@ -1,0 +1,325 @@
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using SacViet.Services;
+using SacViet.ViewModels;
+using System.Security.Claims;
+
+namespace SacViet.Controllers
+{
+    public class AccountController : Controller
+    {
+        private readonly IAuthService _authService;
+        private readonly IConfiguration _config;
+        private readonly ILogger<AccountController> _logger;
+
+        public AccountController(IAuthService authService, IConfiguration config, ILogger<AccountController> logger)
+        {
+            _authService = authService;
+            _config = config;
+            _logger = logger;
+        }
+
+        private bool IsGoogleConfigured()
+        {
+            var clientId = _config["Authentication:Google:ClientId"];
+            var clientSecret = _config["Authentication:Google:ClientSecret"];
+            return !string.IsNullOrWhiteSpace(clientId)
+                && !string.IsNullOrWhiteSpace(clientSecret)
+                && clientId != "YOUR_GOOGLE_CLIENT_ID_HERE"
+                && clientSecret != "YOUR_GOOGLE_CLIENT_SECRET_HERE";
+        }
+
+        [HttpGet]
+        public IActionResult Login(string? returnUrl = null)
+        {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            ViewData["ReturnUrl"] = returnUrl;
+            ViewData["GoogleEnabled"] = IsGoogleConfigured();
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(LoginViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewData["GoogleEnabled"] = IsGoogleConfigured();
+                return View(model);
+            }
+
+            try
+            {
+                var result = await _authService.LoginAsync(model);
+
+                if (!result.Success)
+                {
+                    ModelState.AddModelError(string.Empty, result.Error ?? "Đăng nhập thất bại");
+                    ViewData["GoogleEnabled"] = IsGoogleConfigured();
+                    return View(model);
+                }
+
+                // Tạo claims
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.NameIdentifier, result.User!.UserId.ToString()),
+                    new Claim(ClaimTypes.Name, result.User.FullName),
+                    new Claim(ClaimTypes.Email, result.User.Email),
+                    new Claim(ClaimTypes.Role, result.User.Role.RoleName)
+                };
+
+                if (!string.IsNullOrEmpty(result.User.Avatar))
+                {
+                    claims.Add(new Claim("Avatar", result.User.Avatar));
+                }
+
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var authProperties = new AuthenticationProperties
+                {
+                    IsPersistent = model.RememberMe,
+                    ExpiresUtc = model.RememberMe ? DateTimeOffset.UtcNow.AddDays(30) : DateTimeOffset.UtcNow.AddHours(12)
+                };
+
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(claimsIdentity),
+                    authProperties);
+
+                _logger.LogInformation("User {UserId} logged in successfully via form", result.User.UserId);
+
+                if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
+                {
+                    return Redirect(model.ReturnUrl);
+                }
+
+                return RedirectToAction("Index", "Home");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error during login for email: {Email}", model.Email);
+                ModelState.AddModelError(string.Empty, "Đã xảy ra lỗi không mong muốn. Vui lòng thử lại.");
+                ViewData["GoogleEnabled"] = IsGoogleConfigured();
+                return View(model);
+            }
+        }
+
+        [HttpGet]
+        public IActionResult Register()
+        {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            ViewData["GoogleEnabled"] = IsGoogleConfigured();
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(RegisterViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewData["GoogleEnabled"] = IsGoogleConfigured();
+                return View(model);
+            }
+
+            try
+            {
+                var result = await _authService.RegisterAsync(model);
+
+                if (!result.Success)
+                {
+                    ModelState.AddModelError(string.Empty, result.Error ?? "Đăng ký thất bại");
+                    ViewData["GoogleEnabled"] = IsGoogleConfigured();
+                    return View(model);
+                }
+
+                // Auto login sau khi đăng ký
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.NameIdentifier, result.User!.UserId.ToString()),
+                    new Claim(ClaimTypes.Name, result.User.FullName),
+                    new Claim(ClaimTypes.Email, result.User.Email),
+                    new Claim(ClaimTypes.Role, result.User.Role.RoleName)
+                };
+
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var authProperties = new AuthenticationProperties
+                {
+                    IsPersistent = false,
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddHours(12)
+                };
+
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(claimsIdentity),
+                    authProperties);
+
+                _logger.LogInformation("User {UserId} registered and logged in successfully", result.User.UserId);
+
+                TempData["SuccessMessage"] = "Đăng ký thành công!";
+                return RedirectToAction("Index", "Home");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error during registration for email: {Email}", model.Email);
+                ModelState.AddModelError(string.Empty, "Đã xảy ra lỗi không mong muốn. Vui lòng thử lại.");
+                ViewData["GoogleEnabled"] = IsGoogleConfigured();
+                return View(model);
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            _logger.LogInformation("User {UserId} logged out", userId);
+            return RedirectToAction("Index", "Home");
+        }
+
+        [HttpGet]
+        public IActionResult GoogleLogin(string? returnUrl = null)
+        {
+            if (!IsGoogleConfigured())
+            {
+                _logger.LogWarning("Google login attempted but not configured");
+                TempData["ErrorMessage"] = "Google Sign-In chưa được cấu hình.";
+                return RedirectToAction("Login");
+            }
+
+            _logger.LogInformation("Starting Google login flow, returnUrl: {ReturnUrl}", returnUrl);
+            
+            var redirectUrl = Url.Action("GoogleResponse", "Account", new { returnUrl });
+            var properties = new AuthenticationProperties
+            {
+                RedirectUri = redirectUrl,
+                Items = { { "scheme", GoogleDefaults.AuthenticationScheme } }
+            };
+            return Challenge(properties, GoogleDefaults.AuthenticationScheme);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GoogleResponse(string? returnUrl = null)
+        {
+            if (!IsGoogleConfigured())
+            {
+                TempData["ErrorMessage"] = "Google Sign-In chưa được cấu hình.";
+                return RedirectToAction("Login");
+            }
+
+            try
+            {
+                var result = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
+
+                if (!result.Succeeded)
+                {
+                    var failureMessage = result.Failure?.Message ?? "Unknown error";
+                    _logger.LogWarning("Google authentication failed: {Error}", failureMessage);
+                    TempData["ErrorMessage"] = "Đăng nhập Google thất bại. Vui lòng thử lại.";
+                    return RedirectToAction("Login");
+                }
+
+                // Lấy thông tin từ Google claims
+                var googleId = result.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var email = result.Principal?.FindFirst(ClaimTypes.Email)?.Value;
+                var name = result.Principal?.FindFirst(ClaimTypes.Name)?.Value;
+                var avatar = result.Principal?.FindFirst("picture")?.Value
+                           ?? result.Principal?.FindFirst("urn:google:picture")?.Value
+                           ?? result.Principal?.FindFirst(ClaimTypes.Uri)?.Value;
+
+                _logger.LogInformation("Google auth successful - Email: {Email}, GoogleId: {GoogleId}", email, googleId);
+
+                if (string.IsNullOrEmpty(googleId) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(name))
+                {
+                    _logger.LogWarning("Missing Google claims - GoogleId: {GoogleId}, Email: {Email}, Name: {Name}", 
+                        googleId ?? "null", email ?? "null", name ?? "null");
+                    TempData["ErrorMessage"] = "Không thể lấy thông tin từ Google. Vui lòng thử lại.";
+                    return RedirectToAction("Login");
+                }
+
+                var user = await _authService.GetOrCreateGoogleUserAsync(googleId, email, name, avatar);
+
+                if (user == null)
+                {
+                    _logger.LogError("Failed to get or create user for Google account: {Email}", email);
+                    TempData["ErrorMessage"] = "Đăng nhập Google thất bại. Vui lòng thử lại.";
+                    return RedirectToAction("Login");
+                }
+
+                // Tạo claims mới cho Cookie authentication
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                    new Claim(ClaimTypes.Name, user.FullName),
+                    new Claim(ClaimTypes.Email, user.Email),
+                    new Claim(ClaimTypes.Role, user.Role.RoleName)
+                };
+
+                if (!string.IsNullOrEmpty(user.Avatar))
+                {
+                    claims.Add(new Claim("Avatar", user.Avatar));
+                }
+
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var authProperties = new AuthenticationProperties
+                {
+                    IsPersistent = true,
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddDays(30)
+                };
+
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(claimsIdentity),
+                    authProperties);
+
+                _logger.LogInformation("User {UserId} logged in successfully via Google", user.UserId);
+
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                {
+                    return Redirect(returnUrl);
+                }
+
+                return RedirectToAction("Index", "Home");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during Google login response handling");
+                TempData["ErrorMessage"] = "Lỗi khi xử lý đăng nhập Google. Vui lòng thử lại.";
+                return RedirectToAction("Login");
+            }
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> Profile()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            {
+                _logger.LogWarning("Invalid user ID claim in Profile request");
+                return RedirectToAction("Login");
+            }
+
+            var user = await _authService.GetUserByIdAsync(userId);
+            if (user == null)
+            {
+                _logger.LogWarning("User {UserId} not found in database, signing out", userId);
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return RedirectToAction("Login");
+            }
+
+            return View(user);
+        }
+    }
+}

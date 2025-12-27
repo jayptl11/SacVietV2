@@ -7,6 +7,7 @@ namespace SacViet.Services
     {
         Task<WriterStatsViewModel> GetWriterStatsAsync(int userId);
         Task<(IEnumerable<ArticleListItemViewModel> Articles, int TotalCount)> GetMyArticlesAsync(int userId, string? status, int page, int pageSize);
+        Task<(IEnumerable<ArticleListItemViewModel> Articles, int TotalCount)> GetPendingArticlesForSelfApprovalAsync(int userId, int page, int pageSize);
         Task<int> CreateArticleAsync(ArticleCreateViewModel model, int userId, string status);
         Task<ArticleEditViewModel?> GetArticleForEditAsync(int articleId, int userId);
         Task<bool> UpdateArticleAsync(int articleId, ArticleEditViewModel model, int userId, string status);
@@ -14,5 +15,9 @@ namespace SacViet.Services
         Task<ArticleApproval?> GetLatestApprovalAsync(int articleId);
         Task<IEnumerable<ApprovalHistoryViewModel>> GetApprovalHistoryAsync(int articleId);
         Task<string> UploadImageAsync(IFormFile file);
+        
+        // Self-approval methods for writers
+        Task<ServiceResult> SelfApproveArticleAsync(int articleId, int userId, string note = "");
+        Task<ServiceResult> SelfRejectArticleAsync(int articleId, int userId, string note);
     }
 }

@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SacViet")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1c23029e02e7197b6f14f2cfa011543cf5017913")]
 [assembly: System.Reflection.AssemblyProductAttribute("SacViet")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SacViet")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

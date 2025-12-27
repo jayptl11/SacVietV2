@@ -1,0 +1,4 @@
+<!-- This is a placeholder. Replace with your actual transparent PNG logo image -->
+<!-- Recommended size: 500px width x 120px height -->
+<!-- File: sacviet-logo-large.png -->
+<!-- Use transparent background PNG format -->

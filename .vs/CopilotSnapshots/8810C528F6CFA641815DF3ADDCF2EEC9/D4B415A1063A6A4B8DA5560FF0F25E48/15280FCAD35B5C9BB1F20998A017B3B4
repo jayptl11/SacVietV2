@@ -1,0 +1,957 @@
+﻿@model SacViet.ViewModels.HomePageViewModel
+@{
+    ViewData["Title"] = "Trang chủ";
+}
+
+<style>
+    /* Đảm bảo các cột có chiều cao bằng nhau */
+    .equal-height-row {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    
+    .equal-height-col {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .left-sidebar,
+    .right-sidebar {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        justify-content: space-between; /* Phân bố đều các tin */
+    }
+    
+    .sidebar-news-item {
+        flex: 1; /* Mỗi tin chiếm không gian đều nhau */
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .latest-news-box {
+        /* display: flex;
+        flex-direction: column;
+        height: 100%; */
+    }
+    
+    .latest-timeline {
+        /* flex: 1;
+        overflow-y: auto; */
+        /* Bỏ justify-content để tin phân bố tự nhiên */
+    }
+    
+    .timeline-item {
+        /* Bỏ flex: 1 để tin không bị giãn cách */
+        margin-bottom: 1.5rem; /* Khoảng cách cố định giữa các tin */
+    }
+    
+    .timeline-item.last-item {
+        margin-bottom: 0;
+    }
+    
+    .latest-footer {
+        margin-top: auto; /* Đẩy nút xuống dưới cùng */
+    }
+    
+    /* Podcast-specific styles */
+    .podcast-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .podcast-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+    }
+    
+    .podcast-image-wrapper {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .podcast-play-icon {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 50px;
+        height: 50px;
+        background: rgba(156, 39, 176, 0.9);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 20px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .podcast-card:hover .podcast-play-icon {
+        opacity: 1;
+    }
+    
+    /* eMagazine-specific styles - Magazine Cover Style */
+    .emagazine-card {
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        height: 100%;
+    }
+    
+    .emagazine-card:hover {
+        transform: scale(1.02);
+        box-shadow: 0 8px 20px rgba(152, 7, 0, 0.25) !important;
+    }
+    
+    .emagazine-cover-wrapper {
+        position: relative;
+        overflow: hidden;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .emagazine-cover-image {
+        transition: transform 0.4s ease;
+    }
+    
+    .emagazine-card:hover .emagazine-cover-image {
+        transform: scale(1.05);
+    }
+    
+    .emagazine-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(to bottom, transparent 0%, rgba(152, 7, 0, 0.8) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .emagazine-card:hover .emagazine-overlay {
+        opacity: 1;
+    }
+    
+    .emagazine-ribbon {
+        position: absolute;
+        top: 10px;
+        right: -5px;
+        background: #980700;
+        color: white;
+        padding: 5px 15px;
+        font-size: 0.7rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        z-index: 2;
+    }
+    
+    .emagazine-ribbon:before {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: -5px;
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-width: 0 0 5px 5px;
+        border-color: transparent transparent transparent #5a0400;
+    }
+    
+    .emagazine-info {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 15px;
+        color: white;
+        z-index: 3;
+        transform: translateY(10px);
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+    
+    .emagazine-card:hover .emagazine-info {
+        transform: translateY(0);
+        opacity: 1;
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="row equal-height-row">
+        <!-- Left Sidebar - 6 tin nhỏ (tin 7-12) -->
+        <div class="col-lg-3 equal-height-col">
+            <div class="left-sidebar">
+                @if (Model.SidebarArticles.Any() && Model.SidebarArticles.Count() >= 9)
+                {
+                    @foreach (var article in Model.SidebarArticles.Skip(3).Take(6))
+                    {
+                        <div class="sidebar-news-item">
+                            <div class="news-image-small mb-2 position-relative overflow-hidden rounded">
+                                <img src="@(string.IsNullOrEmpty(article.ThumbnailImage) ? "/images/placeholder-article.jpg" : article.ThumbnailImage)"
+                                     class="img-fluid w-100" alt="@article.Title" style="height: 130px; object-fit: cover;">
+                                <div class="image-overlay"></div>
+                            </div>
+                            <h6 class="news-title-small mb-2" style="font-size: 0.85rem; line-height: 1.3;">
+                                <a href="@Url.Action("Details", "Article", new { slug = article.Slug })" class="text-dark text-decoration-none">
+                                    @article.Title
+                                </a>
+                            </h6>
+                        </div>
+                    }
+                }
+                else if (Model.SidebarArticles.Any())
+                {
+                    <!-- Fallback: Lấy tối đa số tin còn lại -->
+                    @foreach (var article in Model.SidebarArticles.Skip(3).Take(6))
+                    {
+                        <div class="sidebar-news-item">
+                            <div class="news-image-small mb-2 position-relative overflow-hidden rounded">
+                                <img src="@(string.IsNullOrEmpty(article.ThumbnailImage) ? "/images/placeholder-article.jpg" : article.ThumbnailImage)"
+                                     class="img-fluid w-100" alt="@article.Title" style="height: 130px; object-fit: cover;">
+                                <div class="image-overlay"></div>
+                            </div>
+                            <h6 class="news-title-small mb-2" style="font-size: 0.85rem; line-height: 1.3;">
+                                <a href="@Url.Action("Details", "Article", new { slug = article.Slug })" class="text-dark text-decoration-none">
+                                    @article.Title
+                                </a>
+                            </h6>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+
+        <!-- Main Center Content - 6 tin đầu (tin 1-6) -->
+        <div class="col-lg-6 equal-height-col">
+            @if (Model.MostViewedTodayArticles.Any())
+            {
+                var mainArticle = Model.MostViewedTodayArticles.First();
+                var articleDate = mainArticle.PublishedAt?.Date ?? DateTime.Today;
+                var daysAgo = (DateTime.Today - articleDate).Days;
+                var badgeText = daysAgo == 0 ? "Tin mới nhất hôm nay" : 
+                               daysAgo == 1 ? "Tin mới nhất hôm qua" : 
+                               $"Tin mới {daysAgo} ngày trước";
+                
+                <!-- Tin chính lớn (Tin 1) -->
+                <div class="main-featured-article mb-4">
+                    <div class="featured-image mb-3 position-relative overflow-hidden rounded">
+                        <img src="@(string.IsNullOrEmpty(mainArticle.ThumbnailImage) ? "/images/placeholder-article.jpg" : mainArticle.ThumbnailImage)"
+                             class="img-fluid w-100" alt="@mainArticle.Title" style="height: 400px; object-fit: cover;">
+                        <div class="featured-overlay"></div>
+                        <div class="position-absolute top-0 start-0 m-3">
+                            <span class="badge bg-danger">
+                                <i class="fas fa-newspaper me-1"></i>@badgeText
+                            </span>
+                        </div>
+                    </div>
+                    <h2 class="main-title mb-3">
+                        <a href="@Url.Action("Details", "Article", new { slug = mainArticle.Slug })" class="text-dark text-decoration-none">
+                            @mainArticle.Title
+                        </a>
+                    </h2>
+                    <div class="main-meta mb-3">
+                        <small class="text-danger me-3">
+                            <i class="fas fa-clock me-1"></i>@mainArticle.PublishedAt?.ToString("dd/MM/yyyy HH:mm")
+                        </small>
+                        @if (mainArticle.ViewCount.HasValue && mainArticle.ViewCount > 0)
+                        {
+                            <small class="text-danger">
+                                <i class="far fa-eye me-1"></i>@mainArticle.ViewCount lượt xem
+                            </small>
+                        }
+                    </div>
+                    <p class="main-summary text-muted mb-3">@mainArticle.Summary</p>
+
+                    <!-- 2 Sub bullets (Tin 2-3) -->
+                    @if (Model.MostViewedTodayArticles.Count() > 1)
+                    {
+                        <ul class="sub-headlines list-unstyled">
+                            @foreach (var subArticle in Model.MostViewedTodayArticles.Skip(1).Take(2))
+                            {
+                                <li class="mb-2">
+                                    <i class="fas fa-angle-double-right text-danger me-2" style="font-size: 0.8rem;"></i>
+                                    <a href="@Url.Action("Details", "Article", new { slug = subArticle.Slug })" class="text-dark">
+                                        @subArticle.Title
+                                    </a>
+                                    @if (subArticle.ViewCount.HasValue && subArticle.ViewCount > 0)
+                                    {
+                                        <small class="text-muted ms-2">
+                                            <i class="far fa-eye me-1"></i>@subArticle.ViewCount
+                                        </small>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+
+                <!-- 3 tin phụ horizontal (Tin 4-6) -->
+                <div class="secondary-articles">
+                    <div class="row g-3">
+                        @foreach (var article in Model.SidebarArticles.Take(3))
+                        {
+                            <div class="col-md-12 mb-2">
+                                <div class="row g-2 secondary-card p-2 rounded">
+                                    <div class="col-5">
+                                        <div class="position-relative overflow-hidden rounded">
+                                            <img src="@(string.IsNullOrEmpty(article.ThumbnailImage) ? "/images/placeholder-article.jpg" : article.ThumbnailImage)"
+                                                 class="img-fluid w-100" alt="@article.Title" style="height: 110px; object-fit: cover;">
+                                            <div class="secondary-overlay"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-7">
+                                        <h6 class="mb-2" style="font-size: 0.95rem; line-height: 1.4;">
+                                            <a href="@Url.Action("Details", "Article", new { slug = article.Slug })" class="text-dark text-decoration-none">
+                                                @article.Title
+                                            </a>
+                                        </h6>
+                                        <small class="text-muted">
+                                            <i class="far fa-calendar-alt me-1"></i>@article.PublishedAt?.ToString("dd/MM/yyyy HH:mm")
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <!-- Fallback to featured articles if no most viewed today -->
+                @if (Model.FeaturedArticles.Any())
+                {
+                    var mainArticle = Model.FeaturedArticles.First();
+                    <div class="main-featured-article mb-4">
+                        <div class="featured-image mb-3 position-relative overflow-hidden rounded">
+                            <img src="@(string.IsNullOrEmpty(mainArticle.ThumbnailImage) ? "/images/placeholder-article.jpg" : mainArticle.ThumbnailImage)"
+                                 class="img-fluid w-100" alt="@mainArticle.Title" style="height: 400px; object-fit: cover;">
+                            <div class="featured-overlay"></div>
+                        </div>
+                        <h2 class="main-title mb-3">
+                            <a href="@Url.Action("Details", "Article", new { slug = mainArticle.Slug })" class="text-dark text-decoration-none">
+                                @mainArticle.Title
+                            </a>
+                        </h2>
+                        <div class="main-meta mb-3">
+                            <small class="text-danger me-3">
+                                <i class="fas fa-clock me-1"></i>@mainArticle.PublishedAt?.ToString("dd/MM/yyyy HH:mm")
+                            </small>
+                        </div>
+                        <p class="main-summary text-muted mb-3">@mainArticle.Summary</p>
+                    </div>
+                }
+            }
+        </div>
+
+        <!-- Right Sidebar - Latest News với Timeline (kéo dài bằng main) -->
+        <div class="col-lg-3 equal-height-col">
+            <div class="right-sidebar">
+                <div class="latest-news-box bg-white rounded shadow-sm">
+                    <div class="latest-header bg-danger text-white p-3 rounded-top d-flex align-items-center">
+                        <i class="fas fa-newspaper me-2"></i>
+                        <h5 class="mb-0 fw-bold">TIN MỚI NHẤT</h5>
+                    </div>
+
+                    @if (ViewBag.TimelineArticles != null && ((IEnumerable<SacViet.Models.Article>)ViewBag.TimelineArticles).Any())
+                    {
+                        var timelineArticles = (IEnumerable<SacViet.Models.Article>)ViewBag.TimelineArticles;
+                        <div class="latest-timeline p-3">
+                            @{
+                                int i = 0;
+                                foreach (var article in timelineArticles)
+                                {
+                                    <div class="timeline-item @(i == 9 || i == timelineArticles.Count() - 1 ? "last-item" : "")">
+                                        <div class="timeline-marker">
+                                            <div class="timeline-dot"></div>
+                                        </div>
+                                        <div class="timeline-content">
+                                            <div class="timeline-time text-danger mb-1">
+                                                <i class="far fa-clock me-1"></i>
+                                                <small class="fw-semibold">@article.PublishedAt?.ToString("HH:mm")</small>
+                                                <small class="text-muted ms-1">@article.PublishedAt?.ToString("dd/MM")</small>
+                                            </div>
+                                            <h6 class="timeline-title mb-1" style="font-size: 0.85rem; line-height: 1.3;">
+                                                <a href="@Url.Action("Details", "Article", new { slug = article.Slug })"
+                                                   class="text-dark text-decoration-none timeline-link">
+                                                    @article.Title
+                                                </a>
+                                            </h6>
+                                            <div class="timeline-meta d-flex align-items-center mt-1">
+                                                <span class="badge bg-light text-dark small me-2" style="font-size: 0.65rem;">
+                                                    <i class="fas fa-tag me-1"></i>@article.Category.CategoryName
+                                                </span>
+                                                @if (article.ViewCount.HasValue && article.ViewCount > 0)
+                                                {
+                                                    <small class="text-muted" style="font-size: 0.7rem;">
+                                                        <i class="far fa-eye me-1"></i>@article.ViewCount
+                                                    </small>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                    i++;
+                                }
+                            }
+                        </div>
+
+                        <div class="latest-footer p-3 border-top">
+                            <a href="@Url.Action("Search", "Home")" class="btn btn-outline-danger btn-sm w-100">
+                                <i class="fas fa-plus me-2"></i>Xem tất cả tin
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hiện thị bài viết theo thứ tự danh mục cố định với thiết kế đa dạng -->
+@{
+    if (Model.ArticlesByCategory.Any())
+    {
+        // Định nghĩa thứ tự hiện thị danh mục cố định với icon tương ứng
+        var categoryOrder = new List<(string slug, string icon)>
+        {
+            ("trong-nuoc", "fas fa-home"),           // Nhập văn hóa: Trong nước
+            ("the-gioi", "fas fa-globe-asia"),       // Nhập văn hóa: Thế giới
+            ("du-lich", "fas fa-plane"),             // Du lịch
+            ("con-nguoi", "fas fa-users"),           // Con người
+            ("am-thuc", "fas fa-utensils"),          // Ẩm thực
+            ("trang-phuc-va-kien-truc", "fas fa-building"), // Trang phục & Kiến trúc
+            ("thanh-sac", "fas fa-palette"),         // Thanh - Sắc
+            ("podcast", "fas fa-podcast"),           // Multimedia: Podcast
+            ("video", "fas fa-video"),               // Multimedia: Video
+            ("infographic", "fas fa-chart-bar"),     // Multimedia: Infographic
+            ("longform", "fas fa-scroll"),           // Multimedia: Longform
+            ("emagazine", "fas fa-book-open")        // Multimedia: eMagazine
+        };
+
+        // Lấy danh mục có bài viết theo thứ tự đã định
+        var orderedCategories = new List<(SacViet.Models.Category category, string icon)>();
+        
+        foreach (var (slug, icon) in categoryOrder)
+        {
+            var category = Model.AllCategories.FirstOrDefault(c => c.Slug == slug && 
+                Model.ArticlesByCategory.ContainsKey(c.CategoryId) && 
+                Model.ArticlesByCategory[c.CategoryId].Any());
+            
+            if (category != null)
+            {
+                orderedCategories.Add((category, icon));
+            }
+        }
+
+        // Thiết kế đa dạng cho từng danh mục
+        var layoutIndex = 0;
+        foreach (var (category, categoryIcon) in orderedCategories)
+        {
+            var articles = Model.ArticlesByCategory[category.CategoryId];
+            var currentLayout = layoutIndex % 4; // 4 kiểu layout khác nhau
+            
+            // Special layout for podcast and emagazine categories
+            var isPodcast = category.Slug == "podcast";
+            var isEmagazine = category.Slug == "emagazine";
+            
+            <div class="container mt-5" id="category-@category.Slug">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="d-flex align-items-center justify-content-between mb-4 category-section-header">
+                            <h4 class="section-heading text-uppercase text-danger mb-0">
+                                <i class="@categoryIcon me-2"></i>
+                                @if (category.ParentCategoryId.HasValue)
+                                {
+                                    var parentCategory = Model.AllCategories.FirstOrDefault(c => c.CategoryId == category.ParentCategoryId.Value);
+                                    if (parentCategory != null)
+                                    {
+                                        <span class="text-muted" style="font-size: 0.9rem;">@parentCategory.CategoryName / </span>
+                                    }
+                                }
+                                @category.CategoryName
+                            </h4>
+                            <a href="@Url.Action("Index", "Category", new { categorySlug = category.Slug })" class="btn btn-sm btn-outline-danger">
+                                Xem thêm <i class="fas fa-chevron-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                @if (isPodcast)
+                {
+                    <!-- Special Podcast Layout: Compact horizontal cards -->
+                    <div class="row g-3">
+                        @foreach (var article in articles.Take(6))
+                        {
+                            <div class="col-md-6 col-lg-4">
+                                <div class="podcast-card bg-white rounded shadow-sm overflow-hidden h-100">
+                                    <div class="row g-0">
+                                        <div class="col-4">
+                                            <div class="podcast-image-wrapper" style="height: 120px;">
+                                                <img src="@(string.IsNullOrEmpty(article.ThumbnailImage) ? "/images/placeholder-article.jpg" : article.ThumbnailImage)"
+                                                     class="img-fluid w-100 h-100" alt="@article.Title" style="object-fit: cover;">
+                                                <div class="podcast-play-icon">
+                                                    <i class="fas fa-play"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-8">
+                                            <div class="p-3">
+                                                <h6 class="mb-2" style="font-size: 0.9rem; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                                    <a href="@Url.Action("Details", "Article", new { slug = article.Slug })" class="text-dark text-decoration-none">
+                                                        @article.Title
+                                                    </a>
+                                                </h6>
+                                                <div class="d-flex align-items-center justify-content-between mt-2">
+                                                    <small class="text-muted" style="font-size: 0.75rem;">
+                                                        <i class="far fa-calendar me-1"></i>@article.PublishedAt?.ToString("dd/MM/yyyy")
+                                                    </small>
+                                                    @if (article.ViewCount.HasValue && article.ViewCount > 0)
+                                                    {
+                                                        <small class="text-muted" style="font-size: 0.75rem;">
+                                                            <i class="far fa-eye me-1"></i>@article.ViewCount
+                                                        </small>
+                                                    }
+                                                </div>
+                                                <div class="mt-2">
+                                                    <span class="badge bg-purple text-white" style="font-size: 0.7rem;">
+                                                        <i class="fas fa-podcast me-1"></i>Podcast
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else if (isEmagazine)
+                {
+                    <!-- Special eMagazine Layout: Magazine Cover Grid Style -->
+                    <div class="row g-3">
+                        @foreach (var article in articles.Take(6))
+                        {
+                            <div class="col-6 col-md-4 col-lg-2">
+                                <a href="@Url.Action("Details", "Article", new { slug = article.Slug })" class="text-decoration-none">
+                                    <div class="emagazine-card bg-white rounded shadow-sm">
+                                        <div class="emagazine-cover-wrapper">
+                                            <img src="@(string.IsNullOrEmpty(article.ThumbnailImage) ? "/images/placeholder-article.jpg" : article.ThumbnailImage)"
+                                                 class="img-fluid w-100 emagazine-cover-image" alt="@article.Title" style="height: 280px; object-fit: cover;">
+                                            
+
+                                            <div class="emagazine-overlay"></div>
+                                            
+
+                                            <div class="emagazine-info">
+                                                <div class="d-flex align-items-center mb-2">
+                                                    <i class="far fa-calendar me-2" style="font-size: 0.8rem;"></i>
+                                                    <small style="font-size: 0.75rem;">@article.PublishedAt?.ToString("dd/MM/yyyy")</small>
+                                                </div>
+                                                @if (article.ViewCount.HasValue && article.ViewCount > 0)
+                                                {
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="far fa-eye me-2" style="font-size: 0.8rem;"></i>
+                                                        <small style="font-size: 0.75rem;">@article.ViewCount lượt đọc</small>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                        <div class="p-2 text-center">
+                                            <h6 class="mb-0" style="font-size: 0.85rem; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 2.6em;">
+                                                <span class="text-dark">@article.Title</span>
+                                            </h6>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        }
+                    </div>
+                }
+                else if (currentLayout == 0)
+                {
+                    <!-- Layout 1: Classic Grid 3 columns -->
+                    <div class="row g-4">
+                        @foreach (var article in articles.Take(6))
+                        {
+                            <div class="col-md-4">
+                                <div class="news-card-home h-100 bg-white rounded shadow-sm overflow-hidden">
+                                    <div class="news-image-home mb-0 position-relative">
+                                        <img src="@(string.IsNullOrEmpty(article.ThumbnailImage) ? "/images/placeholder-article.jpg" : article.ThumbnailImage)"
+                                             class="img-fluid w-100" alt="@article.Title" style="height: 200px; object-fit: cover;">
+                                        <div class="card-overlay"></div>
+                                        <div class="position-absolute top-0 start-0 m-2">
+                                            <span class="badge bg-danger">@article.Category.CategoryName</span>
+                                        </div>
+                                    </div>
+                                    <div class="p-3">
+                                        <h5 class="news-card-title mb-2">
+                                            <a href="@Url.Action("Details", "Article", new { slug = article.Slug })" class="text-dark text-decoration-none">
+                                                @article.Title
+                                            </a>
+                                        </h5>
+                                        <p class="news-card-summary text-muted small mb-2">
+                                            @if (!string.IsNullOrEmpty(article.Summary))
+                                            {
+                                                @(article.Summary.Length > 100 ? article.Summary.Substring(0, 100) + "..." : article.Summary)
+                                            }
+                                        </p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-muted">
+                                                <i class="far fa-calendar me-1"></i>@article.PublishedAt?.ToString("dd/MM/yyyy")
+                                            </small>
+                                            @if (article.ViewCount.HasValue && article.ViewCount > 0)
+                                            {
+                                                <small class="text-muted">
+                                                    <i class="far fa-eye me-1"></i>@article.ViewCount
+                                                </small>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else if (currentLayout == 1)
+                {
+                    <!-- Layout 2: Featured Left + Grid Right -->
+                    <div class="row g-4">
+                        @{
+                            var featuredArticle = articles.First();
+                            var otherArticles = articles.Skip(1).Take(4);
+                        }
+                        <div class="col-md-6">
+                            <div class="news-card-home h-100 bg-white rounded shadow-sm overflow-hidden">
+                                <div class="news-image-home mb-0 position-relative">
+                                    <img src="@(string.IsNullOrEmpty(featuredArticle.ThumbnailImage) ? "/images/placeholder-article.jpg" : featuredArticle.ThumbnailImage)"
+                                         class="img-fluid w-100" alt="@featuredArticle.Title" style="height: 350px; object-fit: cover;">
+                                    <div class="card-overlay"></div>
+                                    <div class="position-absolute top-0 start-0 m-3">
+                                        <span class="badge bg-danger ">@featuredArticle.Category.CategoryName</span>
+                                    </div>
+                                </div>
+                                <div class="p-4">
+                                    <h4 class="news-card-title mb-3">
+                                        <a href="@Url.Action("Details", "Article", new { slug = featuredArticle.Slug })" class="text-dark text-decoration-none">
+                                            @featuredArticle.Title
+                                        </a>
+                                    </h4>
+                                    <p class="news-card-summary text-muted mb-3">
+                                        @if (!string.IsNullOrEmpty(featuredArticle.Summary))
+                                        {
+                                            @(featuredArticle.Summary.Length > 150 ? featuredArticle.Summary.Substring(0, 150) + "..." : featuredArticle.Summary)
+                                        }
+                                    </p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">
+                                            <i class="far fa-calendar me-1"></i>@featuredArticle.PublishedAt?.ToString("dd/MM/yyyy")
+                                        </small>
+                                        @if (featuredArticle.ViewCount.HasValue && featuredArticle.ViewCount > 0)
+                                        {
+                                            <small class="text-muted">
+                                                <i class="far fa-eye me-1"></i>@featuredArticle.ViewCount
+                                            </small>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row g-3">
+                                @foreach (var article in otherArticles)
+                                {
+                                    <div class="col-12">
+                                        <div class="row g-3 secondary-card p-3 rounded bg-white shadow-sm">
+                                            <div class="col-4">
+                                                <div class="position-relative overflow-hidden rounded">
+                                                    <img src="@(string.IsNullOrEmpty(article.ThumbnailImage) ? "/images/placeholder-article.jpg" : article.ThumbnailImage)"
+                                                         class="img-fluid w-100" alt="@article.Title" style="height: 100px; object-fit: cover;">
+                                                </div>
+                                            </div>
+                                            <div class="col-8">
+                                                <h6 class="mb-2">
+                                                    <a href="@Url.Action("Details", "Article", new { slug = article.Slug })" class="text-dark text-decoration-none">
+                                                        @article.Title
+                                                    </a>
+                                                </h6>
+                                                <small class="text-muted">
+                                                    <i class="far fa-calendar me-1"></i>@article.PublishedAt?.ToString("dd/MM/yyyy")
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+                else if (currentLayout == 2)
+                {
+                    <!-- Layout 3: Horizontal Cards -->
+                    <div class="row g-4">
+                        @foreach (var article in articles.Take(3))
+                        {
+                            <div class="col-12">
+                                <div class="row g-0 bg-white rounded shadow-sm overflow-hidden secondary-card">
+                                    <div class="col-md-4">
+                                        <div class="position-relative">
+                                            <img src="@(string.IsNullOrEmpty(article.ThumbnailImage) ? "/images/placeholder-article.jpg" : article.ThumbnailImage)"
+                                                 class="img-fluid w-100 h-100" alt="@article.Title" style="height: 200px; object-fit: cover;">
+                                            <div class="position-absolute top-0 start-0 m-2">
+                                                <span class="badge bg-danger">@article.Category.CategoryName</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div class="p-4">
+                                            <h5 class="news-card-title mb-3">
+                                                <a href="@Url.Action("Details", "Article", new { slug = article.Slug })" class="text-dark text-decoration-none">
+                                                    @article.Title
+                                                </a>
+                                            </h5>
+                                            <p class="news-card-summary text-muted mb-3">
+                                                @if (!string.IsNullOrEmpty(article.Summary))
+                                                {
+                                                    @(article.Summary.Length > 120 ? article.Summary.Substring(0, 120) + "..." : article.Summary)
+                                                }
+                                            </p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <small class="text-muted">
+                                                    <i class="far fa-calendar me-1"></i>@article.PublishedAt?.ToString("dd/MM/yyyy")
+                                                </small>
+                                                @if (article.ViewCount.HasValue && article.ViewCount > 0)
+                                                {
+                                                    <small class="text-muted">
+                                                        <i class="far fa-eye me-1"></i>@article.ViewCount
+                                                    </small>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <!-- Layout 4: Mixed Grid (1 large + 4 small) -->
+                    <div class="row g-4">
+                        @{
+                            var mainArticle = articles.First();
+                            var sideArticles = articles.Skip(1).Take(4);
+                        }
+                        <div class="col-md-8">
+                            <div class="news-card-home bg-white rounded shadow-sm overflow-hidden">
+                                <div class="news-image-home mb-0 position-relative">
+                                    <img src="@(string.IsNullOrEmpty(mainArticle.ThumbnailImage) ? "/images/placeholder-article.jpg" : mainArticle.ThumbnailImage)"
+                                         class="img-fluid w-100" alt="@mainArticle.Title" style="height: 300px; object-fit: cover;">
+                                    <div class="card-overlay"></div>
+                                    <div class="position-absolute top-0 start-0 m-3">
+                                        <span class="badge bg-danger ">@mainArticle.Category.CategoryName</span>
+                                    </div>
+                                </div>
+                                <div class="p-4">
+                                    <h4 class="news-card-title mb-3">
+                                        <a href="@Url.Action("Details", "Article", new { slug = mainArticle.Slug })" class="text-dark text-decoration-none">
+                                            @mainArticle.Title
+                                        </a>
+                                    </h4>
+                                    <p class="news-card-summary text-muted mb-3">
+                                        @if (!string.IsNullOrEmpty(mainArticle.Summary))
+                                        {
+                                            @(mainArticle.Summary.Length > 150 ? mainArticle.Summary.Substring(0, 150) + "..." : mainArticle.Summary)
+                                        }
+                                    </p>
+                                    <small class="text-muted">
+                                        <i class="far fa-calendar me-1"></i>@mainArticle.PublishedAt?.ToString("dd/MM/yyyy")
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="row g-3">
+                                @foreach (var article in sideArticles)
+                                {
+                                    <div class="col-12">
+                                        <div class="bg-white rounded shadow-sm p-3 secondary-card">
+                                            <div class="row g-2">
+                                                <div class="col-4">
+                                                    <img src="@(string.IsNullOrEmpty(article.ThumbnailImage) ? "/images/placeholder-article.jpg" : article.ThumbnailImage)"
+                                                         class="img-fluid rounded" alt="@article.Title" style="height: 60px; object-fit: cover;">
+                                                </div>
+                                                <div class="col-8">
+                                                    <h6 class="small mb-1">
+                                                        <a href="@Url.Action("Details", "Article", new { slug = article.Slug })" class="text-dark text-decoration-none">
+                                                            @(article.Title.Length > 50 ? article.Title.Substring(0, 50) + "..." : article.Title)
+                                                        </a>
+                                                    </h6>
+                                                    <small class="text-muted">
+                                                        <i class="far fa-calendar me-1"></i>@article.PublishedAt?.ToString("dd/MM")
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+            
+            layoutIndex++;
+        }
+    }
+    else
+    {
+        <!-- Thông báo nếu không có bài viết theo danh mục -->
+        <div class="container mt-5">
+            <div class="alert alert-info text-center">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Chưa có bài viết theo danh mục.</strong> Vui lòng thêm bài viết vào các danh mục trong hệ thống.
+            </div>
+        </div>
+    }
+}
+
+<!-- Tin nổi bật khác -->
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <h4 class="section-heading text-uppercase text-danger mb-0">
+                    <i class="fas fa-fire me-2"></i>Tin nổi bật khác
+                </h4>
+                <a href="@Url.Action("Search", "Home")" class="btn btn-sm btn-outline-danger">Xem thêm</a>
+            </div>
+        </div>
+    </div>
+    <div class="row g-4">
+        @foreach (var article in Model.LatestArticles.Take(6))
+        {
+            <div class="col-md-4">
+                <div class="news-card-home h-100 bg-white rounded shadow-sm overflow-hidden">
+                    <div class="news-image-home mb-0 position-relative">
+                        <img src="@(string.IsNullOrEmpty(article.ThumbnailImage) ? "/images/placeholder-article.jpg" : article.ThumbnailImage)"
+                             class="img-fluid w-100" alt="@article.Title" style="height: 200px; object-fit: cover;">
+                        <div class="card-overlay"></div>
+                        <div class="position-absolute top-0 start-0 m-2">
+                            <span class="badge bg-danger">@article.Category.CategoryName</span>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <h5 class="news-card-title mb-2">
+                            <a href="@Url.Action("Details", "Article", new { slug = article.Slug })" class="text-dark text-decoration-none">
+                                @article.Title
+                            </a>
+                        </h5>
+                        <p class="news-card-summary text-muted small mb-2">
+                            @if (!string.IsNullOrEmpty(article.Summary))
+                            {
+                                @(article.Summary.Length > 100 ? article.Summary.Substring(0, 100) + "..." : article.Summary)
+                            }
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <i class="far fa-calendar me-1"></i>@article.PublishedAt?.ToString("dd/MM/yyyy")
+                            </small>
+                            @if (article.ViewCount.HasValue && article.ViewCount > 0)
+                            {
+                                <small class="text-muted">
+                                    <i class="far fa-eye me-1"></i>@article.ViewCount
+                                </small>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Smooth scroll cho category links với logic phân biệt trang chủ vs trang khác
+        document.addEventListener('DOMContentLoaded', function () {
+            // Kiểm tra xem đang ở trang chủ hay không
+            const isHomePage = window.location.pathname === '/Home/Index' || 
+                              window.location.pathname === '/' || 
+                              window.location.pathname === '';
+            
+            // Xử lý smooth scroll cho các category links
+            const categoryLinks = document.querySelectorAll('.category-home-link');
+            
+            categoryLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    const href = this.getAttribute('href');
+                    const hashIndex = href.indexOf('#');
+                    
+                    // Chỉ xử lý nếu link có hash
+                    if (hashIndex !== -1) {
+                        const hash = href.substring(hashIndex);
+                        const categorySlug = hash.replace('#category-', '');
+                        
+                        // Nếu KHÔNG ở trang chủ, chuyển đến trang danh mục
+                        if (!isHomePage) {
+                            e.preventDefault();
+                            window.location.href = '@Url.Action("Index", "Category")' + '/' + categorySlug;
+                            return;
+                        }
+                        
+                        // Nếu ở trang chủ, thực hiện scroll như cũ
+                        const targetElement = document.querySelector(hash);
+                        if (targetElement) {
+                            e.preventDefault();
+                            
+                            // Tính toán offset cho navbar (navbar height + padding)
+                            const navbarHeight = document.getElementById('mainNavbar')?.offsetHeight || 0;
+                            const categoryMenuHeight = document.getElementById('categoryMenu')?.offsetHeight || 0;
+                            const offset = navbarHeight + categoryMenuHeight + 20; // thêm 20px padding
+                            
+                            const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - offset;
+                            
+                            window.scrollTo({
+                                top: targetPosition,
+                                behavior: 'smooth'
+                            });
+                            
+                            // Highlight effect cho section
+                            targetElement.classList.add('highlight-section');
+                            setTimeout(() => {
+                                targetElement.classList.remove('highlight-section');
+                            }, 2000);
+                        }
+                    }
+                });
+            });
+            
+            // Xử lý khi load trang với hash trong URL (chỉ cho trang chủ)
+            if (isHomePage && window.location.hash) {
+                setTimeout(() => {
+                    const targetElement = document.querySelector(window.location.hash);
+                    if (targetElement) {
+                        const navbarHeight = document.getElementById('mainNavbar')?.offsetHeight || 0;
+                        const categoryMenuHeight = document.getElementById('categoryMenu')?.offsetHeight || 0;
+                        const offset = navbarHeight + categoryMenuHeight + 20;
+                        
+                        const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - offset;
+                        
+                        window.scrollTo({
+                            top: targetPosition,
+                            behavior: 'smooth'
+                        });
+                        
+                        targetElement.classList.add('highlight-section');
+                        setTimeout(() => {
+                            targetElement.classList.remove('highlight-section');
+                        }, 2000);
+                    }
+                }, 100);
+            }
+        });
+    </script>
+}

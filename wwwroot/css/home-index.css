@@ -1,0 +1,344 @@
+/* Home Index Page Styles */
+
+/* Equal Height Layout */
+.equal-height-row {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.equal-height-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.left-sidebar,
+.right-sidebar {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: space-between; /* Phân b? ??u các tin */
+}
+
+.sidebar-news-item {
+    flex: 1; /* M?i tin chi?m không gian ??u nhau */
+    display: flex;
+    flex-direction: column;
+}
+
+.latest-news-box {
+    /* display: flex;
+    flex-direction: column;
+    height: 100%; */
+}
+
+.latest-timeline {
+    /* flex: 1;
+    overflow-y: auto; */
+    /* B? justify-content ?? tin phân b? t? nhiên */
+}
+
+.timeline-item {
+    /* B? flex: 1 ?? tin không b? giãn cách */
+    margin-bottom: 1.5rem; /* Kho?ng cách c? ??nh gi?a các tin */
+}
+
+.timeline-item.last-item {
+    margin-bottom: 0;
+}
+
+.latest-footer {
+    margin-top: auto; /* ??y nút xu?ng d??i cùng */
+}
+
+/* Image Display Optimization */
+.news-image-small img,
+.featured-image img,
+.news-image-home img,
+.emagazine-cover img,
+.emagazine-thumbnail img,
+.podcast-card img {
+    width: 100%;
+    height: auto;
+    object-fit: contain !important; /* Hi?n th? ??y ?? ?nh không c?t xén */
+    background-color: #f8f9fa; /* Background màu nh?t khi ?nh không ??y khung */
+}
+
+/* Alternative: For cases where you want to maintain aspect ratio but show full image */
+.full-image-display {
+    object-fit: contain !important;
+    object-position: center;
+    background-color: #f8f9fa;
+}
+
+/* For maintaining container height while showing full image */
+.image-container-flexible {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 130px;
+    background-color: #f8f9fa;
+    overflow: hidden;
+    border-radius: 0.375rem;
+}
+
+.image-container-flexible img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}
+
+/* Responsive image containers */
+.responsive-image-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 0.375rem;
+    background-color: #f8f9fa;
+}
+
+.responsive-image-container img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: contain;
+}
+
+/* Maintain aspect ratio containers */
+.aspect-ratio-16-9 {
+    aspect-ratio: 16/9;
+    overflow: hidden;
+    background-color: #f8f9fa;
+}
+
+.aspect-ratio-4-3 {
+    aspect-ratio: 4/3;
+    overflow: hidden;
+    background-color: #f8f9fa;
+}
+
+.aspect-ratio-1-1 {
+    aspect-ratio: 1/1;
+    overflow: hidden;
+    background-color: #f8f9fa;
+}
+
+/* Podcast Specific Styles */
+.podcast-card {
+    border-left: 4px solid #8b5cf6;
+    transition: all 0.3s ease;
+}
+
+.podcast-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.15);
+}
+
+.podcast-duration {
+    background: linear-gradient(135deg, #8b5cf6, #a855f7);
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+    white-space: nowrap;
+}
+
+.podcast-play-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #8b5cf6, #a855f7);
+    border: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.podcast-play-btn:hover {
+    background: linear-gradient(135deg, #7c3aed, #9333ea);
+    transform: scale(1.1);
+}
+
+.podcast-list-item {
+    padding: 12px;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.2s ease;
+}
+
+.podcast-list-item:hover {
+    background: #f8fafc;
+}
+
+.podcast-list-item:last-child {
+    border-bottom: none;
+}
+
+/* Emagazine Specific Styles */
+.emagazine-card {
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.emagazine-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.emagazine-featured {
+    border-left: 4px solid #dc2626;
+}
+
+.emagazine-cover {
+    position: relative;
+    overflow: hidden;
+}
+
+.emagazine-cover::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.1), rgba(239, 68, 68, 0.05));
+    z-index: 1;
+}
+
+.emagazine-badge {
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    color: white;
+    font-size: 0.7rem;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.emagazine-title {
+    line-height: 1.4;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.emagazine-meta {
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+
+.emagazine-grid-item {
+    margin-bottom: 16px;
+}
+
+.emagazine-grid-item:last-child {
+    margin-bottom: 0;
+}
+
+.emagazine-thumbnail {
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+}
+
+.emagazine-thumbnail::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(220, 38, 38, 0.05), transparent);
+}
+
+.emagazine-read-btn {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    border: none;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.emagazine-read-btn:hover {
+    background: linear-gradient(135deg, #b91c1c, #991b1b);
+    transform: scale(1.05);
+}
+
+.emagazine-issue-number {
+    background: rgba(220, 38, 38, 0.1);
+    color: #dc2626;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: 700;
+}
+
+/* Ensure all text links are black/dark */
+.emagazine-card a,
+.emagazine-title a,
+.podcast-card a,
+.podcast-list-item a,
+.news-card a,
+.timeline-link,
+.category-link {
+    color: #1f2937 !important;
+    text-decoration: none;
+}
+
+.emagazine-card a:hover,
+.emagazine-title a:hover,
+.podcast-card a:hover,
+.podcast-list-item a:hover,
+.news-card a:hover,
+.timeline-link:hover,
+.category-link:hover {
+    color: #111827 !important;
+    text-decoration: none;
+}
+
+/* Override Bootstrap default link colors */
+a.text-dark {
+    color: #1f2937 !important;
+}
+
+a.text-dark:hover {
+    color: #111827 !important;
+}
+
+/* Ensure all article titles are black */
+.news-card-title a,
+.main-title a,
+.timeline-title a,
+.news-title-small a {
+    color: #1f2937 !important;
+}
+
+.news-card-title a:hover,
+.main-title a:hover,
+.timeline-title a:hover,
+.news-title-small a:hover {
+    color: #111827 !important;
+}
+
+/* Mobile responsive images */
+@media (max-width: 768px) {
+    .news-image-small img,
+    .featured-image img,
+    .news-image-home img {
+        object-fit: contain !important;
+        height: auto !important;
+        min-height: 120px;
+    }
+    
+    .emagazine-cover img,
+    .emagazine-thumbnail img {
+        object-fit: contain !important;
+        height: auto !important;
+    }
+}

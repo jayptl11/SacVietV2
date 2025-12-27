@@ -1,0 +1,186 @@
+﻿using SacViet.Models;
+using SacViet.Repositories;
+using SacViet.ViewModels;
+using System.Security.Cryptography;
+using System.Text;
+using Microsoft.Extensions.Logging;
+
+namespace SacViet.Services
+{
+    public class AuthService : IAuthService
+    {
+        private readonly IUserRepository _userRepository;
+        private readonly ILogger<AuthService> _logger;
+
+        public AuthService(IUserRepository userRepository, ILogger<AuthService> logger)
+        {
+            _userRepository = userRepository;
+            _logger = logger;
+        }
+
+        public async Task<(bool Success, string? Error, User? User)> RegisterAsync(RegisterViewModel model)
+        {
+            try
+            {
+                _logger.LogInformation("Attempting to register user with email: {Email}", model.Email);
+                
+                if (await _userRepository.EmailExistsAsync(model.Email))
+                {
+                    _logger.LogWarning("Registration failed - Email already exists: {Email}", model.Email);
+                    return (false, "Email đã được sử dụng", null);
+                }
+
+                var user = new User
+                {
+                    Email = model.Email,
+                    PasswordHash = HashPassword(model.Password),
+                    FullName = model.FullName,
+                    RoleId = 3, // Reader role (default)
+                    IsEmailVerified = false,
+                    IsActive = true,
+                    CreatedAt = DateTime.Now
+                };
+
+                await _userRepository.CreateAsync(user);
+                // Reload with Role populated
+                var loaded = await _userRepository.GetByIdAsync(user.UserId);
+                
+                _logger.LogInformation("User registered successfully: {Email}, UserId: {UserId}", model.Email, user.UserId);
+                return (true, null, loaded);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during registration for email: {Email}", model.Email);
+                return (false, "Đã xảy ra lỗi khi đăng ký. Vui lòng thử lại.", null);
+            }
+        }
+
+        public async Task<(bool Success, string? Error, User? User)> LoginAsync(LoginViewModel model)
+        {
+            try
+            {
+                _logger.LogInformation("Login attempt for email: {Email}", model.Email);
+                
+                var user = await _userRepository.GetByEmailAsync(model.Email);
+
+                if (user == null)
+                {
+                    _logger.LogWarning("Login failed - User not found: {Email}", model.Email);
+                    return (false, "Email hoặc mật khẩu không đúng", null);
+                }
+
+                if (!user.IsActive.GetValueOrDefault())
+                {
+                    _logger.LogWarning("Login failed - Account disabled: {Email}, UserId: {UserId}", model.Email, user.UserId);
+                    return (false, "Tài khoản đã bị khóa", null);
+                }
+
+                if (string.IsNullOrEmpty(user.PasswordHash))
+                {
+                    _logger.LogWarning("Login failed - Google-only account attempted password login: {Email}", model.Email);
+                    return (false, "Tài khoản này đăng nhập bằng Google", null);
+                }
+
+                if (!VerifyPassword(model.Password, user.PasswordHash))
+                {
+                    _logger.LogWarning("Login failed - Invalid password: {Email}", model.Email);
+                    return (false, "Email hoặc mật khẩu không đúng", null);
+                }
+
+                await UpdateLastLoginAsync(user.UserId);
+                _logger.LogInformation("Login successful: {Email}, UserId: {UserId}", model.Email, user.UserId);
+                return (true, null, user);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during login for email: {Email}", model.Email);
+                return (false, "Đã xảy ra lỗi khi đăng nhập. Vui lòng thử lại.", null);
+            }
+        }
+
+        public async Task<User?> GetOrCreateGoogleUserAsync(string googleId, string email, string fullName, string? avatar)
+        {
+            try
+            {
+                _logger.LogInformation("Google login attempt - GoogleId: {GoogleId}, Email: {Email}", googleId, email);
+                
+                var user = await _userRepository.GetByGoogleIdAsync(googleId);
+                if (user != null)
+                {
+                    _logger.LogInformation("Google user found by GoogleId: {GoogleId}, UserId: {UserId}", googleId, user.UserId);
+                    await UpdateLastLoginAsync(user.UserId);
+                    return user;
+                }
+
+                user = await _userRepository.GetByEmailAsync(email);
+                if (user != null)
+                {
+                    _logger.LogInformation("Linking Google account to existing user: {Email}, UserId: {UserId}", email, user.UserId);
+                    user.GoogleId = googleId;
+                    if (string.IsNullOrEmpty(user.Avatar))
+                    {
+                        user.Avatar = avatar;
+                    }
+                    await _userRepository.UpdateAsync(user);
+                    await UpdateLastLoginAsync(user.UserId);
+                    // Reload with Role
+                    return await _userRepository.GetByIdAsync(user.UserId);
+                }
+
+                _logger.LogInformation("Creating new user from Google: {Email}", email);
+                user = new User
+                {
+                    Email = email,
+                    GoogleId = googleId,
+                    FullName = fullName,
+                    Avatar = avatar,
+                    RoleId = 3, // Reader role
+                    IsEmailVerified = true,
+                    IsActive = true,
+                    CreatedAt = DateTime.Now
+                };
+
+                await _userRepository.CreateAsync(user);
+                var createdUser = await _userRepository.GetByIdAsync(user.UserId);
+                _logger.LogInformation("Google user created successfully: {Email}, UserId: {UserId}", email, user.UserId);
+                return createdUser;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during Google login - GoogleId: {GoogleId}, Email: {Email}", googleId, email);
+                throw; // Re-throw to let controller handle it
+            }
+        }
+
+        public async Task<User?> GetUserByIdAsync(int userId)
+        {
+            return await _userRepository.GetByIdAsync(userId);
+        }
+
+        public async Task UpdateLastLoginAsync(int userId)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user != null)
+            {
+                user.LastLogin = DateTime.Now;
+                await _userRepository.UpdateAsync(user);
+            }
+        }
+
+        public string HashPassword(string password)
+        {
+            using (var sha256 = SHA256.Create())
+            {
+                var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+                return Convert.ToBase64String(hashedBytes);
+            }
+        }
+
+        public bool VerifyPassword(string password, string passwordHash)
+        {
+            var hashOfInput = HashPassword(password);
+            return hashOfInput == passwordHash;
+        }
+    }
+}
+

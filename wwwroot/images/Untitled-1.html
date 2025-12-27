@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo Cáo Chi Tiết Project Website SacViet</title>
+    <style>
+        @page {
+            margin: 2.5cm;
+        }
+        
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            line-height: 1.6;
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 40px;
+            background: white;
+            color: #333;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            font-size: 24pt;
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 15px;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            font-size: 18pt;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            border-left: 5px solid #3498db;
+            padding-left: 15px;
+        }
+        
+        h3 {
+            color: #34495e;
+            font-size: 14pt;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        
+        h4 {
+            color: #555;
+            font-size: 12pt;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        
+        p, li {
+            font-size: 12pt;
+            text-align: justify;
+        }
+        
+        ul, ol {
+            margin-left: 30px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 11pt;
+        }
+        
+        th {
+            background-color: #3498db;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+        
+        td {
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .code-block {
+            background-color: #f4f4f4;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 10pt;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        
+        .diagram-placeholder {
+            background-color: #ecf0f1;
+            border: 2px dashed #95a5a6;
+            padding: 30px;
+            text-align: center;
+            margin: 20px 0;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+        
+        .note {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .section-number {
+            color: #3498db;
+            font-weight: bold;
+        }
+        
+        .highlight {
+            background-color: #ffffcc;
+            padding: 2px 5px;
+        }
+        
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .print-button:hover {
+            background-color: #2980b9;
+        }
+        
+        @media print {
+            body {
+                padding: 0;
+            }
+            .print-button {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="print-button" onclick="window.print()">🖨️ In/Lưu PDF</button>
+    
+    <h1>📋 BÁO CÁO CHI TIẾT<br>PROJECT WEBSITE SACVIET</h1>
+    
+    <h2><span class="section-number">1.</span> TỔNG QUAN DỰ ÁN</h2>
+    
+    <h3>1.1 Giới thiệu</h3>
+    <p>SacViet là một website tin tức về văn hóa Việt Nam, được xây dựng theo phong cách VietnamPlus.vn. Website cho phép:</p>
+    <ul>
+        <li>Đọc tin tức theo chuyên mục</li>
+        <li>Quản lý bài viết (Writer/Admin)</li>
+        <li>Đăng nhập/Đăng ký (hỗ trợ Google OAuth)</li>
+        <li>Tìm kiếm nâng cao</li>
+    </ul>
+    
+    <h3>1.2 Công nghệ sử dụng</h3>
+    <table>
+        <tr>
+            <th>Thành phần</th>
+            <th>Công nghệ</th>
+        </tr>
+        <tr>
+            <td>Framework</td>
+            <td>ASP.NET Core 8.0 (Razor Pages / MVC)</td>
+        </tr>
+        <tr>
+            <td>Database</td>
+            <td>SQL Server + Entity Framework Core</td>
+        </tr>
+        <tr>
+            <td>Authentication</td>
+            <td>Cookie Authentication + Google OAuth 2.0</td>
+        </tr>
+        <tr>
+            <td>Frontend</td>
+            <td>Bootstrap 5, Font Awesome 6, jQuery</td>
+        </tr>
+        <tr>
+            <td>Architecture</td>
+            <td>Repository Pattern + Service Layer</td>
+        </tr>
+    </table>
+    
+    <h2><span class="section-number">2.</span> KIẾN TRÚC HỆ THỐNG (ARCHITECTURE)</h2>
+    
+    <h3>2.1 Sơ đồ kiến trúc tổng quan</h3>
+    <div class="diagram-placeholder">
+        <p><strong>Flowchart: Kiến trúc 4 tầng</strong></p>
+        <p>Presentation Layer (Views, Controllers) ↓</p>
+        <p>Business Logic Layer (Services) ↓</p>
+        <p>Data Access Layer (Repositories, DbContext) ↓</p>
+        <p>Database (SQL Server)</p>
+    </div>
+    
+    <h3>2.2 Cấu trúc thư mục</h3>
+    <div class="code-block">SacViet/
+├── Controllers/           # MVC Controllers
+│   ├── HomeController.cs
+│   ├── AccountController.cs
+│   ├── ArticleController.cs
+│   ├── CategoryController.cs
+│   ├── WriterController.cs
+│   └── AdminController.cs
+├── Models/               # Entity Framework Models
+│   ├── Article.cs
+│   ├── Category.cs
+│   ├── User.cs
+│   ├── Role.cs
+│   ├── Comment.cs
+│   ├── Tag.cs
+│   └── SacVietContext.cs  # DbContext
+├── Repositories/         # Data Access Layer
+│   ├── IArticleRepository.cs
+│   ├── ArticleRepository.cs
+│   ├── ICategoryRepository.cs
+│   ├── CategoryRepository.cs
+│   ├── IUserRepository.cs
+│   └── UserRepository.cs
+├── Services/             # Business Logic Layer
+│   ├── INewsService.cs / NewsService.cs
+│   ├── IAuthService.cs / AuthService.cs
+│   ├── IWriterService.cs / WriterService.cs
+│   ├── IAdminService.cs / AdminService.cs
+│   └── IWebCrawlerService.cs / WebCrawlerService.cs
+├── ViewModels/           # View Models
+│   ├── HomePageViewModel.cs
+│   ├── ArticleCreateViewModel.cs
+│   ├── LoginViewModel.cs
+│   └── RegisterViewModel.cs
+├── Views/                # Razor Views
+│   ├── Home/
+│   ├── Article/
+│   ├── Writer/
+│   ├── Admin/
+│   └── Shared/
+│       └── _Layout.cshtml
+├── wwwroot/             # Static files
+│   ├── css/
+│   ├── js/
+│   └── images/
+└── Program.cs           # Application entry point</div>
+    
+    <h2><span class="section-number">3.</span> CƠ SỞ DỮ LIỆU (DATABASE SCHEMA)</h2>
+    <div class="note">
+        <strong>📌 Lưu ý:</strong> Sơ đồ database sẽ được bổ sung thêm dưới dạng hình ảnh.
+    </div>
+    
+    <h2><span class="section-number">4.</span> LUỒNG XÁC THỰC (AUTHENTICATION FLOW)</h2>
+    
+    <h3>4.1 Đăng nhập thông thường</h3>
+    <div class="diagram-placeholder">
+        <p><strong>Sequence Diagram: Login Flow</strong></p>
+        <ol style="text-align: left; display: inline-block;">
+            <li>User → AccountController: POST /Account/Login</li>
+            <li>AccountController → AuthService: LoginAsync()</li>
+            <li>AuthService → Database: GetByEmailAsync()</li>
+            <li>AuthService: VerifyPassword()</li>
+            <li>AccountController: Create Claims & Cookie</li>
+            <li>Redirect to Home</li>
+        </ol>
+    </div>
+    
+    <h3>4.2 Đăng nhập Google OAuth</h3>
+    <div class="diagram-placeholder">
+        <p><strong>Sequence Diagram: Google OAuth Flow</strong></p>
+        <ol style="text-align: left; display: inline-block;">
+            <li>User → AccountController: GET /Account/GoogleLogin</li>
+            <li>Redirect to Google Authorization</li>
+            <li>User authorizes app</li>
+            <li>Google → AccountController: Callback with claims</li>
+            <li>AccountController → AuthService: GetOrCreateGoogleUserAsync()</li>
+            <li>Check/Create user in Database</li>
+            <li>Create Claims & Cookie</li>
+            <li>Redirect to Home</li>
+        </ol>
+    </div>
+    
+    <h2><span class="section-number">5.</span> LUỒNG QUẢN LÝ BÀI VIẾT (ARTICLE WORKFLOW)</h2>
+    
+    <h3>5.1 Quy trình viết và duyệt bài</h3>
+    <div class="diagram-placeholder">
+        <p><strong>State Diagram: Article Status Flow</strong></p>
+        <p>Draft → Pending → Published</p>
+        <p>Pending → Rejected → Draft (Writer sửa lại)</p>
+    </div>
+    
+    <h3>5.2 WriterController - Các action chính</h3>
+    <table>
+        <tr>
+            <th>Action</th>
+            <th>HTTP</th>
+            <th>Mô tả</th>
+        </tr>
+        <tr>
+            <td>Index</td>
+            <td>GET</td>
+            <td>Dashboard thống kê của Writer</td>
+        </tr>
+        <tr>
+            <td>MyArticles</td>
+            <td>GET</td>
+            <td>Danh sách bài viết của Writer</td>
+        </tr>
+        <tr>
+            <td>Create</td>
+            <td>GET/POST</td>
+            <td>Tạo bài viết mới</td>
+        </tr>
+        <tr>
+            <td>Edit</td>
+            <td>GET/POST</td>
+            <td>Chỉnh sửa bài viết</td>
+        </tr>
+        <tr>
+            <td>Delete</td>
+            <td>POST</td>
+            <td>Xóa bài viết (chỉ Draft)</td>
+        </tr>
+        <tr>
+            <td>UploadImage</td>
+            <td>POST</td>
+            <td>Upload ảnh cho bài viết</td>
+        </tr>
+        <tr>
+            <td>CrawlUrl</td>
+            <td>POST</td>
+            <td>Tự động lấy nội dung từ URL</td>
+        </tr>
+    </table>
+    
+    <h3>5.3 WriterService - Business Logic</h3>
+    <div class="code-block">public class WriterService : IWriterService
+{
+    // Thống kê bài viết của Writer
+    Task<WriterStatsViewModel> GetWriterStatsAsync(int userId);
+    
+    // Lấy danh sách bài viết với phân trang
+    Task<(IEnumerable<ArticleListItemViewModel>, int)> GetMyArticlesAsync(
+        int userId, string? status, int page, int pageSize);
+    
+    // Tạo bài viết mới
+    Task<int> CreateArticleAsync(ArticleCreateViewModel model, 
+        int userId, string status);
+    
+    // Cập nhật bài viết
+    Task<bool> UpdateArticleAsync(int articleId, 
+        ArticleEditViewModel model, int userId, string status);
+    
+    // Xóa bài viết (chỉ Draft)
+    Task<bool> DeleteArticleAsync(int articleId, int userId);
+    
+    // Upload ảnh
+    Task<string> UploadImageAsync(IFormFile file);
+    
+    // Tạo slug từ tiêu đề (xử lý tiếng Việt)
+    string GenerateSlug(string text);
+    
+    // Chuyển đổi URL Google Drive sang playable URL
+    string? ConvertGoogleDriveAudioUrl(string? audioUrl);
+}</div>
+    
+    <h2><span class="section-number">6.</span> GIAO DIỆN NGƯỜI DÙNG (UI/UX)</h2>
+    <div class="note">
+        <strong>📌 Lưu ý:</strong> Screenshots giao diện sẽ được bổ sung thêm dưới dạng hình ảnh.
+    </div>
+    
+    <h2><span class="section-number">7.</span> TÍNH NĂNG ĐẶC BIỆT</h2>
+    
+    <h3>7.1 Web Crawler</h3>
+    <ul>
+        <li>Tự động lấy nội dung từ URL bài báo khác</li>
+        <li>Trích xuất: Title, Summary, Content, Thumbnail</li>
+        <li>Download ảnh về server local</li>
+    </ul>
+    
+    <h3>7.2 Scheduled Publishing</h3>
+    <ul>
+        <li>Hẹn giờ đăng bài tự động</li>
+        <li>Background Service chạy định kỳ kiểm tra và publish</li>
+    </ul>
+    
+    <h3>7.3 Google Drive Audio Support</h3>
+    <ul>
+        <li>Chuyển đổi URL Google Drive thành playable URL</li>
+        <li>Hỗ trợ nhiều format: /file/d/ID/view, open?id=ID</li>
+    </ul>
+    
+    <h3>7.4 Vietnamese Slug Generation</h3>
+    <ul>
+        <li>Tự động chuyển đổi tiếng Việt sang không dấu</li>
+        <li>Thêm timestamp để đảm bảo unique</li>
+    </ul>
+    
+    <h2><span class="section-number">8.</span> BẢO MẬT</h2>
+    <table>
+        <tr>
+            <th>Tính năng</th>
+            <th>Triển khai</th>
+        </tr>
+        <tr>
+            <td>Password Hashing</td>
+            <td>SHA256</td>
+        </tr>
+        <tr>
+            <td>CSRF Protection</td>
+            <td>[ValidateAntiForgeryToken]</td>
+        </tr>
+        <tr>
+            <td>Cookie Security</td>
+            <td>HttpOnly, Secure, SameSite=Lax</td>
+        </tr>
+        <tr>
+            <td>Authorization</td>
+            <td>Role-based ([Authorize(Roles = "Writer,Admin")])</td>
+        </tr>
+        <tr>
+            <td>Input Validation</td>
+            <td>Data Annotations + ModelState</td>
+        </tr>
+        <tr>
+            <td>XSS Prevention</td>
+            <td>HTML Encode (WebUtility.HtmlDecode)</td>
+        </tr>
+    </table>
+    
+    <div class="note" style="margin-top: 40px; background-color: #d1ecf1; border-left-color: #0c5460;">
+        <h4 style="margin-top: 0;">💡 Hướng dẫn xuất file DOCX:</h4>
+        <ol>
+            <li><strong>Cách 1:</strong> Nhấn nút "In/Lưu PDF" ở góc trên bên phải, chọn "Save as PDF"</li>
+            <li><strong>Cách 2:</strong> Sao chép toàn bộ nội dung (Ctrl+A, Ctrl+C) và dán vào Microsoft Word</li>
+            <li><strong>Cách 3:</strong> Sử dụng Ctrl+P → chọn "Microsoft Print to PDF" hoặc "Save as PDF"</li>
+        </ol>
+    </div>
+    
+</body>
+</html>

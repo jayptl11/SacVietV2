@@ -1,0 +1,24 @@
+﻿using SacViet.Models;
+using SacViet.ViewModels;
+
+namespace SacViet.Services
+{
+    public interface IWriterService
+    {
+        Task<WriterStatsViewModel> GetWriterStatsAsync(int userId);
+        Task<(IEnumerable<ArticleListItemViewModel> Articles, int TotalCount)> GetMyArticlesAsync(int userId, string? status, int page, int pageSize);
+        Task<int> CreateArticleAsync(ArticleCreateViewModel model, int userId, string status);
+        Task<ArticleEditViewModel?> GetArticleForEditAsync(int articleId, int userId);
+        Task<bool> UpdateArticleAsync(int articleId, ArticleEditViewModel model, int userId, string status);
+        Task<bool> DeleteArticleAsync(int articleId, int userId);
+        Task<ArticleApproval?> GetLatestApprovalAsync(int articleId);
+        Task<IEnumerable<ApprovalHistoryViewModel>> GetApprovalHistoryAsync(int articleId);
+        Task<string> UploadImageAsync(IFormFile file);
+        
+        // Chức năng tự duyệt bài viết cho Writer
+        Task<(IEnumerable<ArticleListItemViewModel> Articles, int TotalCount)> GetPendingArticlesForSelfApprovalAsync(int userId, int page, int pageSize);
+        Task<ServiceResult> SelfApproveArticleAsync(int articleId, int userId, string note = "");
+        Task<ServiceResult> SelfRejectArticleAsync(int articleId, int userId, string note);
+        Task<ArticleDetailForApprovalViewModel?> GetArticleDetailForApprovalAsync(int articleId, int userId);
+    }
+}
